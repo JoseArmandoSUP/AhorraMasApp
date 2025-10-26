@@ -2,7 +2,7 @@ import React from 'react'
 import { Text, StyleSheet, View, TouchableOpacity, ScrollView } from 'react-native'
 
 
-export default function ButtomSheet () {
+export default function PantallaGestionTransacciones() {
   
     return (
       <ScrollView style={styles.container}>
