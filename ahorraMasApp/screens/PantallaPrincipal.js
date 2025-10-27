@@ -1,57 +1,68 @@
-import React from "react";
+import React, { useState } from "react";
 import { Text, StyleSheet, View, TouchableOpacity, ScrollView } from 'react-native'
+import { Button } from "react-native-web";
+import TransaccionesScreem from './PantallaGestionTransacciones';
 
 export default function PantallaPrincipal(){
-    return(
-        <ScrollView style={styles.container}>
-        
-            {/*ENCABEZADO*/}
-            <Text style={styles.titulo}>AHORRA +</Text>
-            
-            {/*CONTENEDOR DE GASTOS E INGRESOS*/}
-            <View style={styles.todoContainer}>
     
-                <View style={styles.todoCajas}>
-                    <Text style={styles.todoLabel}>GASTOS</Text>
-                    <Text style={styles.todoAmount}>$1000</Text>
-                    {/*<Ionicons>*/}
-                </View>
-    
-                <View style={styles.todoCajas}>
-                    <Text style={styles.todoLabel}>INGRESOS</Text>
-                    <Text style={styles.todoAmount}>$1200</Text>
-                    {/*<Ionicons>*/}
-                </View>
-    
-            </View>
-    
-            {/*BOTONES PRINCIPALES*/}
-            <View style={styles.botonesContainer}>
-    
-                <TouchableOpacity style={styles.boton}>
-                    {/*<Ionicons>*/}
-                    <Text style={styles.botonText}>Transaccion</Text>
-                </TouchableOpacity>
-    
-                <TouchableOpacity style={styles.boton}>
-                    {/*<Ionicons>*/}
-                    <Text style={styles.botonText}>Presupuesto</Text>
-                </TouchableOpacity>
-    
-                <TouchableOpacity style={styles.boton}>
-                    {/*<Ionicons>*/}
-                    <Text style={styles.botonText}>Ver Graficas</Text>
-                </TouchableOpacity>
-    
-                <TouchableOpacity style={styles.boton}>
-                    {/*<Ionicons>*/}
-                    <Text style={styles.botonText}>Configuración de Perfil</Text>
-                </TouchableOpacity>
-    
-            </View>
-    
-        </ScrollView>
-    );
+    const[screen, setScreen]=useState('menu');
+
+    switch(screen){
+        case 'transaccionesScreen':
+            return<TransaccionesScreem></TransaccionesScreem>
+        case 'menu':
+            default:
+                return(
+                    <ScrollView style={styles.container}>
+                    
+                        {/*ENCABEZADO*/}
+                        <Text style={styles.titulo}>AHORRA +</Text>
+                        
+                        {/*CONTENEDOR DE GASTOS E INGRESOS*/}
+                        <View style={styles.todoContainer}>
+                
+                            <View style={styles.todoCajas}>
+                                <Text style={styles.todoLabel}>GASTOS</Text>
+                                <Text style={styles.todoAmount}>$1000</Text>
+                                {/*<Ionicons>*/}
+                            </View>
+                
+                            <View style={styles.todoCajas}>
+                                <Text style={styles.todoLabel}>INGRESOS</Text>
+                                <Text style={styles.todoAmount}>$1200</Text>
+                                {/*<Ionicons>*/}
+                            </View>
+                
+                        </View>
+                
+                        {/*BOTONES PRINCIPALES*/}
+                        <View style={styles.botonesContainer}>
+                
+                            <TouchableOpacity style={styles.boton}>
+                                {/*<Ionicons>*/}
+                                <Button title='Transacciones' style={styles.botonText} onPress={()=>setScreen('transaccionesScreen')}></Button>
+                            </TouchableOpacity>
+                
+                            <TouchableOpacity style={styles.boton}>
+                                {/*<Ionicons>*/}
+                                <Text style={styles.botonText}>Presupuesto</Text>
+                            </TouchableOpacity>
+                
+                            <TouchableOpacity style={styles.boton}>
+                                {/*<Ionicons>*/}
+                                <Text style={styles.botonText}>Ver Graficas</Text>
+                            </TouchableOpacity>
+                
+                            <TouchableOpacity style={styles.boton}>
+                                {/*<Ionicons>*/}
+                                <Text style={styles.botonText}>Configuración de Perfil</Text>
+                            </TouchableOpacity>
+                
+                        </View>
+                
+                    </ScrollView>
+                );
+    }  
 }
 
 const styles = StyleSheet.create({
