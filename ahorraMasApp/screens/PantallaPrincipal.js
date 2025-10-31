@@ -2,12 +2,15 @@ import React, { useState } from "react";
 import { Text, StyleSheet, View, TouchableOpacity, ScrollView } from 'react-native'
 import { Button } from "react-native-web";
 import TransaccionesScreem from './PantallaGestionTransacciones';
+import PantallaRegistro from "./PantallaRegistro";
 
 export default function PantallaPrincipal(){
     
     const[screen, setScreen]=useState('menu');
 
     switch(screen){
+        case 'registro': 
+        return <PantallaRegistro></PantallaRegistro>
         case 'transaccionesScreen':
             return<TransaccionesScreem></TransaccionesScreem>
         case 'menu':
@@ -57,7 +60,7 @@ export default function PantallaPrincipal(){
                                 {/*<Ionicons>*/}
                                 <Text style={styles.botonText}>Configuración de Perfil</Text>
                             </TouchableOpacity>
-                
+                            <Button onPress={()=> setScreen('registro')} title="Pantalla de registro"></Button>
                         </View>
                 
                     </ScrollView>
