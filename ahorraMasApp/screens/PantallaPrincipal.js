@@ -1,16 +1,46 @@
-import React, { useState } from "react";
-import { Text, StyleSheet, View, TouchableOpacity, ScrollView } from 'react-native'
+import React, { useEffect, useState} from "react";
+import { Text, StyleSheet, View, TouchableOpacity, ScrollView, ImageBackground, Animated, Easing } from 'react-native'
 import { Button } from "react-native-web";
 import TransaccionesScreem from './PantallaGestionTransacciones';
 import PantallaRegistro from "./PantallaRegistro";
 
 export default function PantallaPrincipal(){
     
+    //Para la animacion de la pantalla de carga
+    const[cargando, setCargando] = useState(true);
+    const desvanecido = new Animated.Value(1);
+
     const[screen, setScreen]=useState('menu');
+
+    useEffect(()=>{
+        const timer=setTimeout(()=>{
+            Animated.timing(desvanecido,{
+                toValue: 0,
+                duration: 1000,
+                easing: Easing.out(Easing.ease),
+                useNativeDriver: true
+            }).start(()=> setCargando(false));
+        }, 2000);
+        return()=>clearTimeout(timer);
+    },[]);
+
+    if(cargando){
+        return(
+            <Animated.View style={[styles.splashContainer, {opacity: desvanecido}]}>
+                <ImageBackground
+                    source={require('../assets/PantallaCarga_page-0002.png')}
+                    resizeMode='cover'
+                    style={styles.splashImagen}
+                >
+                    <Text style={styles.splashText}>Ahorra más, vive mejor</Text>
+                </ImageBackground>
+            </Animated.View>
+        );
+    }
 
     switch(screen){
         case 'registro': 
-        return <PantallaRegistro></PantallaRegistro>
+            return<PantallaRegistro></PantallaRegistro>
         case 'transaccionesScreen':
             return<TransaccionesScreem></TransaccionesScreem>
         case 'menu':
@@ -139,4 +169,27 @@ const styles = StyleSheet.create({
         color: '#333',
         fontWeight: '500',
     },
+
+    //Estilos imagen de carga
+    splashContainer:{
+        flex: 1,
+        justifyContent: 'center',
+        alignItems:'center',
+    },
+
+    splashImagen:{
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        width: '100%',
+        height: '100%',
+    },
+
+    splashText:{
+        position: 'absolute',
+        bottom: 100,
+        fontSize: 20,
+        color: 'white',
+    },
+
 });
