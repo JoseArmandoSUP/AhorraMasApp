@@ -1,36 +1,82 @@
-import { Text,  StyleSheet, View, Button, ImageBackground, TextInput, Image, Switch} from "react-native";
+import { Text,  StyleSheet, View, Button, ImageBackground, TextInput, Image, Switch, ScrollView, Alert} from "react-native";
 import React, { useState } from 'react'
+import PantallaPrincipal from "./PantallaPrincipal";
+import PantallaRegistro from "./PantallaRegistro";
 
 export default function LoginScreen (){
 
-    const [correo, setCorreo] = useState ()
-    const [password, setPassword] = useState ()
+    const[screen, setScreen]=useState('menu');
+
+    const [correo, setCorreo] = useState ('')
+    const [password, setPassword] = useState ('')
+
+    const mostrarAlerta = () =>{
+        if(correo.trim() === '' || password.trim() === ''){
+            Alert.alert("Faltan campos por llenar, porfavor completelos");
+            alert("Faltan campos por llenar, porfavor completelos");
+            return;
+        }
+        const validarCorreo = /^[\w.%+-]+@gmail\.com$/;
+        if(!validarCorreo.test(correo)){
+            Alert.alert("Correo electronico no valido, intente otra vez porfavor");
+            alert("Correo electronico no valido, intente otra vez porfavor");
+            return;
+        }else{
+            Alert.alert("Inicio de sesión esxitoso\n");
+            alert("Inicio de sesión esxitoso\n");
+        }
+    };
+
+    switch(screen){
+        case 'registro':
+            return<PantallaRegistro></PantallaRegistro>
+        case 'pantallaPrincipal':
+            return<PantallaPrincipal></PantallaPrincipal>
+        case 'menu':
+            default:
+                return(
+                    <ScrollView>
+                        <View style={styles.container}>
+                        <Image 
+                            source={require('../assets/Logo.png')}
+                        />
+                        <Text style={styles.text} >Iniciemos Sesion..!</Text>
+                        <Text style={styles.text2}>Inicie sesion para poder acceder a su cuenta</Text>
+                        <TextInput style={styles.input}
+                            placeholder='Correo'
+                            value={correo}
+                            onChangeText={setCorreo}
+                        />
+                        <TextInput style={styles.input}
+                            placeholder='Password'
+                            value={password}
+                            onChangeText={setPassword}
+                        />
+                        <View>
+                            <Switch></Switch>
+                            <Text></Text>
+                        </View>
+                        
+                        <Button title="INICIAR SESION" onPress={mostrarAlerta}></Button>
+                        
+                        <Text>¿No tienes cuenta? REGISTRARSE</Text>
+
+                        <Button 
+                            style={styles.boton} 
+                            onPress={()=> setScreen('registro')} title="Registrarse"
+                        ></Button>
+
+                        <Button 
+                            style={styles.boton} 
+                            onPress={()=> setScreen('pantallaPrincipal')} title="Volver al menú"
+                        ></Button>
+                        </View>
+                    </ScrollView>
+                    
+                );
+    }
     
-    return(
-        <View style={styles.container}>
-            <Image 
-            source={require('../assets/Logo.png')}
-            />
-            <Text style={styles.text} >Iniciemos Sesion..!</Text>
-            <Text style={styles.text2}>Inicie sesion para poder acceder a su cuenta</Text>
-            <TextInput style={styles.input}
-            placeholder='Correo'
-            value={correo}
-            onChangeText={setCorreo}
-            />
-            <TextInput style={styles.input}
-            placeholder='Password'
-            value={password}
-            onChangeText={setPassword}
-            />
-            <View>
-                <Switch></Switch>
-                <Text></Text>
-            </View>
-            <Button title="INICIAR SESION"></Button>
-            <Text>¿No tienes cuenta? REGISTRARSE</Text>
-        </View>
-    )
+    
 }
 
 const styles = StyleSheet.create ({
@@ -70,4 +116,7 @@ const styles = StyleSheet.create ({
         justifyContent: 'center',
     },
 
+    boton:{
+        flex: 1,
+    },
 })
