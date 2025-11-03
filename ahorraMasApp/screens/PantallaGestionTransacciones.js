@@ -1,60 +1,95 @@
-import React from 'react'
-import { Text, StyleSheet, View, TouchableOpacity, ScrollView } from 'react-native'
+import React, {useEffect, useState} from 'react'
+import { Text, StyleSheet, View, TouchableOpacity, ScrollView, Button } from 'react-native'
+import PantallaPrincipal from './PantallaPrincipal';
+import { TextInput } from 'react-native-web';
 
 
 export default function PantallaGestionTransacciones() {
   
-    return (
-      <ScrollView style={styles.container}>
+    const[screen, setScreen]=useState('menu');
 
-        {/*ENCABEZADO*/}
-        <Text style={styles.titulo}>TRANSACCIONES</Text>
-        
-        {/*CONTENEDOR DE GASTOS E INGRESOS*/}
-        <View style={styles.todoContainer}>
+    switch(screen){
+        case 'pantallaPrincipal':
+            return<PantallaPrincipal></PantallaPrincipal>
+        case 'menu':
+            default:
+                return (
+                    <ScrollView style={styles.container}>
 
-            <View style={styles.todoCajas}>
-                <Text style={styles.todoLabel}>GASTOS</Text>
-                <Text style={styles.todoAmount}>$1000</Text>
-                {/*<Ionicons>*/}
-            </View>
+                        {/*ENCABEZADO*/}
+                        <Text style={styles.titulo}>TRANSACCIONES</Text>
 
-            <View style={styles.todoCajas}>
-                <Text style={styles.todoLabel}>INGRESOS</Text>
-                <Text style={styles.todoAmount}>$1200</Text>
-                {/*<Ionicons>*/}
-            </View>
+                        {/*FILTRADO*/}
+                        <View style={styles.filtrosContainer}>
+                            <Text style={styles.filtrosTitulo}>Filtrar por</Text>
 
-        </View>
+                            <View style={styles.filtrosFila}>
+                                <Text style={styles.filtrosLabel}>Fecha: </Text>
+                                <View style={styles.filtrosInput}>
+                                    <TextInput style={styles.filtrosPlaceHolder} placeholder='AÑO-MES-DIA'></TextInput>
+                                </View>
+                            </View>
 
-        {/*BOTONES CRUD*/}
-        <View style={styles.botonesContainer}>
+                            <View style={styles.filtrosFila}>
+                                <Text style={styles.filtrosLabel}>Categoria: </Text>
+                                <View style={styles.filtrosInput}>
+                                    <TextInput style={styles.filtrosPlaceHolder} placeholder='Seleccionar la categoria'></TextInput>
+                                </View>
+                            </View>
 
-            <TouchableOpacity style={styles.boton}>
-                {/*<Ionicons>*/}
-                <Text style={styles.botonText}>Lista de Transacciones</Text>
-            </TouchableOpacity>
+                            <TouchableOpacity style={styles.filtrosBoton}>
+                                <Text style={styles.filtrosBotonTexto}>Aplicar</Text>
+                            </TouchableOpacity>
 
-            <TouchableOpacity style={styles.boton}>
-                {/*<Ionicons>*/}
-                <Text style={styles.botonText}>Agregar Transaccion</Text>
-            </TouchableOpacity>
+                        </View>
+                        
+                        {/*CONTENEDOR DE GASTOS E INGRESOS*/}
+                        <View style={styles.todoContainer}>
 
-            <TouchableOpacity style={styles.boton}>
-                {/*<Ionicons>*/}
-                <Text style={styles.botonText}>Editar Transaccion</Text>
-            </TouchableOpacity>
+                            <View style={styles.todoCajas}>
+                                <Text style={styles.todoLabel}>GASTOS</Text>
+                                <Text style={styles.todoAmount}>$1000</Text>
+                                {/*<Ionicons>*/}
+                            </View>
 
-            <TouchableOpacity style={styles.boton}>
-                {/*<Ionicons>*/}
-                <Text style={styles.botonText}>Eliminar Transaccion</Text>
-            </TouchableOpacity>
+                            <View style={styles.todoCajas}>
+                                <Text style={styles.todoLabel}>INGRESOS</Text>
+                                <Text style={styles.todoAmount}>$1200</Text>
+                                {/*<Ionicons>*/}
+                            </View>
 
-        </View>
+                        </View>
 
-      </ScrollView>
-    );
-  
+                        {/*BOTONES CRUD*/}
+                        <View style={styles.botonesContainer}>
+
+                            <TouchableOpacity style={styles.boton}>
+                                {/*<Ionicons>*/}
+                                <Text style={styles.botonText}>Lista de Transacciones</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity style={styles.boton}>
+                                {/*<Ionicons>*/}
+                                <Text style={styles.botonText}>Agregar Transaccion</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity style={styles.boton}>
+                                {/*<Ionicons>*/}
+                                <Text style={styles.botonText}>Editar Transaccion</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity style={styles.boton}>
+                                {/*<Ionicons>*/}
+                                <Text style={styles.botonText}>Eliminar Transaccion</Text>
+                            </TouchableOpacity>
+
+                            <Button onPress={()=> setScreen('pantallaPrincipal')} title="Volver al menú"></Button>
+
+                        </View>
+
+                    </ScrollView>
+                );
+    }
 }
 
 const styles = StyleSheet.create({
@@ -64,6 +99,68 @@ const styles = StyleSheet.create({
         paddingTop: 60,
         paddingHorizontal: 20,
     },
+
+    //Estilos del filtardo
+    filtrosContainer:{
+        backgroundColor: '#fff',
+        borderRadius: 15,
+        padding: 15,
+        marginBottom: 20,
+        shadowColor: '#000',
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+    },
+
+    filtrosTitulo:{
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#2e7d32',
+        textAlign: 'center',
+        marginBottom: 10,
+    },
+
+    filtrosFila:{
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 10,
+    },
+
+    filtrosLabel:{
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#333',
+        width: '40%',
+    },
+
+    filtrosInput:{
+        backgroundColor: '#f0f0f0',
+        borderRadius: 8,
+        paddingVertical: 8,
+        paddingHorizontal: 10,
+        width: '55%',
+    },
+
+    filtrosPlaceHolder:{
+        color: '#999',
+        fontSize: 14,
+    },
+
+    filtrosBoton:{
+        backgroundColor: '#2e7d32',
+        borderRadius: 10,
+        paddingVertical: 10,
+        marginTop: 5,
+        alignItems: 'center',
+    },
+
+    filtrosBotonTexto:{
+        color: '#fff',
+        fontWeight: 'bold',
+        fontSize: 15,
+    },
+    //-----------------------------------------------
 
     titulo:{
         fontSize: 22,
