@@ -1,8 +1,10 @@
 import React, { useEffect, useState} from "react";
-import { Text, StyleSheet, View, TouchableOpacity, ScrollView, ImageBackground, Animated, Easing } from 'react-native'
+import { Text, StyleSheet, View, TouchableOpacity, ScrollView, ImageBackground, Animated, Easing, Image } from 'react-native'
 import { Button } from "react-native-web";
 import TransaccionesScreem from './PantallaGestionTransacciones';
 import PantallaRegistro from "./PantallaRegistro";
+import PantallaPresupuesto from "./PresupuestosScreen";
+import LoginScreen from "./LoginScreen";
 
 export default function PantallaPrincipal(){
     
@@ -41,8 +43,12 @@ export default function PantallaPrincipal(){
     switch(screen){
         case 'registro': 
             return<PantallaRegistro></PantallaRegistro>
+        case 'login':
+            return<LoginScreen></LoginScreen>
         case 'transaccionesScreen':
             return<TransaccionesScreem></TransaccionesScreem>
+        case 'presupuestos':
+            return<PantallaPresupuesto></PantallaPresupuesto>
         case 'menu':
             default:
                 return(
@@ -50,10 +56,15 @@ export default function PantallaPrincipal(){
                     
                         {/*ENCABEZADO*/}
                         <Text style={styles.titulo}>AHORRA +</Text>
+                        <Image style={styles.logo}
+                                source={require('../assets/Logo.png')}
+                            />
                         
                         {/*CONTENEDOR DE GASTOS E INGRESOS*/}
                         <View style={styles.todoContainer}>
-                
+                            
+                            
+
                             <View style={styles.todoCajas}>
                                 <Text style={styles.todoLabel}>GASTOS</Text>
                                 <Text style={styles.todoAmount}>$1000</Text>
@@ -78,7 +89,7 @@ export default function PantallaPrincipal(){
                 
                             <TouchableOpacity style={styles.boton}>
                                 {/*<Ionicons>*/}
-                                <Text style={styles.botonText}>Presupuesto</Text>
+                                <Button title='Presupuesto Mensual' style={styles.botonText} onPress={()=>setScreen('presupuestos')}></Button>
                             </TouchableOpacity>
                 
                             <TouchableOpacity style={styles.boton}>
@@ -90,7 +101,7 @@ export default function PantallaPrincipal(){
                                 {/*<Ionicons>*/}
                                 <Text style={styles.botonText}>Configuración de Perfil</Text>
                             </TouchableOpacity>
-                            <Button onPress={()=> setScreen('registro')} title="Pantalla de registro"></Button>
+                            <Button onPress={()=> setScreen('login')} title="Iniciar Sesion"></Button>
                         </View>
                 
                     </ScrollView>
@@ -105,6 +116,14 @@ const styles = StyleSheet.create({
         paddingTop: 70,
         paddingHorizontal: 25,
     },
+
+    logo: {
+        height: 100,
+        width: 100,
+        flexDirection:'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+    }, 
 
     titulo:{
         fontSize: 30,
