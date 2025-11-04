@@ -1,7 +1,11 @@
-import React from 'react';
-import { View, Text, Image, StyleSheet, ScrollView } from 'react-native';
+import React,{useState} from 'react';
+import { View, Text, Image, StyleSheet, ScrollView, Button } from 'react-native';
+import PantallaPrincipal from './PantallaPrincipal';
 
 export default function GraficasScreen() {
+    
+    const[screen, setScreen]=useState('menu');
+
     const gastos = [
         { categoria: 'comida', porcentaje: 30.77 },
         { categoria: 'transporte', porcentaje: 15.38 },
@@ -19,50 +23,58 @@ export default function GraficasScreen() {
         { categoria: 'Presupuesto restante', porcentaje: 45.83 },
     ];
 
-    return (
-        <ScrollView style={styles.container}>
-            <Text style={styles.titulo}>REPORTES</Text>
+    switch(screen){
+        case 'pantallaPrincipal':
+            return<PantallaPrincipal></PantallaPrincipal>
+        case 'menu':
+            default:
+                return (
+                    <ScrollView style={styles.container} contentContainerStyle={{paddingBottom: 100}}>
+                        <Text style={styles.titulo}>REPORTES</Text>
 
-            <View style={styles.seccion}>
-                <Text style={styles.subtitulo}>Reporte de Gastos</Text>
+                        <View style={styles.seccion}>
+                            <Text style={styles.subtitulo}>Reporte de Gastos</Text>
 
-                <Image
-                    source={require('../assets/Grafica1.png')}
-                    style={styles.imagenGrafica}
-                    resizeMode="contain"
-                />
+                            <Image
+                                source={require('../assets/Grafica1.png')}
+                                style={styles.imagenGrafica}
+                                resizeMode="contain"
+                            />
 
-                {gastos.map((item, index) => (
-                    <View key={index} style={styles.card}>
-                        <Text style={styles.textoCategoria}>{item.categoria}</Text>
-                        <Text style={styles.textoPorcentaje}>
-                            {item.porcentaje.toFixed(2)}%
-                        </Text>
-                    </View>
-                ))}
-            </View>
+                            {gastos.map((item, index) => (
+                                <View key={index} style={styles.card}>
+                                    <Text style={styles.textoCategoria}>{item.categoria}</Text>
+                                    <Text style={styles.textoPorcentaje}>
+                                        {item.porcentaje.toFixed(2)}%
+                                    </Text>
+                                </View>
+                            ))}
+                        </View>
 
-            <View style={styles.seccion}>
-                <Text style={styles.subtitulo}>Reporte de Presupuesto</Text>
+                        <View style={styles.seccion}>
+                            <Text style={styles.subtitulo}>Reporte de Presupuesto</Text>
 
-                <Image
-                    source={require('../assets/Grafica2.png')}
-                    style={styles.imagenGrafica}
-                    resizeMode="contain"
-                />
+                            <Image
+                                source={require('../assets/Grafica2.png')}
+                                style={styles.imagenGrafica}
+                                resizeMode="contain"
+                            />
 
-                {presupuesto.map((item, index) => (
-                    <View key={index} style={styles.card}>
-                        <Text style={styles.textoCategoria}>{item.categoria}</Text>
-                        <Text style={styles.textoPorcentaje}>
-                            {item.porcentaje.toFixed(2)}%
-                        </Text>
-                    </View>
-                ))}
+                            {presupuesto.map((item, index) => (
+                                <View key={index} style={styles.card}>
+                                    <Text style={styles.textoCategoria}>{item.categoria}</Text>
+                                    <Text style={styles.textoPorcentaje}>
+                                        {item.porcentaje.toFixed(2)}%
+                                    </Text>
+                                </View>
+                            ))}
 
-            </View>
-        </ScrollView>
-    );
+                        </View>
+
+                        <Button onPress={()=> setScreen('pantallaPrincipal')} title="Volver al menú"></Button>
+                    </ScrollView>
+                );
+    }    
 }
 
 const styles = StyleSheet.create({

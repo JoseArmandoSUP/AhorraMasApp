@@ -1,6 +1,6 @@
 import React, { useEffect, useState} from "react";
 import { Text, StyleSheet, View, TouchableOpacity, ScrollView, ImageBackground, Animated, Easing, Image } from 'react-native'
-import { Button } from "react-native-web";
+import { Button } from "react-native";
 import TransaccionesScreem from './PantallaGestionTransacciones';
 import PantallaRegistro from "./PantallaRegistro";
 import PantallaPresupuesto from "./PresupuestosScreen";
@@ -61,7 +61,7 @@ export default function PantallaPrincipal(){
                         <Text style={styles.titulo}>AHORRA +</Text>
                         <Image style={styles.logo}
                                 source={require('../assets/Logo.png')}
-                            />
+                        />
                         
                         {/*CONTENEDOR DE GASTOS E INGRESOS*/}
                         <View style={styles.todoContainer}>
@@ -123,9 +123,8 @@ const styles = StyleSheet.create({
     logo: {
         height: 100,
         width: 100,
-        flexDirection:'column',
-        justifyContent: 'center',
-        alignItems: 'center',
+        alignSelf: 'center',
+        marginBottom: 20,
     }, 
 
     titulo:{

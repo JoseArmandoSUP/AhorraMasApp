@@ -42,7 +42,7 @@ export default function PantallaRegistro () {
         case 'menu':
             default:
                 return (
-                    <ScrollView>
+                    <ScrollView contentContainerStyle={{paddingBottom: 100}}>
                         <View style={styles.container}>
                             <Image style={styles.logo}
                                 source={require('../assets/Logo.png')}

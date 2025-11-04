@@ -35,7 +35,7 @@ export default function LoginScreen (){
         case 'menu':
             default:
                 return(
-                    <ScrollView>
+                    <ScrollView contentContainerStyle={{paddingBottom: 100}}>
                         <View style={styles.container}>
                         <Image 
                             source={require('../assets/Logo.png')}

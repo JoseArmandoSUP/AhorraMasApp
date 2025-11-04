@@ -3,7 +3,7 @@ import {View, Text, TouchableOpacity, StyleSheet, ScrollView, ProgressBarAndroid
     ProgressViewIOS, TextInput} from 'react-native'
 //import { ProgressBar } from "react-native-web";
 import PantallaPrincipal from "./PantallaPrincipal";
-import { Button } from "react-native-web";
+import { Button } from "react-native";
 
 export default function PresupuestosScreen(){
     
@@ -26,7 +26,7 @@ export default function PresupuestosScreen(){
         case 'menu':
             default:
                 return(
-                    <ScrollView style={styles.container}>
+                    <ScrollView style={styles.container} contentContainerStyle={{paddingBottom: 100}}>
                         <Text style={styles.titulo}>PRESUPUESTO</Text>
 
                         {/*Definicion del presupusto mensual*/}

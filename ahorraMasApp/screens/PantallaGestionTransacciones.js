@@ -1,7 +1,6 @@
 import React, {useEffect, useState} from 'react'
-import { Text, StyleSheet, View, TouchableOpacity, ScrollView, Button } from 'react-native'
+import { Text, StyleSheet, View, TouchableOpacity, ScrollView, Button, TextInput } from 'react-native'
 import PantallaPrincipal from './PantallaPrincipal';
-import { TextInput } from 'react-native-web';
 
 
 export default function PantallaGestionTransacciones() {
@@ -14,7 +13,7 @@ export default function PantallaGestionTransacciones() {
         case 'menu':
             default:
                 return (
-                    <ScrollView style={styles.container}>
+                    <ScrollView style={styles.container} contentContainerStyle={{paddingBottom: 100}}>
 
                         {/*ENCABEZADO*/}
                         <Text style={styles.titulo}>TRANSACCIONES</Text>
@@ -82,6 +81,8 @@ export default function PantallaGestionTransacciones() {
                                 {/*<Ionicons>*/}
                                 <Text style={styles.botonText}>Eliminar Transaccion</Text>
                             </TouchableOpacity>
+
+                            
 
                             <Button onPress={()=> setScreen('pantallaPrincipal')} title="Volver al menú"></Button>
 
@@ -224,5 +225,9 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: '#333',
         fontWeight: '500',
+    },
+
+    relleno:{
+        color:'#fff',
     },
 });
