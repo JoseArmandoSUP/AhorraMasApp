@@ -1,5 +1,6 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState} from "react";
 import { Text, StyleSheet, View, TouchableOpacity, ScrollView, ImageBackground, Animated, Easing, Image } from 'react-native'
+import { Button } from "react-native-web";
 import TransaccionesScreem from './PantallaGestionTransacciones';
 import PantallaRegistro from "./PantallaRegistro";
 import PantallaPresupuesto from "./PresupuestosScreen";
@@ -10,7 +11,7 @@ export default function PantallaPrincipal(){
     
     //Para la animacion de la pantalla de carga
     const[cargando, setCargando] = useState(true);
-    const desvanecido = useRef(new Animated.Value(1)).current;
+    const desvanecido = new Animated.Value(1);
 
     const[screen, setScreen]=useState('menu');
 
@@ -84,25 +85,26 @@ export default function PantallaPrincipal(){
                         {/*BOTONES PRINCIPALES*/}
                         <View style={styles.botonesContainer}>
                 
-                            <TouchableOpacity style={styles.boton} onPress={()=>setScreen('transaccionesScreen')}>
-                                <Text style={styles.botonText}>Transacciones</Text>
+                            <TouchableOpacity style={styles.boton}>
+                                {/*<Ionicons>*/}
+                                <Button title='Transacciones' style={styles.botonText} onPress={()=>setScreen('transaccionesScreen')}></Button>
                             </TouchableOpacity>
                 
-                            <TouchableOpacity style={styles.boton} onPress={()=>setScreen('presupuestos')}>
-                                <Text style={styles.botonText}>Presupuesto Mensual</Text>
+                            <TouchableOpacity style={styles.boton}>
+                                {/*<Ionicons>*/}
+                                <Button title='Presupuesto Mensual' style={styles.botonText} onPress={()=>setScreen('presupuestos')}></Button>
                             </TouchableOpacity>
                 
-                            <TouchableOpacity style={styles.boton} onPress={()=>setScreen('graficas')}>
-                                <Text style={styles.botonText}>Ver Graficas</Text>
+                            <TouchableOpacity style={styles.boton}>
+                                {/*<Ionicons>*/}
+                                <Button title='Ver Graficas' style={styles.botonText} onPress={()=>setScreen('graficas')}></Button>
                             </TouchableOpacity>
                 
                             <TouchableOpacity style={styles.boton}>
                                 {/*<Ionicons>*/}
                                 <Text style={styles.botonText}>Configuración de Perfil</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity style={[styles.boton, styles.loginButton]} onPress={()=> setScreen('login')}>
-                                <Text style={styles.botonText}>Iniciar Sesión</Text>
-                            </TouchableOpacity>
+                            <Button onPress={()=> setScreen('login')} title="Iniciar Sesion"></Button>
                         </View>
                 
                     </ScrollView>
