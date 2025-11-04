@@ -6,6 +6,8 @@ import PantallaRegistro from "./PantallaRegistro";
 import PantallaPresupuesto from "./PresupuestosScreen";
 import LoginScreen from "./LoginScreen";
 
+
+
 export default function PantallaPrincipal(){
     
     //Para la animacion de la pantalla de carga
@@ -49,6 +51,7 @@ export default function PantallaPrincipal(){
             return<TransaccionesScreem></TransaccionesScreem>
         case 'presupuestos':
             return<PantallaPresupuesto></PantallaPresupuesto>
+        
         case 'menu':
             default:
                 return(
@@ -94,7 +97,7 @@ export default function PantallaPrincipal(){
                 
                             <TouchableOpacity style={styles.boton}>
                                 {/*<Ionicons>*/}
-                                <Text style={styles.botonText}>Ver Graficas</Text>
+                                
                             </TouchableOpacity>
                 
                             <TouchableOpacity style={styles.boton}>
