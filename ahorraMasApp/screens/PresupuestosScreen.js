@@ -4,6 +4,8 @@ import {View, Text, TouchableOpacity, StyleSheet, ScrollView, ProgressBarAndroid
 //import { ProgressBar } from "react-native-web";
 import PantallaPrincipal from "./PantallaPrincipal";
 import { Button } from "react-native";
+import VerPresupuestos from "./VerPresupuestos";
+import AgregarPresupuesto from "./AgregarPresupuesto";
 
 export default function PresupuestosScreen(){
     
@@ -23,6 +25,10 @@ export default function PresupuestosScreen(){
     switch(screen){
         case 'pantallaPrincipal':
             return<PantallaPrincipal></PantallaPrincipal>
+        case 'verP':
+            return<VerPresupuestos></VerPresupuestos>
+        case 'agregarP':
+            return<AgregarPresupuesto></AgregarPresupuesto>
         case 'menu':
             default:
                 return(
@@ -80,12 +86,12 @@ export default function PresupuestosScreen(){
                             
                             <TouchableOpacity style={styles.crudBoton}>
                                 {/*<Ionicons>*/}
-                                <Text style={styles.crudTexto}>Ver Presupuestos</Text>
+                                <Button title="Ver Presupuestos" onPress={()=>setScreen('verP')}></Button>
                             </TouchableOpacity>
 
                             <TouchableOpacity style={styles.crudBoton}>
                                 {/*<Ionicons>*/}
-                                <Text style={styles.crudTexto}>Agregar Presupuesto</Text>
+                                <Button title="Agregar Presupuesto" onPress={()=>setScreen('agregarP')}></Button>
                             </TouchableOpacity>
 
                             <TouchableOpacity style={styles.crudBoton}>
