@@ -3,6 +3,8 @@ import { Text, StyleSheet, View, TouchableOpacity, ScrollView, Button, TextInput
 import PantallaPrincipal from './PantallaPrincipal';
 import ListarTransaccion from './ListarTransaccion';
 import AgregarTransaccion from './AgregarTransaccion';
+import EditarTransacciones from './EditarTransaccion';
+import EliminarTransaccion from './EliminarTransaccion';
 
 
 export default function PantallaGestionTransacciones() {
@@ -16,6 +18,10 @@ export default function PantallaGestionTransacciones() {
             return<ListarTransaccion></ListarTransaccion>
         case 'agregarT':
             return<AgregarTransaccion></AgregarTransaccion>
+        case 'editarT':
+            return<EditarTransacciones></EditarTransacciones>
+        case 'eliminarT':
+            return<EliminarTransaccion></EliminarTransaccion>
         case 'menu':
             default:
                 return (
@@ -80,12 +86,12 @@ export default function PantallaGestionTransacciones() {
 
                             <TouchableOpacity style={styles.boton}>
                                 {/*<Ionicons>*/}
-                                <Text style={styles.botonText}>Editar Transaccion</Text>
+                                <Button title='Editar Transaccion' style={styles.botonText} onPress={()=>setScreen("editarT")}></Button>
                             </TouchableOpacity>
 
                             <TouchableOpacity style={styles.boton}>
                                 {/*<Ionicons>*/}
-                                <Text style={styles.botonText}>Eliminar Transaccion</Text>
+                                <Button title='Eliminar Transaccion' style={styles.botonText} onPress={()=>setScreen("eliminarT")}></Button>
                             </TouchableOpacity>
 
                             
