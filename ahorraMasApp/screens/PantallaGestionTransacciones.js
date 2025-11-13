@@ -1,6 +1,8 @@
 import React, {useEffect, useState} from 'react'
 import { Text, StyleSheet, View, TouchableOpacity, ScrollView, Button, TextInput } from 'react-native'
 import PantallaPrincipal from './PantallaPrincipal';
+import ListarTransaccion from './ListarTransaccion';
+import AgregarTransaccion from './AgregarTransaccion';
 
 
 export default function PantallaGestionTransacciones() {
@@ -10,6 +12,10 @@ export default function PantallaGestionTransacciones() {
     switch(screen){
         case 'pantallaPrincipal':
             return<PantallaPrincipal></PantallaPrincipal>
+        case 'listarT':
+            return<ListarTransaccion></ListarTransaccion>
+        case 'agregarT':
+            return<AgregarTransaccion></AgregarTransaccion>
         case 'menu':
             default:
                 return (
@@ -64,12 +70,12 @@ export default function PantallaGestionTransacciones() {
 
                             <TouchableOpacity style={styles.boton}>
                                 {/*<Ionicons>*/}
-                                <Text style={styles.botonText}>Lista de Transacciones</Text>
+                                <Button title='Lista de Transacciones' style={styles.botonText} onPress={()=>setScreen("listarT")}></Button>
                             </TouchableOpacity>
 
                             <TouchableOpacity style={styles.boton}>
                                 {/*<Ionicons>*/}
-                                <Text style={styles.botonText}>Agregar Transaccion</Text>
+                                <Button title='Agregar Transaccion' style={styles.botonText} onPress={()=>setScreen("agregarT")}></Button>
                             </TouchableOpacity>
 
                             <TouchableOpacity style={styles.boton}>
