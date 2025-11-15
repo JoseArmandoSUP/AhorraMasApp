@@ -35,8 +35,8 @@ export default function AgregarPresupuesto(){
                                 placeholder="Ejemplo: $500"
                                 keyboardType="numeric"
                                 placeholderTextColor="#999"
-                                value={categoria}
-                                onChangeText={setCategoria}
+                                value={monto}
+                                onChangeText={setMonto}
                             ></TextInput>
 
                             <Button title="Guardar Presupuesto"></Button>

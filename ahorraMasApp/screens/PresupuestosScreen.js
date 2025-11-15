@@ -6,6 +6,8 @@ import PantallaPrincipal from "./PantallaPrincipal";
 import { Button } from "react-native";
 import VerPresupuestos from "./VerPresupuestos";
 import AgregarPresupuesto from "./AgregarPresupuesto";
+import EditarPresupuesto from "./EditarPresupuesto";
+import EliminarPresupuesto from "./EliminarPresupuesto";
 
 export default function PresupuestosScreen(){
     
@@ -29,6 +31,10 @@ export default function PresupuestosScreen(){
             return<VerPresupuestos></VerPresupuestos>
         case 'agregarP':
             return<AgregarPresupuesto></AgregarPresupuesto>
+        case 'editarP':
+            return<EditarPresupuesto></EditarPresupuesto>
+        case 'eliminarP':
+            return<EliminarPresupuesto></EliminarPresupuesto>
         case 'menu':
             default:
                 return(
@@ -96,12 +102,13 @@ export default function PresupuestosScreen(){
 
                             <TouchableOpacity style={styles.crudBoton}>
                                 {/*<Ionicons>*/}
-                                <Text style={styles.crudTexto}>Editar Presupuesto</Text>
+                                <Button title="Editar Presupuesto" onPress={()=>setScreen('editarP')}></Button>
                             </TouchableOpacity>
 
                             <TouchableOpacity style={styles.crudBoton}>
                                 {/*<Ionicons>*/}
-                                <Text style={styles.crudTexto}>Eliminar Presupuesto</Text>
+                                {/*<Text style={styles.crudTexto}></Text>*/}
+                                <Button title="Eliminar Presupuesto" onPress={()=>setScreen('eliminarP')}></Button>
                             </TouchableOpacity>
 
                             <Button onPress={()=> setScreen('pantallaPrincipal')} title="Volver al menú"></Button>
