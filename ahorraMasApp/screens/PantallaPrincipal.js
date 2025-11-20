@@ -95,9 +95,9 @@ export default function PantallaPrincipal(){
                                 <Button title='Presupuesto Mensual' style={styles.botonText} onPress={()=>setScreen('presupuestos')}></Button>
                             </TouchableOpacity>
                 
-                            <TouchableOpacity style={styles.boton}>
+                            <TouchableOpacity style={styles.boton} onPress={()=>setScreen('graficas')}>
                                 {/*<Ionicons>*/}
-                                <Button title='Ver Graficas' style={styles.botonText} onPress={()=>setScreen('graficas')}></Button>
+                                <Text style={styles.botonText}>Ver Graficas</Text>
                             </TouchableOpacity>
                 
                             <TouchableOpacity style={styles.boton}>
@@ -189,6 +189,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: '#333',
         fontWeight: '500',
+        fontWeight: "bold",
     },
 
     //Estilos imagen de carga

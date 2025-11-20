@@ -7,11 +7,11 @@ export default function PantallaRegistro () {
     
     const[screen, setScreen]=useState('menu');
     
-    const [nombre, setNombre] = useState ('')
-    const [usuario, setUsuario] = useState ('')
-    const [edad, setEdad] = useState ('') 
-    const [correo, setCorreo] = useState ('')
-    const [telefono, setTelefono] = useState ('')
+    const [nombre, setNombre] = useState ('');
+    const [usuario, setUsuario] = useState ('');
+    const [edad, setEdad] = useState (''); 
+    const [correo, setCorreo] = useState ('');
+    const [telefono, setTelefono] = useState ('');
 
     const mostrarAlerta = () =>{
         if(nombre.trim() === '' || usuario.trim() === '' || edad.trim() === '' || correo.trim() === '' || telefono.trim() === ''){
@@ -32,6 +32,16 @@ export default function PantallaRegistro () {
                 `Nombre: ${nombre}\n usuario: ${usuario}\n Edad: ${edad}\n 
                 Correo: ${correo}\n Telefono: ${telefono}\n`);
         }
+    };
+
+    const filtrarCaracteresE = (input) => {
+        const numerico = input.replace(/[^0-9]/g, '');
+        setEdad(numerico);
+    };
+
+    const filtrarCaracteresT = (input) => {
+        const numerico = input.replace(/[^0-9]/g, '');
+        setTelefono(numerico);
     };
 
     switch(screen){
@@ -66,8 +76,9 @@ export default function PantallaRegistro () {
 
                             <TextInput style={styles.input}
                                 placeholder='Escribe tu edad'
+                                keyboardType="numeric"
                                 value={edad}
-                                onChangeText={setEdad}
+                                onChangeText={filtrarCaracteresE}
                             />
 
                             <TextInput style={styles.input}
@@ -78,8 +89,9 @@ export default function PantallaRegistro () {
 
                             <TextInput style={styles.input}
                                 placeholder='Escribe tu numero telefonico'
+                                keyboardType="numeric"
                                 value={telefono}
-                                onChangeText={setTelefono}
+                                onChangeText={filtrarCaracteresT}
                             />
 
                             <Button
