@@ -8,6 +8,11 @@ export default function AgregarPresupuesto(){
     const[categoria, setCategoria] = useState("");
     const[monto, setMonto] = useState("");
 
+    const filtrarCaracteresM = (input) => {
+        const numerico = input.replace(/[^0-9]/g, '');
+        setMonto(numerico);
+    };
+
     switch(screen){
         case 'presupuestosS':
             return<PresupuestosScreen></PresupuestosScreen>
@@ -18,28 +23,39 @@ export default function AgregarPresupuesto(){
 
                         <Text style={styles.titulo}>AGREGAR PRESUPUESTO</Text>
 
-                        <View style={styles.formulaioContainer}>
+                        {/*Definicion del presupusto mensual*/}
+                        <View style={styles.definirContainer}>
+                            
+                            <Text style={styles.definirTitulo}>Definir presupuesto mensual</Text>
 
-                            <Text style={styles.label}>Categoría</Text>
-                            <TextInput 
-                                style={styles.input}
-                                placeholder="Ejemplo: Comida, Transporte..."
-                                placeholderTextColor="#999"
-                                value={categoria}
-                                onChangeText={setCategoria}
-                            ></TextInput>
+                            <View style={styles.definirColumna}>
+                                <Text style={styles.definirLabel}>Categoria:</Text>
+                                <View style={styles.definirInput}>
+                                    <TextInput 
+                                        style={styles.definirPlaceholder} 
+                                        placeholder="Ejemplo: Comida, Transporte..."
+                                        value={categoria}
+                                        onChangeText={setCategoria}
+                                    ></TextInput>
+                                </View>
+                            </View>
 
-                            <Text style={styles.label}>Monto Límite</Text>
-                            <TextInput 
-                                style={styles.input}
-                                placeholder="Ejemplo: $500"
-                                keyboardType="numeric"
-                                placeholderTextColor="#999"
-                                value={monto}
-                                onChangeText={setMonto}
-                            ></TextInput>
+                            <View style={styles.definirColumna}>
+                                <Text style={styles.definirLabel}>Monto Límite:</Text>
+                                <View style={styles.definirInput}>
+                                    <TextInput 
+                                        keyboardType="numeric"
+                                        style={styles.definirPlaceholder} 
+                                        placeholder="Ejemplo: $500"
+                                        value={monto}
+                                        onChangeText={filtrarCaracteresM}
+                                    ></TextInput>
+                                </View>
+                            </View>
 
-                            <Button title="Guardar Presupuesto"></Button>
+                            <TouchableOpacity style={styles.definirBoton}>
+                                <Text style={styles.definirBotonTexto}>Guardar presupuesto</Text>
+                            </TouchableOpacity>
 
                         </View>
 
@@ -60,42 +76,74 @@ const styles = StyleSheet.create({
         paddingHorizontal: 25,
     },
 
+    //Estilos para la parte de definir presupuesto
+    definirContainer:{
+        backgroundColor: '#fff',
+        borderRadius: 15,
+        padding: 15,
+        marginBottom: 20,
+        shadowColor: '#000',
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+    },
+
+    definirTitulo:{
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#2e7d32',
+        textAlign: 'center',
+        marginBottom: 10,
+    },
+
+    definirColumna:{
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 10,
+    },
+
+    definirLabel:{
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#333',
+        width: '40%',
+    },
+
+    definirInput:{
+        backgroundColor: '#f0f0f0',
+        borderRadius: 8,
+        paddingVertical: 8,
+        paddingHorizontal: 10,
+        width: '55%',
+    },
+
+    definirPlaceholder:{
+        color: '#999',
+        fontSize: 14,
+    },
+
+    definirBoton:{
+        backgroundColor: '#2e7d32',
+        borderRadius: 10,
+        paddingVertical: 10,
+        marginTop: 5,
+        alignItems: 'center',
+    },
+
+    definirBotonTexto:{
+        color: '#fff',
+        fontWeight: 'bold',
+        fontSize: 15,
+    },
+    //---------------------------------------------
+
     titulo:{
         fontSize: 22,
         fontWeight: 'bold',
         color: "#1b5e20",
         textAlign: "center",
         marginBottom: 25,
-    },
-
-    formulaioContainer:{
-        backgroundColor: "#fff",
-        borderRadius: 15,
-        padding: 20,
-        shadowColor: "#000",
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 3,
-        marginBottom: 30,
-    },
-
-    label:{
-        fontSize: 15,
-        color: "#333",
-        marginBottom: 6,
-        fontWeight: "600",
-    },
-
-    input:{
-        borderWidth: 1,
-        borderColor: "#ccc",
-        borderRadius: 10,
-        paddingVertical: 10,
-        paddingHorizontal: 15,
-        marginBottom: 15,
-        backgroundColor: "#f9f9f9",
-        fontSize: 15,
-        color: "#000",
     },
 
     btnContainer:{

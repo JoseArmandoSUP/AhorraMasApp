@@ -85,14 +85,14 @@ export default function PantallaPrincipal(){
                         {/*BOTONES PRINCIPALES*/}
                         <View style={styles.botonesContainer}>
                 
-                            <TouchableOpacity style={styles.boton}>
+                            <TouchableOpacity style={styles.boton} onPress={()=>setScreen('transaccionesScreen')}>
                                 {/*<Ionicons>*/}
-                                <Button title='Transacciones' style={styles.botonText} onPress={()=>setScreen('transaccionesScreen')}></Button>
+                                <Text style={styles.botonText}>Transacciones</Text>
                             </TouchableOpacity>
                 
-                            <TouchableOpacity style={styles.boton}>
+                            <TouchableOpacity style={styles.boton} onPress={()=>setScreen('presupuestos')}>
                                 {/*<Ionicons>*/}
-                                <Button title='Presupuesto Mensual' style={styles.botonText} onPress={()=>setScreen('presupuestos')}></Button>
+                                <Text style={styles.botonText}>Presupuesto Mensual</Text>
                             </TouchableOpacity>
                 
                             <TouchableOpacity style={styles.boton} onPress={()=>setScreen('graficas')}>
@@ -104,7 +104,11 @@ export default function PantallaPrincipal(){
                                 {/*<Ionicons>*/}
                                 <Text style={styles.botonText}>Configuración de Perfil</Text>
                             </TouchableOpacity>
-                            <Button onPress={()=> setScreen('login')} title="Iniciar Sesion"></Button>
+                            
+                            <TouchableOpacity style={styles.loginBoton} onPress={()=> setScreen('login')}>
+                                <Text style={styles.loginBotonTexto}>Iniciar Sesion</Text>
+                            </TouchableOpacity>
+
                         </View>
                 
                     </ScrollView>
@@ -212,6 +216,20 @@ const styles = StyleSheet.create({
         bottom: 100,
         fontSize: 20,
         color: 'white',
+    },
+
+    loginBoton:{
+        backgroundColor: '#2e7d32',
+        borderRadius: 10,
+        paddingVertical: 10,
+        marginTop: 5,
+        alignItems: 'center',
+    },
+
+    loginBotonTexto:{
+        color: '#fff',
+        fontWeight: 'bold',
+        fontSize: 15,
     },
 
 });

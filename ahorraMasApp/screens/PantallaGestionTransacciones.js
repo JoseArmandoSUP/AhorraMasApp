@@ -50,29 +50,29 @@ export default function PantallaGestionTransacciones() {
                         {/*BOTONES CRUD*/}
                         <View style={styles.botonesContainer}>
 
-                            <TouchableOpacity style={styles.boton}>
+                            <TouchableOpacity style={styles.boton} onPress={()=>setScreen("listarT")}>
                                 {/*<Ionicons>*/}
-                                <Button title='Lista de Transacciones' style={styles.botonText} onPress={()=>setScreen("listarT")}></Button>
+                                <Text style={styles.botonText}>Lista de Transacciones</Text>
                             </TouchableOpacity>
 
-                            <TouchableOpacity style={styles.boton}>
+                            <TouchableOpacity style={styles.boton} onPress={()=>setScreen("agregarT")}>
                                 {/*<Ionicons>*/}
-                                <Button title='Agregar Transaccion' style={styles.botonText} onPress={()=>setScreen("agregarT")}></Button>
+                                <Text style={styles.botonText}>Agregar Transaccion</Text>
                             </TouchableOpacity>
 
-                            <TouchableOpacity style={styles.boton}>
+                            <TouchableOpacity style={styles.boton} onPress={()=>setScreen("editarT")}>
                                 {/*<Ionicons>*/}
-                                <Button title='Editar Transaccion' style={styles.botonText} onPress={()=>setScreen("editarT")}></Button>
+                                <Text style={styles.botonText}>Editar Transaccion</Text>
                             </TouchableOpacity>
 
-                            <TouchableOpacity style={styles.boton}>
+                            <TouchableOpacity style={styles.boton} onPress={()=>setScreen("eliminarT")}>
                                 {/*<Ionicons>*/}
-                                <Button title='Eliminar Transaccion' style={styles.botonText} onPress={()=>setScreen("eliminarT")}></Button>
+                                <Text style={styles.botonText}>Eliminar Transaccion</Text>
                             </TouchableOpacity>
 
-                            
-
-                            <Button onPress={()=> setScreen('pantallaPrincipal')} title="Volver al menú"></Button>
+                            <TouchableOpacity style={styles.volverBoton} onPress={()=> setScreen('pantallaPrincipal')}>
+                                <Text style={styles.volverBotonTexto}>Volver al menú</Text>
+                            </TouchableOpacity>
 
                         </View>
 
@@ -155,5 +155,19 @@ const styles = StyleSheet.create({
 
     relleno:{
         color:'#fff',
+    },
+
+    volverBoton:{
+        backgroundColor: '#2e7d32',
+        borderRadius: 10,
+        paddingVertical: 10,
+        marginTop: 5,
+        alignItems: 'center',
+    },
+
+    volverBotonTexto:{
+        color: '#fff',
+        fontWeight: 'bold',
+        fontSize: 15,
     },
 });

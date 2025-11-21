@@ -56,7 +56,9 @@ export default function ListarTransaccion(){
                     ))}
 
                     <View style={styles.botonContainer}>
-                        <Button title="Volver al menú de Transacciones" onPress={()=>setScreen("pantallaTransacciones")}></Button>
+                        <TouchableOpacity style={styles.volverBoton} onPress={()=>setScreen("pantallaTransacciones")}>
+                            <Text style={styles.volverBotonTexto}>Volver al menú de Transacciones</Text>
+                        </TouchableOpacity>
                     </View>
 
                     </ScrollView>
@@ -169,5 +171,20 @@ const styles = StyleSheet.create({
     botonContainer:{
         marginTop: 20,
         marginBottom: 30,
+    },
+
+    //----------------------------------------
+    volverBoton:{
+        backgroundColor: '#2e7d32',
+        borderRadius: 10,
+        paddingVertical: 10,
+        marginTop: 5,
+        alignItems: 'center',
+    },
+
+    volverBotonTexto:{
+        color: '#fff',
+        fontWeight: 'bold',
+        fontSize: 15,
     },
 });

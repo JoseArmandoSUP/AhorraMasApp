@@ -39,32 +39,8 @@ export default function PresupuestosScreen(){
             default:
                 return(
                     <ScrollView style={styles.container} contentContainerStyle={{paddingBottom: 100}}>
+                        
                         <Text style={styles.titulo}>PRESUPUESTO</Text>
-
-                        {/*Definicion del presupusto mensual*/}
-                        <View style={styles.definirContainer}>
-                            
-                            <Text style={styles.definirTitulo}>Definir presupuesto mensual</Text>
-
-                            <View style={styles.definirColumna}>
-                                <Text style={styles.definirLabel}>Categoria:</Text>
-                                <View style={styles.definirInput}>
-                                    <TextInput style={styles.definirPlaceholder} placeholder="Escribe aquí"></TextInput>
-                                </View>
-                            </View>
-
-                            <View style={styles.definirColumna}>
-                                <Text style={styles.definirLabel}>Monto:</Text>
-                                <View style={styles.definirInput}>
-                                    <TextInput style={styles.definirPlaceholder} placeholder="Escribe aquí"></TextInput>
-                                </View>
-                            </View>
-
-                            <TouchableOpacity style={styles.definirBoton}>
-                                <Text style={styles.definirBotonTexto}>Guardar presupuesto</Text>
-                            </TouchableOpacity>
-
-                        </View>
 
                         {/*LISTA DE PRESUPUESTOS*/}
                         {presupuestos.map(item => {
@@ -128,67 +104,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
     },
 
-    //Estilos para la parte de definir presupuesto
-    definirContainer:{
-        backgroundColor: '#fff',
-        borderRadius: 15,
-        padding: 15,
-        marginBottom: 20,
-        shadowColor: '#000',
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 3,
-    },
-
-    definirTitulo:{
-        fontSize: 16,
-        fontWeight: 'bold',
-        color: '#2e7d32',
-        textAlign: 'center',
-        marginBottom: 10,
-    },
-
-    definirColumna:{
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 10,
-    },
-
-    definirLabel:{
-        fontSize: 14,
-        fontWeight: '600',
-        color: '#333',
-        width: '40%',
-    },
-
-    definirInput:{
-        backgroundColor: '#f0f0f0',
-        borderRadius: 8,
-        paddingVertical: 8,
-        paddingHorizontal: 10,
-        width: '55%',
-    },
-
-    definirPlaceholder:{
-        color: '#999',
-        fontSize: 14,
-    },
-
-    definirBoton:{
-        backgroundColor: '#2e7d32',
-        borderRadius: 10,
-        paddingVertical: 10,
-        marginTop: 5,
-        alignItems: 'center',
-    },
-
-    definirBotonTexto:{
-        color: '#fff',
-        fontWeight: 'bold',
-        fontSize: 15,
-    },
-    //---------------------------------------------
     titulo:{
         fontSize: 22,
         fontWeight: 'bold',

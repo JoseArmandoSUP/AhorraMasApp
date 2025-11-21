@@ -24,6 +24,11 @@ export default function AgregarTransaccion(){
         );
     };
 
+    const filtrarCaracteresM = (input) => {
+        const numerico = input.replace(/[^0-9]/g, '');
+        setMonto(numerico);
+    };
+
     switch(screen){
         case 'pantallaTransacciones':
             return<PantallaGestionTransacciones></PantallaGestionTransacciones>
@@ -55,9 +60,10 @@ export default function AgregarTransaccion(){
                             <Text style={styles.label}>Monto</Text>
                             <TextInput 
                                 style={styles.input}
+                                keyboardType="numeric"
                                 placeholder="Ejemplo: 500"
                                 value={monto}
-                                onChangeText={setMonto}
+                                onChangeText={filtrarCaracteresM}
                             ></TextInput>
 
                             <Text style={styles.label}>Fecha: </Text>
