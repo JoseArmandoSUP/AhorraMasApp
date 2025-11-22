@@ -1,20 +1,24 @@
 import { Text,  StyleSheet, View, Button, ImageBackground, TextInput, Image, ScrollView, Alert} from "react-native";
 import React, { useState } from 'react'
-import LoginScreen from "./LoginScreen";
-import PantallaPrincipal from "./PantallaPrincipal";
+//import LoginScreen from "./LoginScreen";
+//import PantallaPrincipal from "./PantallaPrincipal";
+
+//Navegacion
+import { useNavigation } from "@react-navigation/native";
 
 export default function PantallaRegistro () {
     
-    const[screen, setScreen]=useState('menu');
+    const nav = useNavigation();
     
     const [nombre, setNombre] = useState ('');
     const [usuario, setUsuario] = useState ('');
     const [edad, setEdad] = useState (''); 
     const [correo, setCorreo] = useState ('');
     const [telefono, setTelefono] = useState ('');
+    const [password, setPassword] = useState('');
 
     const mostrarAlerta = () =>{
-        if(nombre.trim() === '' || usuario.trim() === '' || edad.trim() === '' || correo.trim() === '' || telefono.trim() === ''){
+        if(nombre.trim() === '' || usuario.trim() === '' || edad.trim() === '' || correo.trim() === '' || telefono.trim() === '' || password.trim() === ''){
             Alert.alert("Faltan campos por llenar, porfavor completelos");
             alert("Faltan campos por llenar, porfavor completelos");
             return;
@@ -44,70 +48,70 @@ export default function PantallaRegistro () {
         setTelefono(numerico);
     };
 
-    switch(screen){
-        case 'registro':
-            return <LoginScreen/>;
-        case 'pantallaPrincipal':
-            return<PantallaPrincipal></PantallaPrincipal>
-        case 'menu':
-            default:
-                return (
-                    <ScrollView contentContainerStyle={{paddingBottom: 100}}>
-                        <View style={styles.container}>
-                            <Image style={styles.logo}
-                                source={require('../assets/Logo.png')}
-                            />
-                            <Text style={styles.text}>REGISTRATE</Text>
-                            <Text style={styles.text2}>Completa el formulario para poder crear una cuenta</Text>   
-                            
-                            
+    return (
+        <ScrollView contentContainerStyle={{paddingBottom: 100}}>
+            <View style={styles.container}>
+                <Image style={styles.logo}
+                    source={require('../assets/Logo.png')}
+                />
+                <Text style={styles.text}>REGISTRATE</Text>
+                <Text style={styles.text2}>Completa el formulario para poder crear una cuenta</Text>   
+                
+                
 
-                            <TextInput style={styles.input}
-                                placeholder='Escribe tu nombre'
-                                value={nombre}
-                                onChangeText={setNombre}
-                            />
+                <TextInput style={styles.input}
+                    placeholder='Escribe tu nombre'
+                    value={nombre}
+                    onChangeText={setNombre}
+                />
 
-                            <TextInput style={styles.input}
-                                placeholder='Escribe tu usuario'
-                                value={usuario}
-                                onChangeText={setUsuario}
-                            />
+                <TextInput style={styles.input}
+                    placeholder='Escribe tu usuario'
+                    value={usuario}
+                    onChangeText={setUsuario}
+                />
 
-                            <TextInput style={styles.input}
-                                placeholder='Escribe tu edad'
-                                keyboardType="numeric"
-                                value={edad}
-                                onChangeText={filtrarCaracteresE}
-                            />
+                <TextInput style={styles.input}
+                    placeholder='Escribe tu edad'
+                    keyboardType="numeric"
+                    value={edad}
+                    onChangeText={filtrarCaracteresE}
+                />
 
-                            <TextInput style={styles.input}
-                                placeholder='Escribe tu correo'
-                                value={correo}
-                                onChangeText={setCorreo}
-                            />
+                <TextInput style={styles.input}
+                    placeholder='Escribe tu correo'
+                    value={correo}
+                    onChangeText={setCorreo}
+                />
 
-                            <TextInput style={styles.input}
-                                placeholder='Escribe tu numero telefonico'
-                                keyboardType="numeric"
-                                value={telefono}
-                                onChangeText={filtrarCaracteresT}
-                            />
+                <TextInput style={styles.input}
+                    placeholder='Escribe tu numero telefonico'
+                    keyboardType="numeric"
+                    value={telefono}
+                    onChangeText={filtrarCaracteresT}
+                />
 
-                            <Button
-                                color="blue"
-                                title="Resgistrarse"
-                                onPress={mostrarAlerta}
-                            ></Button>
+                <TextInput style={styles.input}
+                    placeholder="Definir contraseña"
+                    value={password}
+                    secureTextEntry={true}
+                    onChangeText={setPassword}
+                ></TextInput>
 
-                            <Button 
-                                onPress={()=> setScreen('pantallaPrincipal')} title="Volver al menú"
-                            ></Button>
-                            
-                        </View>
-                    </ScrollView> 
-                );
-    }
+                <Button
+                    color="blue"
+                    title="Resgistrarse"
+                    onPress={mostrarAlerta}
+                ></Button>
+
+                <Button title="Volver al Login" onPress={()=>nav.navigate("Login")}></Button>
+
+                <Button onPress={()=> nav.navigate("Home")} title="Volver al menú"></Button>
+                
+            </View>
+        </ScrollView> 
+    );
+    
 }
 
 const styles = StyleSheet.create ({

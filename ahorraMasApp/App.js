@@ -1,8 +1,12 @@
-import PantallaPrincipal from './screens/PantallaPrincipal';
+
+import StackNavigator from './navegacion/StackNavigator';
+import { NavigationContainer } from '@react-navigation/native';
 
 export default function App() {
   
   return (
-    <PantallaPrincipal></PantallaPrincipal>
+    <NavigationContainer>
+      <StackNavigator></StackNavigator>
+    </NavigationContainer>
   );
 }

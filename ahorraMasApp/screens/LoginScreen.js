@@ -1,11 +1,14 @@
 import { Text,  StyleSheet, View, Button, ImageBackground, TextInput, Image, Switch, ScrollView, Alert} from "react-native";
 import React, { useState } from 'react'
-import PantallaPrincipal from "./PantallaPrincipal";
-import PantallaRegistro from "./PantallaRegistro";
+//import PantallaPrincipal from "./PantallaPrincipal";
+//import PantallaRegistro from "./PantallaRegistro";
+
+//Navegacion
+import { useNavigation } from "@react-navigation/native";
 
 export default function LoginScreen (){
 
-    const[screen, setScreen]=useState('menu');
+    const nav = useNavigation();
 
     const [correo, setCorreo] = useState ('')
     const [password, setPassword] = useState ('')
@@ -14,69 +17,62 @@ export default function LoginScreen (){
         if(correo.trim() === '' || password.trim() === ''){
             Alert.alert("Faltan campos por llenar, porfavor completelos");
             alert("Faltan campos por llenar, porfavor completelos");
-            return;
+            return false;
         }
         const validarCorreo = /^[\w.%+-]+@gmail\.com$/;
         if(!validarCorreo.test(correo)){
             Alert.alert("Correo electronico no valido, intente otra vez porfavor");
             alert("Correo electronico no valido, intente otra vez porfavor");
-            return;
+            return false;
         }else{
             Alert.alert("Inicio de sesión esxitoso\n");
             alert("Inicio de sesión esxitoso\n");
+            return true;
         }
     };
 
-    switch(screen){
-        case 'registro':
-            return<PantallaRegistro></PantallaRegistro>
-        case 'pantallaPrincipal':
-            return<PantallaPrincipal></PantallaPrincipal>
-        case 'menu':
-            default:
-                return(
-                    <ScrollView contentContainerStyle={{paddingBottom: 100}}>
-                        <View style={styles.container}>
-                        <Image 
-                            source={require('../assets/Logo.png')}
-                        />
-                        <Text style={styles.text} >Iniciemos Sesion..!</Text>
-                        <Text style={styles.text2}>Inicie sesion para poder acceder a su cuenta</Text>
-                        <TextInput style={styles.input}
-                            placeholder='Correo'
-                            value={correo}
-                            onChangeText={setCorreo}
-                        />
-                        <TextInput style={styles.input}
-                            placeholder='Password'
-                            value={password}
-                            onChangeText={setPassword}
-                        />
-                        <View>
-                            <Switch></Switch>
-                            <Text></Text>
-                        </View>
-                        
-                        <Button title="INICIAR SESION" onPress={mostrarAlerta}></Button>
-                        
-                        <Text>¿No tienes cuenta? REGISTRARSE</Text>
+    return(
+        <ScrollView contentContainerStyle={{paddingBottom: 100}}>
+            <View style={styles.container}>
+                <Image 
+                    source={require('../assets/Logo.png')}
+                />
+                <Text style={styles.text} >Iniciemos Sesion..!</Text>
+                <Text style={styles.text2}>Inicie sesion para poder acceder a su cuenta</Text>
+                <TextInput style={styles.input}
+                    placeholder='Correo'
+                    value={correo}
+                    onChangeText={setCorreo}
+                />
+                <TextInput style={styles.input}
+                    placeholder='Password'
+                    value={password}
+                    onChangeText={setPassword}
+                />
+                <View>
+                    <Switch></Switch>
+                    <Text></Text>
+                </View>
+                
+                <Button 
+                    title="INICIAR SESION" 
+                    onPress={()=>{
+                        const valido = mostrarAlerta();
+                        if (valido) nav.navigate("Home");
+                    }}
+                ></Button>
+                
+                <Text>¿No tienes cuenta? REGISTRARSE</Text>
 
-                        <Button 
-                            style={styles.boton} 
-                            onPress={()=> setScreen('registro')} title="Registrarse"
-                        ></Button>
+                <Button 
+                    style={styles.boton} 
+                    onPress={()=> nav.navigate("Registro")} title="Registrarse"
+                ></Button>
 
-                        <Button 
-                            style={styles.boton} 
-                            onPress={()=> setScreen('pantallaPrincipal')} title="Volver al menú"
-                        ></Button>
-                        </View>
-                    </ScrollView>
-                    
-                );
-    }
-    
-    
+            </View>
+        </ScrollView>
+        
+    );
 }
 
 const styles = StyleSheet.create ({
