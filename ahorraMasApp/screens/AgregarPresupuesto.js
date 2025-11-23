@@ -1,71 +1,95 @@
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Button, TextInput } from "react-native";
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Button, TextInput, Alert } from "react-native";
 import React, {useState} from "react";
-import PresupuestosScreen from "./PresupuestosScreen";
+//import PresupuestosScreen from "./PresupuestosScreen";
+import { useNavigation } from "@react-navigation/native";
 
 export default function AgregarPresupuesto(){
-    const[screen, setScreen] = useState("menu");
+    const navigatation = useNavigation();
 
     const[categoria, setCategoria] = useState("");
     const[monto, setMonto] = useState("");
+    const[fecha, setFecha] = useState("");
+
+    const alertaAgregar = () => {
+        if(!categoria || !monto || !fecha){
+            Alert.alert("Por favor complete todos los campos");
+            alert("Por favor complete todos los campos");
+            return;
+        }
+        Alert.alert(
+            `Presupuesto agregado correctamente: \n Categoria: ${categoria} \n Monto: $${monto} \n Fecha: ${fecha}`
+        );
+        alert(
+            `Presupuesto agregado correctamente: \n Categoria: ${categoria} \n Monto: $${monto} \n Fecha: ${fecha}`
+        );
+    };
 
     const filtrarCaracteresM = (input) => {
         const numerico = input.replace(/[^0-9]/g, '');
         setMonto(numerico);
     };
 
-    switch(screen){
-        case 'presupuestosS':
-            return<PresupuestosScreen></PresupuestosScreen>
-        case 'menu':
-            default:
-                return(
-                    <ScrollView style={styles.container}>
+    return(
+        <ScrollView style={styles.container}>
 
-                        <Text style={styles.titulo}>AGREGAR PRESUPUESTO</Text>
+            <Text style={styles.titulo}>AGREGAR PRESUPUESTO</Text>
 
-                        {/*Definicion del presupusto mensual*/}
-                        <View style={styles.definirContainer}>
-                            
-                            <Text style={styles.definirTitulo}>Definir presupuesto mensual</Text>
+            {/*Definicion del presupusto mensual*/}
+            <View style={styles.definirContainer}>
+                
+                <Text style={styles.definirTitulo}>Definir presupuesto mensual</Text>
 
-                            <View style={styles.definirColumna}>
-                                <Text style={styles.definirLabel}>Categoria:</Text>
-                                <View style={styles.definirInput}>
-                                    <TextInput 
-                                        style={styles.definirPlaceholder} 
-                                        placeholder="Ejemplo: Comida, Transporte..."
-                                        value={categoria}
-                                        onChangeText={setCategoria}
-                                    ></TextInput>
-                                </View>
-                            </View>
+                <View style={styles.definirColumna}>
+                    <Text style={styles.definirLabel}>Categoria:</Text>
+                    <View style={styles.definirInput}>
+                        <TextInput 
+                            style={styles.definirPlaceholder} 
+                            placeholder="Ejemplo: Comida, Transporte..."
+                            value={categoria}
+                            onChangeText={setCategoria}
+                        ></TextInput>
+                    </View>
+                </View>
 
-                            <View style={styles.definirColumna}>
-                                <Text style={styles.definirLabel}>Monto Límite:</Text>
-                                <View style={styles.definirInput}>
-                                    <TextInput 
-                                        keyboardType="numeric"
-                                        style={styles.definirPlaceholder} 
-                                        placeholder="Ejemplo: $500"
-                                        value={monto}
-                                        onChangeText={filtrarCaracteresM}
-                                    ></TextInput>
-                                </View>
-                            </View>
+                <View style={styles.definirColumna}>
+                    <Text style={styles.definirLabel}>Monto Límite:</Text>
+                    <View style={styles.definirInput}>
+                        <TextInput 
+                            keyboardType="numeric"
+                            style={styles.definirPlaceholder} 
+                            placeholder="Ejemplo: $500"
+                            value={monto}
+                            onChangeText={filtrarCaracteresM}
+                        ></TextInput>
+                    </View>
+                </View>
 
-                            <TouchableOpacity style={styles.definirBoton}>
-                                <Text style={styles.definirBotonTexto}>Guardar presupuesto</Text>
-                            </TouchableOpacity>
+                <View style={styles.definirColumna}>
+                    <Text style={styles.definirLabel}>Fecha:</Text>
+                    <View style={styles.definirInput}>
+                        <TextInput
+                            style={styles.definirPlaceholder} 
+                            placeholder="AÑO-MES-DIA"
+                            value={fecha}
+                            onChangeText={setFecha}
+                        ></TextInput>
+                    </View>
+                </View>
 
-                        </View>
+                <TouchableOpacity style={styles.definirBoton} onPress={alertaAgregar}>
+                    <Text style={styles.definirBotonTexto}>Guardar presupuesto</Text>
+                </TouchableOpacity>
 
-                        <View style={styles.btnContainer}>
-                            <Button title="Volver al menú de Presupuestos" onPress={()=>setScreen('presupuestosS')}></Button>
-                        </View>
+            </View>
 
-                    </ScrollView>
-                );
-    }
+            <View style={styles.btnContainer}>
+                <TouchableOpacity style={styles.volverBoton} onPress={()=>navigatation.goBack()}>
+                    <Text style={styles.volverBotonTexto}>Volver al menú de Presupuestos</Text>
+                </TouchableOpacity>
+            </View>
+
+        </ScrollView>
+    );
 }
 
 const styles = StyleSheet.create({
@@ -149,5 +173,18 @@ const styles = StyleSheet.create({
     btnContainer:{
         marginTop: 10,
         alignItems: "center",
+    },
+
+    volverBoton: {
+        backgroundColor: "#999",
+        padding: 12,
+        borderRadius: 10,
+        alignItems: "center",
+        marginTop: 15,
+    },
+
+    volverBotonTexto: {
+        color: "#fff",
+        fontWeight: "bold",
     },
 });

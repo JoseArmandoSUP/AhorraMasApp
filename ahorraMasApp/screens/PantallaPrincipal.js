@@ -1,11 +1,12 @@
 import React, { useEffect, useState} from "react";
 import { Text, StyleSheet, View, TouchableOpacity, ScrollView, ImageBackground, Animated, Easing, Image } from 'react-native'
 import { Button } from "react-native";
-import TransaccionesScreem from './PantallaGestionTransacciones';
-import PantallaRegistro from "./PantallaRegistro";
-import PantallaPresupuesto from "./PresupuestosScreen";
-import LoginScreen from "./LoginScreen";
-import GraficasScreen from "./GraficasScreen";
+//import TransaccionesScreem from './PantallaGestionTransacciones';
+//import PantallaRegistro from "./PantallaRegistro";
+//import PantallaPresupuesto from "./PresupuestosScreen";
+//import LoginScreen from "./LoginScreen";
+//import GraficasScreen from "./GraficasScreen";
+import { useNavigation } from "@react-navigation/native";
 
 export default function PantallaPrincipal(){
     
@@ -13,7 +14,7 @@ export default function PantallaPrincipal(){
     const[cargando, setCargando] = useState(true);
     const desvanecido = new Animated.Value(1);
 
-    const[screen, setScreen]=useState('menu');
+    const navigation = useNavigation();
 
     useEffect(()=>{
         const timer=setTimeout(()=>{
@@ -41,79 +42,65 @@ export default function PantallaPrincipal(){
         );
     }
 
-    switch(screen){
-        case 'registro': 
-            return<PantallaRegistro></PantallaRegistro>
-        case 'login':
-            return<LoginScreen></LoginScreen>
-        case 'transaccionesScreen':
-            return<TransaccionesScreem></TransaccionesScreem>
-        case 'presupuestos':
-            return<PantallaPresupuesto></PantallaPresupuesto>
-        case 'graficas':
-            return<GraficasScreen></GraficasScreen>
-        case 'menu':
-            default:
-                return(
-                    <ScrollView style={styles.container}>
-                    
-                        {/*ENCABEZADO*/}
-                        <Text style={styles.titulo}>AHORRA +</Text>
-                        <Image style={styles.logo}
-                                source={require('../assets/Logo.png')}
-                        />
-                        
-                        {/*CONTENEDOR DE GASTOS E INGRESOS*/}
-                        <View style={styles.todoContainer}>
-                            
-                            
+    
+    return(
+        <ScrollView style={styles.container}>
+        
+            {/*ENCABEZADO*/}
+            <Text style={styles.titulo}>AHORRA +</Text>
+            <Image style={styles.logo}
+                source={require('../assets/Logo.png')}
+            />
+            
+            {/*CONTENEDOR DE GASTOS E INGRESOS*/}
+            <View style={styles.todoContainer}>
+                
+                <View style={styles.todoCajas}>
+                    <Text style={styles.todoLabel}>GASTOS</Text>
+                    <Text style={styles.todoAmount}>$1000</Text>
+                    {/*<Ionicons>*/}
+                </View>
+    
+                <View style={styles.todoCajas}>
+                    <Text style={styles.todoLabel}>INGRESOS</Text>
+                    <Text style={styles.todoAmount}>$1200</Text>
+                    {/*<Ionicons>*/}
+                </View>
+    
+            </View>
+    
+            {/*BOTONES PRINCIPALES*/}
+            <View style={styles.botonesContainer}>
+    
+                <TouchableOpacity style={styles.boton} onPress={()=>navigation.navigate("Transacciones")}>
+                    {/*<Ionicons>*/}
+                    <Text style={styles.botonText}>Transacciones</Text>
+                </TouchableOpacity>
+    
+                <TouchableOpacity style={styles.boton} onPress={()=>navigation.navigate("Presupuestos")}>
+                    {/*<Ionicons>*/}
+                    <Text style={styles.botonText}>Presupuesto Mensual</Text>
+                </TouchableOpacity>
+    
+                <TouchableOpacity style={styles.boton} onPress={()=>navigation.navigate("Graficas")}>
+                    {/*<Ionicons>*/}
+                    <Text style={styles.botonText}>Ver Graficas</Text>
+                </TouchableOpacity>
+    
+                <TouchableOpacity style={styles.boton}>
+                    {/*<Ionicons>*/}
+                    <Text style={styles.botonText}>Configuración de Perfil</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity style={styles.loginBoton} onPress={()=> navigation.navigate("Login")}>
+                    <Text style={styles.loginBotonTexto}>Iniciar Sesion</Text>
+                </TouchableOpacity>
 
-                            <View style={styles.todoCajas}>
-                                <Text style={styles.todoLabel}>GASTOS</Text>
-                                <Text style={styles.todoAmount}>$1000</Text>
-                                {/*<Ionicons>*/}
-                            </View>
-                
-                            <View style={styles.todoCajas}>
-                                <Text style={styles.todoLabel}>INGRESOS</Text>
-                                <Text style={styles.todoAmount}>$1200</Text>
-                                {/*<Ionicons>*/}
-                            </View>
-                
-                        </View>
-                
-                        {/*BOTONES PRINCIPALES*/}
-                        <View style={styles.botonesContainer}>
-                
-                            <TouchableOpacity style={styles.boton} onPress={()=>setScreen('transaccionesScreen')}>
-                                {/*<Ionicons>*/}
-                                <Text style={styles.botonText}>Transacciones</Text>
-                            </TouchableOpacity>
-                
-                            <TouchableOpacity style={styles.boton} onPress={()=>setScreen('presupuestos')}>
-                                {/*<Ionicons>*/}
-                                <Text style={styles.botonText}>Presupuesto Mensual</Text>
-                            </TouchableOpacity>
-                
-                            <TouchableOpacity style={styles.boton} onPress={()=>setScreen('graficas')}>
-                                {/*<Ionicons>*/}
-                                <Text style={styles.botonText}>Ver Graficas</Text>
-                            </TouchableOpacity>
-                
-                            <TouchableOpacity style={styles.boton}>
-                                {/*<Ionicons>*/}
-                                <Text style={styles.botonText}>Configuración de Perfil</Text>
-                            </TouchableOpacity>
-                            
-                            <TouchableOpacity style={styles.loginBoton} onPress={()=> setScreen('login')}>
-                                <Text style={styles.loginBotonTexto}>Iniciar Sesion</Text>
-                            </TouchableOpacity>
-
-                        </View>
-                
-                    </ScrollView>
-                );
-    }  
+            </View>
+    
+        </ScrollView>
+    );
+     
 }
 
 const styles = StyleSheet.create({

@@ -1,84 +1,72 @@
 import React, {useEffect, useState} from 'react'
 import { Text, StyleSheet, View, TouchableOpacity, ScrollView, Button, TextInput } from 'react-native'
-import PantallaPrincipal from './PantallaPrincipal';
-import ListarTransaccion from './ListarTransaccion';
-import AgregarTransaccion from './AgregarTransaccion';
-import EditarTransacciones from './EditarTransaccion';
-import EliminarTransaccion from './EliminarTransaccion';
+//import PantallaPrincipal from './PantallaPrincipal';
+//import ListarTransaccion from './ListarTransaccion';
+//import AgregarTransaccion from './AgregarTransaccion';
+//import EditarTransacciones from './EditarTransaccion';
+//import EliminarTransaccion from './EliminarTransaccion';
+import { useNavigation } from '@react-navigation/native';
 
 
 export default function PantallaGestionTransacciones() {
-  
-    const[screen, setScreen]=useState('menu');
+    //Agregado 3:23
+    const navigation = useNavigation();
 
-    switch(screen){
-        case 'pantallaPrincipal':
-            return<PantallaPrincipal></PantallaPrincipal>
-        case 'listarT':
-            return<ListarTransaccion></ListarTransaccion>
-        case 'agregarT':
-            return<AgregarTransaccion></AgregarTransaccion>
-        case 'editarT':
-            return<EditarTransacciones></EditarTransacciones>
-        case 'eliminarT':
-            return<EliminarTransaccion></EliminarTransaccion>
-        case 'menu':
-            default:
-                return (
-                    <ScrollView style={styles.container} contentContainerStyle={{paddingBottom: 100}}>
+    return (
+        <ScrollView style={styles.container} contentContainerStyle={{paddingBottom: 100}}>
 
-                        {/*ENCABEZADO*/}
-                        <Text style={styles.titulo}>TRANSACCIONES</Text>
-                        
-                        {/*CONTENEDOR DE GASTOS E INGRESOS*/}
-                        <View style={styles.todoContainer}>
+            {/*ENCABEZADO*/}
+            <Text style={styles.titulo}>TRANSACCIONES</Text>
+            
+            {/*CONTENEDOR DE GASTOS E INGRESOS*/}
+            <View style={styles.todoContainer}>
 
-                            <View style={styles.todoCajas}>
-                                <Text style={styles.todoLabel}>GASTOS</Text>
-                                <Text style={styles.todoAmount}>$1000</Text>
-                                {/*<Ionicons>*/}
-                            </View>
+                <View style={styles.todoCajas}>
+                    <Text style={styles.todoLabel}>GASTOS</Text>
+                    <Text style={styles.todoAmount}>$1000</Text>
+                    {/*<Ionicons>*/}
+                </View>
 
-                            <View style={styles.todoCajas}>
-                                <Text style={styles.todoLabel}>INGRESOS</Text>
-                                <Text style={styles.todoAmount}>$1200</Text>
-                                {/*<Ionicons>*/}
-                            </View>
+                <View style={styles.todoCajas}>
+                    <Text style={styles.todoLabel}>INGRESOS</Text>
+                    <Text style={styles.todoAmount}>$1200</Text>
+                    {/*<Ionicons>*/}
+                </View>
 
-                        </View>
+            </View>
 
-                        {/*BOTONES CRUD*/}
-                        <View style={styles.botonesContainer}>
+            {/*BOTONES CRUD*/}
+            <View style={styles.botonesContainer}>
 
-                            <TouchableOpacity style={styles.boton} onPress={()=>setScreen("listarT")}>
-                                {/*<Ionicons>*/}
-                                <Text style={styles.botonText}>Lista de Transacciones</Text>
-                            </TouchableOpacity>
+                <TouchableOpacity style={styles.boton} onPress={()=>navigation.navigate("ListarTransaccion")}>
+                    {/*<Ionicons>*/}
+                    <Text style={styles.botonText}>Lista de Transacciones</Text>
+                </TouchableOpacity>
 
-                            <TouchableOpacity style={styles.boton} onPress={()=>setScreen("agregarT")}>
-                                {/*<Ionicons>*/}
-                                <Text style={styles.botonText}>Agregar Transaccion</Text>
-                            </TouchableOpacity>
+                <TouchableOpacity style={styles.boton} onPress={()=>navigation.navigate("AgregarTransaccion")}>
+                    {/*<Ionicons>*/}
+                    <Text style={styles.botonText}>Agregar Transaccion</Text>
+                </TouchableOpacity>
 
-                            <TouchableOpacity style={styles.boton} onPress={()=>setScreen("editarT")}>
-                                {/*<Ionicons>*/}
-                                <Text style={styles.botonText}>Editar Transaccion</Text>
-                            </TouchableOpacity>
+                <TouchableOpacity style={styles.boton} onPress={()=>navigation.navigate("EditarTransaccion")}>
+                    {/*<Ionicons>*/}
+                    <Text style={styles.botonText}>Editar Transaccion</Text>
+                </TouchableOpacity>
 
-                            <TouchableOpacity style={styles.boton} onPress={()=>setScreen("eliminarT")}>
-                                {/*<Ionicons>*/}
-                                <Text style={styles.botonText}>Eliminar Transaccion</Text>
-                            </TouchableOpacity>
+                <TouchableOpacity style={styles.boton} onPress={()=>navigation.navigate("EliminarTransaccion")}>
+                    {/*<Ionicons>*/}
+                    <Text style={styles.botonText}>Eliminar Transaccion</Text>
+                </TouchableOpacity>
 
-                            <TouchableOpacity style={styles.volverBoton} onPress={()=> setScreen('pantallaPrincipal')}>
-                                <Text style={styles.volverBotonTexto}>Volver al menú</Text>
-                            </TouchableOpacity>
+                <TouchableOpacity style={styles.volverBoton} onPress={()=>navigation.navigate("Home")}>
+                    <Text style={styles.volverBotonTexto}>Volver al menú</Text>
+                </TouchableOpacity>
 
-                        </View>
+            </View>
 
-                    </ScrollView>
-                );
-    }
+        </ScrollView>
+    );
+    
 }
 
 const styles = StyleSheet.create({

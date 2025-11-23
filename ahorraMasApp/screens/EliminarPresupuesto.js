@@ -1,9 +1,10 @@
-import { Text, View, ScrollView, StyleSheet, Button, TouchableOpacity } from "react-native";
+import { Text, View, ScrollView, StyleSheet, Button, TouchableOpacity, Alert } from "react-native";
 import React, {useState} from "react";
-import PresupuestosScreen from "./PresupuestosScreen";
+//import PresupuestosScreen from "./PresupuestosScreen";
+import { useNavigation } from "@react-navigation/native";
 
 export default function EliminarPresupuesto(){
-    const[screen, setScreen] = useState("menu");
+    const navigation = useNavigation();
 
     const presupuestos = [
         {id: 1, categoria: "Comida", limite: 500, color: "#2e7d32"},
@@ -13,38 +14,45 @@ export default function EliminarPresupuesto(){
         {id: 5, categoria: "Servicios", limite: 800, color: "#8e24aa"},
     ];
 
-    switch(screen){
-        case 'presupuestosS':
-            return<PresupuestosScreen></PresupuestosScreen>
-        case 'menu':
-            default:
-                return(
-                    <ScrollView style={styles.container}>
+    const confirmarEliminacion = () => {
+        Alert.alert("Confirmar", "¿Desea eliminar este presupuesto?",
+            [
+                {text: "Cancelar", style: "cancel"}, 
+                {text: "Eliminar", style: "destructive", onPress:()=>navigation.goBack()}
+            ]
+        );
+    };
 
-                        <Text style={styles.titulo}>ELIMINAR PRESUPUESTO</Text>
+    return(
+        <ScrollView contentContainerStyle={{paddingBottom: 100}}>
 
-                        {presupuestos.map(item => (
-                            <View key={item.id} style={styles.tarjeta}>
+            <View style={styles.container}>
 
-                                <View style={styles.infoContainer}>
-                                    <Text style={[styles.categoria, {color: item.color}]}>{item.categoria}</Text>
-                                    <Text style={styles.monto}>Límite: ${item.limite}</Text>
-                                </View>
+                <Text style={styles.titulo}>ELIMINAR PRESUPUESTO</Text>
 
-                                <TouchableOpacity style={styles.btnEliminar}>
-                                    <Text style={styles.btnEliminarText}>ELIMINAR</Text>
-                                </TouchableOpacity>
+                {presupuestos.map(item => (
+                    <View key={item.id} style={styles.tarjeta}>
 
-                            </View>
-                        ))}
+                        <View style={styles.infoContainer}>
+                            <Text style={[styles.categoria, {color: item.color}]}>{item.categoria}</Text>
+                            <Text style={styles.monto}>Límite: ${item.limite}</Text>
+                        </View>
 
-                        <TouchableOpacity style={styles.btnVolver} onPress={()=>setScreen("presupuestosS")}>
-                            <Text style={[styles.btnTexto, {color: "#fff"}]}>Volver al menú de Presupuestos</Text>    
-                        </TouchableOpacity> 
+                        <TouchableOpacity style={styles.btnEliminar} onPress={confirmarEliminacion}>
+                            <Text style={styles.btnEliminarText}>ELIMINAR</Text>
+                        </TouchableOpacity>
 
-                    </ScrollView>
-                );
-    }
+                    </View>
+                ))}
+
+                <TouchableOpacity style={styles.volverBoton} onPress={()=>navigation.goBack()}>
+                    <Text style={styles.volverBotonTexto}>Volver al menú de Presupuestos</Text>    
+                </TouchableOpacity> 
+
+            </View>
+
+        </ScrollView>
+    );
 }
 
 const styles = StyleSheet.create({
@@ -119,6 +127,19 @@ const styles = StyleSheet.create({
 
     btnTexto:{
         fontSize: 16,
+        fontWeight: "bold",
+    },
+
+    volverBoton: {
+        backgroundColor: "#999",
+        padding: 12,
+        borderRadius: 10,
+        alignItems: "center",
+        marginTop: 15,
+    },
+
+    volverBotonTexto: {
+        color: "#fff",
         fontWeight: "bold",
     },
 });

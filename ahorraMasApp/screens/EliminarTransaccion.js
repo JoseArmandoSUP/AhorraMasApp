@@ -1,9 +1,10 @@
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Button, TextInput, Alert } from "react-native";
 import React, {useState} from "react";
-import PantallaGestionTransacciones from "./PantallaGestionTransacciones";
+//import PantallaGestionTransacciones from "./PantallaGestionTransacciones";
+import { useNavigation } from "@react-navigation/native";
 
 export default function EliminarTransaccion(){
-    const[screen, setScreen] = useState('menu');
+    const navigation = useNavigation();
 
     const transaccion = {
         tipo: "Gasto",
@@ -26,41 +27,39 @@ export default function EliminarTransaccion(){
         );
     };
 
-    switch(screen){
-        case 'pantallaTransacciones':
-            return<PantallaGestionTransacciones></PantallaGestionTransacciones>
-        case 'menu':
-            default:
-                return(
-                    <ScrollView style={styles.container}>
+    return(
+        <ScrollView style={styles.container} contentContainerStyle={{paddingBottom: 100}}>
 
-                        <Text style={styles.titulo}>ELIMINAR TRANSACCIÓN</Text>
+            <Text style={styles.titulo}>ELIMINAR TRANSACCIÓN</Text>
 
-                        <View style={styles.trajeta}>
-                            
-                            <Text style={styles.label}>Tipo:</Text>
-                            <Text style={styles.valor}>{transaccion.tipo}</Text>
+            <View style={styles.trajeta}>
+                
+                <Text style={styles.label}>Tipo:</Text>
+                <Text style={styles.valor}>{transaccion.tipo}</Text>
 
-                            <Text style={styles.label}>Categoria:</Text>
-                            <Text style={styles.valor}>{transaccion.categoria}</Text>
+                <Text style={styles.label}>Categoria:</Text>
+                <Text style={styles.valor}>{transaccion.categoria}</Text>
 
-                            <Text style={styles.label}>Monto:</Text>
-                            <Text style={styles.valor}>{transaccion.monto}</Text>
+                <Text style={styles.label}>Monto:</Text>
+                <Text style={styles.valor}>{transaccion.monto}</Text>
 
-                            <Text style={styles.label}>Fecha:</Text>
-                            <Text style={styles.valor}>{transaccion.fecha}</Text>
+                <Text style={styles.label}>Fecha:</Text>
+                <Text style={styles.valor}>{transaccion.fecha}</Text>
 
-                        </View>
+            </View>
 
-                        <Button style={styles.btnEliminar} onPress={confirmarEliminacion} title="ELIMINAR TRANSACCIÓN"></Button>
+            <TouchableOpacity style={styles.btnEliminar} onPress={confirmarEliminacion}>
+                <Text style={styles.volverBotonTexto}>ELIMINAR TRANSACCIÓN</Text>
+            </TouchableOpacity>
 
-                        <View style={styles.btnContainer}>
-                            <Button title="Volver al menú de Transacciones" onPress={()=>setScreen("pantallaTransacciones")}></Button>
-                        </View>
+            <View style={styles.btnContainer}>
+                <TouchableOpacity style={styles.volverBoton} onPress={()=>navigation.goBack()}>
+                    <Text style={styles.volverBotonTexto}>Volver al menu de Transacciones</Text>
+                </TouchableOpacity>
+            </View>
 
-                    </ScrollView>
-                );
-    }
+        </ScrollView>
+    );
 }
 
 const styles = StyleSheet.create({
@@ -113,5 +112,18 @@ const styles = StyleSheet.create({
     btnContainer:{
         marginTop: 25,
         marginBottom: 40,
+    },
+
+    volverBoton: {
+        backgroundColor: "#999",
+        padding: 12,
+        borderRadius: 10,
+        alignItems: "center",
+        marginTop: 15,
+    },
+
+    volverBotonTexto: {
+        color: "#fff",
+        fontWeight: "bold",
     },
 });

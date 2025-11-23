@@ -1,55 +1,85 @@
-import { Text, View, ScrollView, StyleSheet, TouchableOpacity, Button, TextInput } from "react-native";
+import { Text, View, ScrollView, StyleSheet, TouchableOpacity, Button, TextInput, Alert } from "react-native";
 import React, {useState} from "react";
-import PresupuestosScreen from "./PresupuestosScreen";
+//import PresupuestosScreen from "./PresupuestosScreen";
+import { useNavigation } from "@react-navigation/native";
 
-export default function EditarPresupuesto(){
-    const[screen, setScreen] = useState("menu");
+export default function EditarPresupuesto({/*{route}*/}){
+    const navigatation = useNavigation();
 
-    const[categoria, setCategoria] = useState("Comida");
-    const[monto, setMonto] = useState("500");
+    {/* const {categoria: cat, monto: mon} = route.params; */}
+    const[categoria, setCategoria] = useState("Comida"); {/* useState(cat) */}
+    const[monto, setMonto] = useState("500"); {/* useState(mont) */}
+    const[fecha, setFecha] = useState("2025-11-10");
 
-    switch(screen){
-        case 'presupuestosS':
-            return<PresupuestosScreen></PresupuestosScreen>
-        case 'menu':
-            default:
-                return(
-                    <ScrollView style={styles.container}>
+    const alertaAgregar = () => {
+        if(!categoria || !monto || !fecha){
+            Alert.alert("Por favor complete todos los campos");
+            alert("Por favor complete todos los campos");
+            return;
+        }
+        Alert.alert(
+            `Presupuesto editado correctamente: \n Categoria: ${categoria} \n Monto: $${monto} \n Fecha: ${fecha}`
+        );
+        alert(
+            `Presupuesto editado correctamente: \n Categoria: ${categoria} \n Monto: $${monto} \n Fecha: ${fecha}`
+        );
+    };
+    
+    const filtrarCaracteresM = (input) => {
+        const numerico = input.replace(/[^0-9]/g, '');
+        setMonto(numerico);
+    };
 
-                        <Text style={styles.titulo}>EDITAR PRESUPUESTO</Text>
+    return(
+        <ScrollView style={styles.container}>
 
-                        <View style={styles.formulaioContainer}>
+            <Text style={styles.titulo}>EDITAR PRESUPUESTO</Text>
 
-                            <Text style={styles.label}>Categoría</Text>
-                            <TextInput 
-                                style={styles.input}
-                                placeholder="Comida"
-                                placeholderTextColor="#999"
-                                value={categoria}
-                                onChangeText={setCategoria}
-                            ></TextInput>
+            <View style={styles.formulaioContainer}>
 
-                            <Text style={styles.label}>Monto Límite</Text>
-                            <TextInput 
-                                style={styles.input}
-                                placeholder="Ejemplo: $500"
-                                keyboardType="numeric"
-                                placeholderTextColor="#999"
-                                value={monto}
-                                onChangeText={setMonto}
-                            ></TextInput>
+                <Text style={styles.label}>Categoría</Text>
+                <TextInput 
+                    style={styles.input}
+                    placeholder="Comida"
+                    placeholderTextColor="#999"
+                    value={categoria}
+                    onChangeText={setCategoria}
+                ></TextInput>
 
-                            <Button title="Editar Presupuesto"></Button>
+                <Text style={styles.label}>Monto Límite</Text>
+                <TextInput 
+                    style={styles.input}
+                    placeholder="Ejemplo: $500"
+                    keyboardType="numeric"
+                    placeholderTextColor="#999"
+                    value={monto}
+                    onChangeText={filtrarCaracteresM}
+                ></TextInput>
 
-                        </View>
+                <Text style={styles.label}>Fecha:</Text>
+                <TextInput
+                    style={styles.input} 
+                    placeholder="AÑO-MES-DIA"
+                    placeholderTextColor="#999"
+                    value={fecha}
+                    onChangeText={setFecha}
+                ></TextInput>
+                
 
-                        <View style={styles.btnContainer}>
-                            <Button title="Volver al menú de Presupuestos" onPress={()=>setScreen("presupuestosS")}></Button>
-                        </View>
+                <TouchableOpacity style={styles.definirBoton} onPress={alertaAgregar}>
+                    <Text style={styles.definirBotonTexto}>Editar Presupuesto</Text>
+                </TouchableOpacity>
 
-                    </ScrollView>
-                );
-    }
+            </View>
+
+            <View style={styles.btnContainer}>
+                <TouchableOpacity style={styles.volverBoton} onPress={()=>navigatation.goBack()}>
+                    <Text style={styles.volverBotonTexto}>Volver al menú de Presupuestos</Text>
+                </TouchableOpacity>
+            </View>
+
+        </ScrollView>
+    );
 }
 
 const styles = StyleSheet.create({
@@ -101,5 +131,32 @@ const styles = StyleSheet.create({
     btnContainer:{
         marginTop: 10,
         alignItems: "center",
+    },
+
+    definirBoton:{
+        backgroundColor: '#2e7d32',
+        borderRadius: 10,
+        paddingVertical: 10,
+        marginTop: 5,
+        alignItems: 'center',
+    },
+
+    definirBotonTexto:{
+        color: '#fff',
+        fontWeight: 'bold',
+        fontSize: 15,
+    },
+
+    volverBoton: {
+        backgroundColor: "#999",
+        padding: 12,
+        borderRadius: 10,
+        alignItems: "center",
+        marginTop: 15,
+    },
+
+    volverBotonTexto: {
+        color: "#fff",
+        fontWeight: "bold",
     },
 });

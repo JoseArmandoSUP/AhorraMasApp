@@ -1,69 +1,66 @@
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Button, TextInput } from "react-native";
 import React, {useState} from "react";
-import PantallaGestionTransacciones from "./PantallaGestionTransacciones";
+//import PantallaGestionTransacciones from "./PantallaGestionTransacciones";
+import { useNavigation } from "@react-navigation/native";
 
 export default function ListarTransaccion(){
-    const[screen, setScreen] = useState("menu");
+    
+    const navigation = useNavigation();
 
     const transacciones = [
-        {id: 1, tipo: "Gasto", categoria: "Comida", monto: 150, fecha: "2025-10-20"},
-        {id: 2, tipo: "Ingreso", categoria: "Salario", monto: 1200, fecha: "2025-10-21"},
-        {id: 3, tipo: "Gasto", categoria: "Transporte", monto: 80, fecha: "2025-10-22"},
+        {id: 1, tipo: "Gasto", categoria: "Comida", monto: 150, fecha: "2025-10-20", descripcion: "Tacos"},
+        {id: 2, tipo: "Ingreso", categoria: "Salario", monto: 1200, fecha: "2025-10-21", descripcion: "Pago mensual"},
+        {id: 3, tipo: "Gasto", categoria: "Transporte", monto: 80, fecha: "2025-10-22", descripcion: "Camión"},
     ];
 
-    switch(screen){
-        case 'pantallaTransacciones':
-            return<PantallaGestionTransacciones></PantallaGestionTransacciones>
-        case 'menu':
-            default:
-                return(
-                    <ScrollView style={styles.container}>
-                    
-                    <Text style={styles.titulo}>LISTA DE TRANSACCIONES</Text>
+    return(
+        <ScrollView style={styles.container} contentContainerStyle={{paddingBottom: 100}}>
+        
+        <Text style={styles.titulo}>LISTA DE TRANSACCIONES</Text>
 
-                    {/*FILTRADO*/}
-                    <View style={styles.filtrosContainer}>
-                        <Text style={styles.filtrosTitulo}>Filtrar por</Text>
+        {/*FILTRADO*/}
+        <View style={styles.filtrosContainer}>
+            <Text style={styles.filtrosTitulo}>Filtrar por</Text>
 
-                        <View style={styles.filtrosFila}>
-                            <Text style={styles.filtrosLabel}>Fecha: </Text>
-                            <View style={styles.filtrosInput}>
-                                <TextInput style={styles.filtrosPlaceHolder} placeholder='AÑO-MES-DIA'></TextInput>
-                            </View>
-                        </View>
+            <View style={styles.filtrosFila}>
+                <Text style={styles.filtrosLabel}>Fecha: </Text>
+                <View style={styles.filtrosInput}>
+                    <TextInput style={styles.filtrosPlaceHolder} placeholder='AÑO-MES-DIA'></TextInput>
+                </View>
+            </View>
 
-                        <View style={styles.filtrosFila}>
-                            <Text style={styles.filtrosLabel}>Categoria: </Text>
-                            <View style={styles.filtrosInput}>
-                                <TextInput style={styles.filtrosPlaceHolder} placeholder='Seleccionar la categoria'></TextInput>
-                            </View>
-                        </View>
+            <View style={styles.filtrosFila}>
+                <Text style={styles.filtrosLabel}>Categoria: </Text>
+                <View style={styles.filtrosInput}>
+                    <TextInput style={styles.filtrosPlaceHolder} placeholder='Seleccionar la categoria'></TextInput>
+                </View>
+            </View>
 
-                        <TouchableOpacity style={styles.filtrosBoton}>
-                            <Text style={styles.filtrosBotonTexto}>Aplicar</Text>
-                        </TouchableOpacity>
+            <TouchableOpacity style={styles.filtrosBoton}>
+                <Text style={styles.filtrosBotonTexto}>Aplicar</Text>
+            </TouchableOpacity>
 
-                    </View>
+        </View>
 
-                    {/* TARJETAS CON LAS TRANSACCIONES */}
-                    {transacciones.map((item)=>(
-                        <View key={item.id} style={styles.tarjeta}>
-                            <Text style={styles.tipo}>{item.tipo}</Text>
-                            <Text style={styles.texto}>Categoria: {item.categoria}</Text>
-                            <Text style={styles.texto}>Monto: ${item.monto}</Text>
-                            <Text style={styles.texto}>Fecha: {item.fecha}</Text>
-                        </View>
-                    ))}
+        {/* TARJETAS CON LAS TRANSACCIONES */}
+        {transacciones.map((item)=>(
+            <View key={item.id} style={styles.tarjeta}>
+                <Text style={styles.tipo}>{item.tipo}</Text>
+                <Text style={styles.texto}>Categoria: {item.categoria}</Text>
+                <Text style={styles.texto}>Monto: ${item.monto}</Text>
+                <Text style={styles.texto}>Fecha: {item.fecha}</Text>
+                <Text>Descripción: {item.descripcion}</Text>
+            </View>
+        ))}
 
-                    <View style={styles.botonContainer}>
-                        <TouchableOpacity style={styles.volverBoton} onPress={()=>setScreen("pantallaTransacciones")}>
-                            <Text style={styles.volverBotonTexto}>Volver al menú de Transacciones</Text>
-                        </TouchableOpacity>
-                    </View>
+        <View style={styles.btnContainer}>
+            <TouchableOpacity style={styles.volverBoton} onPress={()=>navigation.goBack()}>
+                <Text style={styles.volverBotonTexto}>Volver al menu de Transacciones</Text>
+            </TouchableOpacity>
+        </View>
 
-                    </ScrollView>
-                );
-    }
+        </ScrollView>
+    );
 
 }
 
