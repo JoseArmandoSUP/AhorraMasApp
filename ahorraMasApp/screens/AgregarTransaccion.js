@@ -1,7 +1,8 @@
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Button, TextInput, Alert } from "react-native";
-import React, {useState} from "react";
+import React, {useContext, useState} from "react";
 //import PantallaGestionTransacciones from "./PantallaGestionTransacciones";
 import { useNavigation } from "@react-navigation/native";
+import { AppContext } from "../context/AppContext";
 
 export default function AgregarTransaccion(){
     const navigatation = useNavigation();
@@ -11,6 +12,21 @@ export default function AgregarTransaccion(){
     const[monto, setMonto] = useState("");
     const[fecha, setFecha] = useState("");
     const[descripcion, setDescripcion] = useState("");
+
+    const{ setTransacciones } = useContext(AppContext);
+
+    function guardarTransaccion(){
+        const nueva ={
+            tipo,
+            categoria,
+            monto,
+            fecha,
+            descripcion
+        };
+
+        setTransacciones(prev => [...prev, nueva]); // <-- Activa la verificacion automaticamente
+        Alert.alert("Transaccion agregada");
+    }
 
     const alertaRegistro = () => {
         if(!tipo || !categoria || !monto || !fecha || descripcion.trim() === ""){

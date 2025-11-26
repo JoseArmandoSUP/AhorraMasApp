@@ -1,4 +1,4 @@
-import React, { useEffect, useState} from "react";
+import React, { useContext, useEffect, useState} from "react";
 import { Text, StyleSheet, View, TouchableOpacity, ScrollView, ImageBackground, Animated, Easing, Image } from 'react-native'
 import { Button } from "react-native";
 //import TransaccionesScreem from './PantallaGestionTransacciones';
@@ -7,14 +7,17 @@ import { Button } from "react-native";
 //import LoginScreen from "./LoginScreen";
 //import GraficasScreen from "./GraficasScreen";
 import { useNavigation } from "@react-navigation/native";
+import { AppContext } from "../context/AppContext";
 
 export default function PantallaPrincipal(){
     
     //Para la animacion de la pantalla de carga
     const[cargando, setCargando] = useState(true);
     const desvanecido = new Animated.Value(1);
-
+    //Para Navigation
     const navigation = useNavigation();
+    //Para las notificaciones de ecceso del presupuesto
+    const { alertas } = useContext(AppContext);
 
     useEffect(()=>{
         const timer=setTimeout(()=>{
@@ -51,6 +54,16 @@ export default function PantallaPrincipal(){
             <Image style={styles.logo}
                 source={require('../assets/Logo.png')}
             />
+
+            {alertas.length > 0 && (
+                <View style={{backgroundColor: "#ffcccc", padding: 10, borderRadius: 10, marginBottom: 10}}>
+                    {alertas.map((a, index) => (
+                        <Text key={index} style={{color: "#900", fontWeight: "bold"}}>
+                            {a}
+                        </Text>
+                    ))}
+                </View>
+            )}
             
             {/*CONTENEDOR DE GASTOS E INGRESOS*/}
             <View style={styles.todoContainer}>
