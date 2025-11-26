@@ -1,10 +1,13 @@
-import React,{useState} from 'react';
-import { View, Text, Image, StyleSheet, ScrollView, Button } from 'react-native';
-import PantallaPrincipal from './PantallaPrincipal';
+import React,{ useEffect, useState, useContext} from 'react';
+import { View, Text, Image, StyleSheet, ScrollView, Button, TouchableOpacity, Dimensions } from 'react-native';
+//import PantallaPrincipal from './PantallaPrincipal';
+import { useNavigation } from '@react-navigation/native';
+//import { LineChart, PieChart } from "react-native-chart-kit";
+import { AppContext } from '../context/AppContext';
 
 export default function GraficasScreen() {
     
-    const[screen, setScreen]=useState('menu');
+    const navigation = useNavigation();
 
     const gastos = [
         { categoria: 'comida', porcentaje: 30.77 },
@@ -23,61 +26,134 @@ export default function GraficasScreen() {
         { categoria: 'Presupuesto restante', porcentaje: 45.83 },
     ];
 
-    switch(screen){
-        case 'pantallaPrincipal':
-            return<PantallaPrincipal></PantallaPrincipal>
-        case 'menu':
-            default:
-                return (
-                    <ScrollView style={styles.container} contentContainerStyle={{paddingBottom: 100}}>
-                        <Text style={styles.titulo}>REPORTES</Text>
+    {/*//Simulacion como placeholder
+    useEffect(()=>{
+        // Proximamente se remplezará con SELECT * FROM transacciones GROUP BY categoria
+        setGastosPorcategoria([
+            {categoria: "Comida", total: 450, color: "#ff6b6b", legendFontColor: "#333", legendFontSize: 14},
+            {categoria: "Transporte", total: 200, color: "#4dabf7", legendFontColor: "#333", legendFontSize: 14},
+            {categoria: "Salud", total: 120, color: "#51cf66", legendFontColor: "#333", legendFontSize: 14},
+            {categoria: "Servicios", total: 300, color: "#845ef7", legendFontColor: "#333", legendFontSize: 14},
+        ]);
 
-                        <View style={styles.seccion}>
-                            <Text style={styles.subtitulo}>Reporte de Gastos</Text>
+        //Luego se reemplaza con SELECT SUM(monto) WHERE tipo='Ingreso' / 'Gasto' AND fecha LIKE '%2025-10%'
+        setIngresosYGastos({ingresos: 3200, gastos: 1700});
+    }, []);*/}
 
-                            <Image
-                                source={require('../assets/Grafica1.png')}
-                                style={styles.imagenGrafica}
-                                resizeMode="contain"
-                            />
+    return (
+        <ScrollView style={styles.container} contentContainerStyle={{paddingBottom: 100}}>
+            <Text style={styles.titulo}>REPORTES</Text>
 
-                            {gastos.map((item, index) => (
-                                <View key={index} style={styles.card}>
-                                    <Text style={styles.textoCategoria}>{item.categoria}</Text>
-                                    <Text style={styles.textoPorcentaje}>
-                                        {item.porcentaje.toFixed(2)}%
-                                    </Text>
-                                </View>
-                            ))}
-                        </View>
+            {/* Grafica de gastos por categoria 
+            <Text style={styles.subtitulo}>Gastos por Categoria</Text>
 
-                        <View style={styles.seccion}>
-                            <Text style={styles.subtitulo}>Reporte de Presupuesto</Text>
+            {gastosPorcategoria.length > 0 ? (
+                <PieChart
+                    data={gastosPorcategoria.map(item => ({
+                        name: item.name,
+                        population: item.total,
+                        color: item.color,
+                        legendFontColor: "#333",
+                        legendFontSize: 14
+                    }))}
+                    width={Dimensions.get("window").width - 20}
+                    height={220}
+                    accessor={"population"}
+                    backgroundColor={"transparent"}
+                    paddingLeft={"10"}
+                ></PieChart>
+            ) : (
+                <Text>No hay datos por mostrar</Text>
+            )} */}
 
-                            <Image
-                                source={require('../assets/Grafica2.png')}
-                                style={styles.imagenGrafica}
-                                resizeMode="contain"
-                            />
+            {/* Grafica de ingresos contra gastos del mes 
+            <Text style={styles.subtitulo}>Ingresos vs Gastos del Mes</Text>
+            <LineChart
+                data={{
+                    labels: ["ingresos", "Gastos"],
+                    datasets: [
+                        {
+                            data: [ingresosYGastosMes.ingresos, ingresosYGastosMes.gastos]
+                        }
+                    ]
+                }}
+                width={Dimensions.get("window").width - 20}
+                height={250}
+                chartConfig={chartConfig}
+                bezier
+                style={{borderRadius: 10}}
+            ></LineChart> */}
 
-                            {presupuesto.map((item, index) => (
-                                <View key={index} style={styles.card}>
-                                    <Text style={styles.textoCategoria}>{item.categoria}</Text>
-                                    <Text style={styles.textoPorcentaje}>
-                                        {item.porcentaje.toFixed(2)}%
-                                    </Text>
-                                </View>
-                            ))}
+            <View style={styles.seccion}>
+                <Text style={styles.subtitulo}>Reporte de Gastos</Text>
 
-                        </View>
+                <Image
+                    source={require('../assets/Grafica1.png')}
+                    style={styles.imagenGrafica}
+                    resizeMode="contain"
+                />
 
-                        <Button onPress={()=> setScreen('pantallaPrincipal')} title="Volver al menú"></Button>
-                    </ScrollView>
-                );
-    }    
+                {gastos.map((item, index) => (
+                    <View key={index} style={styles.card}>
+                        <Text style={styles.textoCategoria}>{item.categoria}</Text>
+                        <Text style={styles.textoPorcentaje}>
+                            {item.porcentaje.toFixed(2)}%
+                        </Text>
+                    </View>
+                ))}
+            </View>
+
+            <View style={styles.seccion}>
+                <Text style={styles.subtitulo}>Reporte de Presupuesto</Text>
+
+                <Image
+                    source={require('../assets/Grafica2.png')}
+                    style={styles.imagenGrafica}
+                    resizeMode="contain"
+                />
+
+                {presupuesto.map((item, index) => (
+                    <View key={index} style={styles.card}>
+                        <Text style={styles.textoCategoria}>{item.categoria}</Text>
+                        <Text style={styles.textoPorcentaje}>
+                            {item.porcentaje.toFixed(2)}%
+                        </Text>
+                    </View>
+                ))}
+
+            </View>
+
+            <TouchableOpacity style={styles.volverBoton} onPress={()=> navigation.goBack()}>
+                <Text style={styles.volverBotonTexto}>Volver al menú</Text>
+            </TouchableOpacity>
+
+        </ScrollView>
+    );
+        
 }
 
+{/*const chartConfig = {
+    backgroundGradientFrom: "#ffffff",
+    backgroundGradientTo: "#ffffff",
+    decimalPlaces: 0,
+    color: (opacity = 1) => `rgba(46, 125, 50, ${opacity})`,
+    labelColor: () => "#333",
+}; */}
+
 const styles = StyleSheet.create({
+    
+    /* container: { flex: 1, backgroundColor: "#f4f6fb", padding: 15 },
+    titulo: { fontSize: 24, fontWeight: "bold", textAlign: "center", marginBottom: 20 },
+    subtitulo: { fontSize: 18, fontWeight: "600", marginBottom: 10, marginTop: 10 },
+    volverBoton: {
+        backgroundColor: "#2e7d32",
+        borderRadius: 10,
+        paddingVertical: 10,
+        marginTop: 20,
+        alignItems: "center"
+    },
+    volverBotonTexto: { color: "#fff", fontWeight: "bold", fontSize: 15 } */
+    
     container: {
         flex: 1,
         backgroundColor: '#f4f6fb',
@@ -125,5 +201,19 @@ const styles = StyleSheet.create({
     textoPorcentaje: {
         fontSize: 16,
         color: '#555',
+    },
+
+    volverBoton:{
+        backgroundColor: '#2e7d32',
+        borderRadius: 10,
+        paddingVertical: 10,
+        marginTop: 5,
+        alignItems: 'center',
+    },
+
+    volverBotonTexto:{
+        color: '#fff',
+        fontWeight: 'bold',
+        fontSize: 15,
     },
 });
