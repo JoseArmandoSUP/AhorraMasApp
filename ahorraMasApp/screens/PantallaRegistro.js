@@ -1,10 +1,12 @@
 import { Text,  StyleSheet, View, Button, ImageBackground, TextInput, Image, ScrollView, Alert} from "react-native";
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 //import LoginScreen from "./LoginScreen";
 //import PantallaPrincipal from "./PantallaPrincipal";
-
 //Navegacion
 import { useNavigation } from "@react-navigation/native";
+import { UsuarioController } from "../controllers/UsuarioController";
+
+const controller = new UsuarioController();
 
 export default function PantallaRegistro () {
     
@@ -17,7 +19,23 @@ export default function PantallaRegistro () {
     const [telefono, setTelefono] = useState ('');
     const [password, setPassword] = useState('');
 
-    const mostrarAlerta = () =>{
+    //Inicializar SQLite
+    useEffect(() => {
+        controller.initialize();
+    },[]);
+
+    const handleRegistro = async () => {
+        try{
+            await controller.registrar(nombre, usuario, edad, correo, telefono, password);
+
+            Alert.alert("Registrado correctamente");
+            nav.navigate("Login");
+        }catch(error){
+            Alert.alert("Error", error.message);
+        }
+    };
+
+    {/*const mostrarAlerta = () =>{
         if(nombre.trim() === '' || usuario.trim() === '' || edad.trim() === '' || correo.trim() === '' || telefono.trim() === '' || password.trim() === ''){
             Alert.alert("Faltan campos por llenar, porfavor completelos");
             alert("Faltan campos por llenar, porfavor completelos");
@@ -36,7 +54,7 @@ export default function PantallaRegistro () {
                 `Nombre: ${nombre}\n usuario: ${usuario}\n Edad: ${edad}\n 
                 Correo: ${correo}\n Telefono: ${telefono}\n`);
         }
-    };
+    }; */}
 
     const filtrarCaracteresE = (input) => {
         const numerico = input.replace(/[^0-9]/g, '');
@@ -101,7 +119,7 @@ export default function PantallaRegistro () {
                 <Button
                     color="blue"
                     title="Resgistrarse"
-                    onPress={mostrarAlerta}
+                    onPress={handleRegistro}
                 ></Button>
 
                 <Button title="Volver al Login" onPress={()=>nav.navigate("Login")}></Button>

@@ -1,19 +1,50 @@
 import { Text,  StyleSheet, View, Button, ImageBackground, TextInput, Image, Switch, ScrollView, Alert} from "react-native";
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 //import PantallaPrincipal from "./PantallaPrincipal";
 //import PantallaRegistro from "./PantallaRegistro";
-
 //Navegacion
 import { useNavigation } from "@react-navigation/native";
+//Importar el controlador de Usuario
+import { UsuarioController } from "../controllers/UsuarioController";
+import { useContext } from "react";
+import { AuthContext } from "../context/AuthContext";
+
+const controller = new UsuarioController();
 
 export default function LoginScreen (){
 
     const nav = useNavigation();
 
+    const {setUsuario} = useContext(AuthContext);
+
     const [correo, setCorreo] = useState ('')
     const [password, setPassword] = useState ('')
 
-    const mostrarAlerta = () =>{
+    // Inicializar SQLite (solo una vez)
+    useEffect(()=>{
+        controller.initialize();
+    },[]);
+
+    //Funcion de Login real
+    const iniciarSesion = async () => {
+        if(correo.trim() === "" || password.trim() === ""){
+            Alert.alert("Faltan campos por llenar, porfavor completelos");
+            return;
+        }
+        try{
+            const usuario = await controller.login(correo, password);
+            setUsuario(usuario); // <-- Guarda el usuario
+            Alert.alert("Sesion iniciada de", `${usuario.nombre}`);
+
+            //Pasar al usuario a la pantalla principal
+            nav.navigate("Home", {usuario});
+
+        }catch(error){
+            Alert.alert("Error al iniciar sesión", error.message);
+        }
+    };
+
+    {/* const mostrarAlerta = () =>{
         if(correo.trim() === '' || password.trim() === ''){
             Alert.alert("Faltan campos por llenar, porfavor completelos");
             alert("Faltan campos por llenar, porfavor completelos");
@@ -29,7 +60,7 @@ export default function LoginScreen (){
             alert("Inicio de sesión esxitoso\n");
             return true;
         }
-    };
+    }; */}
 
     return(
         <ScrollView contentContainerStyle={{paddingBottom: 100}}>
@@ -48,26 +79,18 @@ export default function LoginScreen (){
                     placeholder='Password'
                     value={password}
                     onChangeText={setPassword}
+                    autoCapitalize="none"
                 />
-                <View>
+                <View style={{flexDirection: "row", alignItems: "center"}}>
                     <Switch></Switch>
-                    <Text></Text>
+                    <Text>Aceptar Terminos y Condiciones</Text>
                 </View>
                 
-                <Button 
-                    title="INICIAR SESION" 
-                    onPress={()=>{
-                        const valido = mostrarAlerta();
-                        if (valido) nav.navigate("Home");
-                    }}
-                ></Button>
+                <Button title="INICIAR SESION" onPress={iniciarSesion}></Button>
                 
-                <Text>¿No tienes cuenta? REGISTRARSE</Text>
+                <Text style={{marginTop: 15}}>¿No tienes cuenta? REGISTRARSE</Text>
 
-                <Button 
-                    style={styles.boton} 
-                    onPress={()=> nav.navigate("Registro")} title="Registrarse"
-                ></Button>
+                <Button style={styles.boton} onPress={()=> nav.navigate("Registro")} title="Registrarse"></Button>
 
             </View>
         </ScrollView>
@@ -83,16 +106,16 @@ const styles = StyleSheet.create ({
         backgroundColor: '#F5F9FF'
     },
     text: {
-        justifyContent: 'flex-start',
         alignSelf: 'flex-start',   
         marginLeft: 20,  
         fontWeight:'bold',
-        fontSize: 30
+        fontSize: 30,
+        marginTop: 10,
     },
     text2:{
-        justifyContent:'center',
         alignSelf: 'flex-start',
-        marginLeft:20
+        marginLeft:20,
+        marginBottom: 20,
     },
     input: {
         width: '80%', 
@@ -102,7 +125,6 @@ const styles = StyleSheet.create ({
         padding: 20,
         backgroundColor: 'white', 
         marginTop:20,
-        marginBottom:20,
         color:'#000'
     },
     logo: {
