@@ -1,118 +1,120 @@
-import { Text,  StyleSheet, View, Button, ImageBackground, TextInput, Image, Switch, ScrollView, Alert} from "react-native";
-import React, { useState } from 'react'
-//import PantallaPrincipal from "./PantallaPrincipal";
-//import PantallaRegistro from "./PantallaRegistro";
-
-//Navegacion
+import { Text, StyleSheet, View, Button, TextInput, Image, ScrollView, Alert, Switch } from "react-native";
+import React, { useState, useEffect } from "react";
+import * as SQLite from "expo-sqlite";
 import { useNavigation } from "@react-navigation/native";
 
-export default function LoginScreen (){
+export default function LoginScreen() {
 
-    const nav = useNavigation();
+  const nav = useNavigation();
+  const [correo, setCorreo] = useState("");
+  const [password, setPassword] = useState("");
+  const [db, setDb] = useState(null);
 
-    const [correo, setCorreo] = useState ('')
-    const [password, setPassword] = useState ('')
+  // Abrir DB al iniciar
+  useEffect(() => {
+    abrirDB();
+  }, []);
 
-    const mostrarAlerta = () =>{
-        if(correo.trim() === '' || password.trim() === ''){
-            Alert.alert("Faltan campos por llenar, porfavor completelos");
-            alert("Faltan campos por llenar, porfavor completelos");
-            return false;
-        }
-        const validarCorreo = /^[\w.%+-]+@gmail\.com$/;
-        if(!validarCorreo.test(correo)){
-            Alert.alert("Correo electronico no valido, intente otra vez porfavor");
-            alert("Correo electronico no valido, intente otra vez porfavor");
-            return false;
-        }else{
-            Alert.alert("Inicio de sesión esxitoso\n");
-            alert("Inicio de sesión esxitoso\n");
-            return true;
-        }
-    };
+  const abrirDB = async () => {
+    const database = await SQLite.openDatabaseAsync("finanzas.db");
+    setDb(database);
+  };
 
-    return(
-        <ScrollView contentContainerStyle={{paddingBottom: 100}}>
-            <View style={styles.container}>
-                <Image 
-                    source={require('../assets/Logo.png')}
-                />
-                <Text style={styles.text} >Iniciemos Sesion..!</Text>
-                <Text style={styles.text2}>Inicie sesion para poder acceder a su cuenta</Text>
-                <TextInput style={styles.input}
-                    placeholder='Correo'
-                    value={correo}
-                    onChangeText={setCorreo}
-                />
-                <TextInput style={styles.input}
-                    placeholder='Password'
-                    value={password}
-                    onChangeText={setPassword}
-                />
-                <View>
-                    <Switch></Switch>
-                    <Text></Text>
-                </View>
-                
-                <Button 
-                    title="INICIAR SESION" 
-                    onPress={()=>{
-                        const valido = mostrarAlerta();
-                        if (valido) nav.navigate("Home");
-                    }}
-                ></Button>
-                
-                <Text>¿No tienes cuenta? REGISTRARSE</Text>
+  const iniciarSesion = async () => {
+    if (!correo.trim() || !password.trim()) {
+      Alert.alert("Error", "Completa todos los campos");
+      return;
+    }
 
-                <Button 
-                    style={styles.boton} 
-                    onPress={()=> nav.navigate("Registro")} title="Registrarse"
-                ></Button>
+    const validarCorreo = /^[\w.%+-]+@gmail\.com$/;
+    if (!validarCorreo.test(correo)) {
+      Alert.alert("Correo inválido", "Debe ser correo Gmail");
+      return;
+    }
 
-            </View>
-        </ScrollView>
-        
-    );
+    try {
+      const result = await db.getFirstAsync(
+        "SELECT * FROM usuarios WHERE correo = ?",
+        [correo]
+      );
+
+      if (!result) {
+        Alert.alert("No encontrado", "No existe una cuenta con ese correo");
+        return;
+      }
+
+      if (result.password !== password) {
+        Alert.alert("Contraseña incorrecta", "Intente de nuevo");
+        return;
+      }
+
+      Alert.alert("Bienvenido", `Hola ${result.nombre}`);
+      nav.replace("Home");
+
+    } catch (err) {
+      Alert.alert("Error inesperado", "No se pudo validar el usuario");
+    }
+  };
+
+  return (
+    <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
+      <View style={styles.container}>
+        <Image source={require("../assets/Logo.png")} />
+
+        <Text style={styles.text}>Iniciemos Sesión..!</Text>
+        <Text style={styles.text2}>Accede a tu cuenta</Text>
+
+        <TextInput
+          style={styles.input}
+          placeholder="Correo"
+          value={correo}
+          onChangeText={setCorreo}
+        />
+
+        <TextInput
+          style={styles.input}
+          placeholder="Contraseña"
+          secureTextEntry
+          value={password}
+          onChangeText={setPassword}
+        />
+
+        <Button title="INICIAR SESIÓN" onPress={iniciarSesion} />
+
+        <Text>¿No tienes cuenta?</Text>
+
+        <Button title="Registrarse" onPress={() => nav.navigate("Registro")} />
+      </View>
+    </ScrollView>
+  );
 }
 
-const styles = StyleSheet.create ({
-    container: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#F5F9FF'
-    },
-    text: {
-        justifyContent: 'flex-start',
-        alignSelf: 'flex-start',   
-        marginLeft: 20,  
-        fontWeight:'bold',
-        fontSize: 30
-    },
-    text2:{
-        justifyContent:'center',
-        alignSelf: 'flex-start',
-        marginLeft:20
-    },
-    input: {
-        width: '80%', 
-        borderWidth: 2,
-        borderColor: 'white', 
-        borderRadius: 10, 
-        padding: 20,
-        backgroundColor: 'white', 
-        marginTop:20,
-        marginBottom:20,
-        color:'#000'
-    },
-    logo: {
-        height: '30%',
-        width: '30%',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-
-    boton:{
-        flex: 1,
-    },
-})
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#F5F9FF",
+  },
+  text: {
+    alignSelf: "flex-start",
+    marginLeft: 20,
+    fontWeight: "bold",
+    fontSize: 30,
+  },
+  text2: {
+    alignSelf: "flex-start",
+    marginLeft: 20,
+  },
+  input: {
+    width: "80%",
+    borderWidth: 2,
+    borderColor: "white",
+    borderRadius: 10,
+    padding: 20,
+    backgroundColor: "white",
+    marginTop: 20,
+    marginBottom: 20,
+    color: "#000",
+  },
+});
