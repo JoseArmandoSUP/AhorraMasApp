@@ -2,6 +2,10 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import LoginScreen from "../screens/LoginScreen";
 import PantallaRegistro from "../screens/PantallaRegistro";
 import TabNavigator from "./TabNavigator"; // <-- Pantalla principal
+import RecuperarPassword from "../screens/RecuperarPasswordScreen";
+import CambiarPassword from "../screens/CambiarPasswordScreen";
+
+
 
 //------------------------Pantallas de Transacciones----------------------------------------------
 import PantallaGestionTransacciones from "../screens/PantallaGestionTransacciones";
@@ -29,6 +33,11 @@ export default function StackNavigator(){
             {/* Pantallas fuera del Tab */}
             <Stack.Screen name="Login" component={LoginScreen}></Stack.Screen>
             <Stack.Screen name="Registro" component={PantallaRegistro}></Stack.Screen>
+
+            {/*  Recuperación contraseña */}
+            <Stack.Screen name="Recuperar" component={RecuperarPassword} />
+            <Stack.Screen name="CambiarPassword" component={CambiarPassword} />
+
 
             {/* INICIO (Pantalla dentro del Tab) */}
             <Stack.Screen name="Home" component={TabNavigator}></Stack.Screen>

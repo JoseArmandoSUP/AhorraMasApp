@@ -84,6 +84,14 @@ export default function LoginScreen() {
         <Text>¿No tienes cuenta?</Text>
 
         <Button title="Registrarse" onPress={() => nav.navigate("Registro")} />
+
+        <Text
+        style={{ color: 'blue', marginTop: 10 }}
+        onPress={() => nav.navigate("Recuperar")}
+        >
+        ¿Olvidaste tu contraseña?
+        </Text>
+
       </View>
     </ScrollView>
   );
@@ -117,4 +125,5 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     color: "#000",
   },
+  color:{color:'blue'},
 });
