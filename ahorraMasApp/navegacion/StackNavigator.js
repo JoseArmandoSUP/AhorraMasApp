@@ -19,6 +19,7 @@ import EditarPresupuesto from "../screens/EditarPresupuesto";
 import EliminarPresupuesto from "../screens/EliminarPresupuesto";
 //-------------------------------------------------------------------------------------------------
 import GraficasScreen from "../screens/GraficasScreen";
+import Perfil from "../screens/Perfil";
 
 const Stack = createNativeStackNavigator();
 
@@ -48,7 +49,7 @@ export default function StackNavigator(){
             <Stack.Screen name="EliminarPresupuesto" component={EliminarPresupuesto}></Stack.Screen>
 
             <Stack.Screen name="Graficas" component={GraficasScreen}></Stack.Screen>
-            {/* <Stack.Screen name="Perfil" component={PerfilScreen}></Stack.Screen> */}
+            <Stack.Screen name="Perfil" component={Perfil}></Stack.Screen> 
 
         </Stack.Navigator>
     );
