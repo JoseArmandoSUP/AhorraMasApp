@@ -72,6 +72,7 @@ export default function LoginScreen (){
                 <Text style={styles.text2}>Inicie sesion para poder acceder a su cuenta</Text>
                 <TextInput style={styles.input}
                     placeholder='Correo'
+                    keyboardType="email-address"
                     value={correo}
                     onChangeText={setCorreo}
                 />

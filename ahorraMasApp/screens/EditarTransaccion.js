@@ -1,34 +1,66 @@
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Button, TextInput, Alert } from "react-native";
 import React, {useState} from "react";
 //import PantallaGestionTransacciones from "./PantallaGestionTransacciones";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
+import { TransaccionController } from "../controllers/TransaccionController";
+
+const controller = new TransaccionController();
 
 export default function EditarTransaccion(){
     const navigatation = useNavigation();
+    const route = useRoute();
+    const transaccion = route.params?.transaccion; // <-- recibe la transaccion enviada
 
-    const[tipo, setTipo] = useState("Gasto");
-    const[categoria, setCategoria] = useState("Comida");
-    const[monto, setMonto] = useState("500");
-    const[fecha, setFecha] = useState("2025-10-25");
-    const[descripcion, setDescripcion] = useState("Simulacion de una descripicon, hola soy una descripcion");
+    if(!transaccion){
+        return(
+            <View style={{flex: 1, justifyContent:"center", alignItems:"center"}}>
+                <Text style={{fontSize: 18, color:"red"}}>
+                    No se ha recibido una transacción
+                </Text>
+            </View>
+        );
+    }
 
-    const alertaEdicion = () => {
-        if(!tipo || !categoria || !monto || !fecha || descripcion.trim() === ""){
-            Alert.alert("Por favor complete todos los campos");
-            alert("Por favor complete todos los campos");
-            return;
-        }
-        Alert.alert(
-            `Transaccion editada correctamente: \n Tipo: ${tipo} \n Categoria: ${categoria} \n Monto: $${monto} \n Fecha: ${fecha}`
-        );
-        alert(
-            `Transaccion editada correctamente: \n Tipo: ${tipo} \n Categoria: ${categoria} \n Monto: $${monto} \n Fecha: ${fecha}`
-        );
-    };
+    //Estados iniciales con los datos en BD
+    const[tipo, setTipo] = useState(transaccion.tipo);
+    const[categoria, setCategoria] = useState(transaccion.categoria);
+    const[monto, setMonto] = useState(transaccion.monto);
+    const[descripcion, setDescripcion] = useState(transaccion.descripcion);
+    const[fecha, setFecha] = useState(transaccion.fecha.split(" ")[0]); // <-- Para el formato AÑO-MES-DIA
 
     const filtrarCaracteresM = (input) => {
         const numerico = input.replace(/[^0-9]/g, '');
         setMonto(numerico);
+    };
+
+    //Valida el formato de la fecha
+    const validarFecha = (f) => {
+        const regex= /^\d{4}-\d{2}-\d{2}$/;
+        return regex.test(f);
+    };
+
+    const alertaEdicion = async () => {
+        if(!tipo || !categoria || !monto || descripcion.trim() === "" || !fecha){
+            Alert.alert("Por favor complete todos los campos");
+            alert("Por favor complete todos los campos");
+            return;
+        }
+        if(!validarFecha(fecha)){
+            Alert.alert("Formato de fecha invalido, use: AÑO-MES-DIA");
+            return;
+        }
+        try{
+            await controller.actualizar(transaccion.id, tipo, categoria, Number(monto), descripcion, fecha);
+            Alert.alert(
+                `Transaccion editada correctamente: \n Tipo: ${tipo} \n Categoria: ${categoria} \n Monto: $${monto} \n Fecha: ${fecha}`
+            );
+            alert(
+                `Transaccion editada correctamente: \n Tipo: ${tipo} \n Categoria: ${categoria} \n Monto: $${monto} \n Fecha: ${fecha}`
+            );
+            navigatation.goBack();
+        }catch(error){
+            Alert.alert("Error al actualizar", error.message);
+        }
     };
 
     return(
@@ -43,7 +75,6 @@ export default function EditarTransaccion(){
                     <Text style={styles.label}>Tipo (Gasto o Ingreso)</Text>
                     <TextInput 
                         style={styles.input}
-                        placeholder="Ejemplo: Gasto"
                         value={tipo}
                         onChangeText={setTipo}
                     ></TextInput>
@@ -51,7 +82,6 @@ export default function EditarTransaccion(){
                     <Text style={styles.label}>Categoria</Text>
                     <TextInput 
                         style={styles.input}
-                        placeholder="Comida, Transporte, etc."
                         value={categoria}
                         onChangeText={setCategoria}
                     ></TextInput>
@@ -59,27 +89,25 @@ export default function EditarTransaccion(){
                     <Text style={styles.label}>Monto</Text>
                     <TextInput 
                         style={styles.input}
-                        keyboardType="numeric"
-                        placeholder="Ejemplo: 500"
+                        keyboardType="numeric"  
                         value={monto}
                         onChangeText={filtrarCaracteresM}
-                    ></TextInput>
-
-                    <Text style={styles.label}>Fecha: </Text>
-                    <TextInput 
-                        style={styles.input}
-                        placeholder="AÑO-MES-DIA"
-                        value={fecha}
-                        onChangeText={setFecha}
                     ></TextInput>
 
                     <Text style={styles.label}>Descripción: </Text>
                     <TextInput 
                         style={styles.areaTexto}
-                        placeholder="Descripcion"
                         value={descripcion}
                         onChangeText={setDescripcion}
                         multiline={true}
+                    ></TextInput>
+
+                    <Text style={styles.label}>Fecha (AÑO-MES-DIA): </Text>
+                    <TextInput 
+                        style={styles.input}
+                        value={fecha}
+                        onChangeText={setFecha}
+                        placeholder="AÑO-MES-DIA"
                     ></TextInput>
 
                     {/* Agregado 3:23 */}

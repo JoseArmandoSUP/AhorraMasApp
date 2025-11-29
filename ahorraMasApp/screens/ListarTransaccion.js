@@ -1,63 +1,170 @@
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Button, TextInput } from "react-native";
-import React, {useState} from "react";
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Button, TextInput, Alert } from "react-native";
+import React, {useState, useEffect, useContext, useCallback} from "react";
 //import PantallaGestionTransacciones from "./PantallaGestionTransacciones";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
+import { AppContext } from "../context/AppContext";
+import { TransaccionController } from "../controllers/TransaccionController";
+
+const controller = new TransaccionController();
 
 export default function ListarTransaccion(){
     
     const navigation = useNavigation();
 
-    const transacciones = [
-        {id: 1, tipo: "Gasto", categoria: "Comida", monto: 150, fecha: "2025-10-20", descripcion: "Tacos"},
-        {id: 2, tipo: "Ingreso", categoria: "Salario", monto: 1200, fecha: "2025-10-21", descripcion: "Pago mensual"},
-        {id: 3, tipo: "Gasto", categoria: "Transporte", monto: 80, fecha: "2025-10-22", descripcion: "Camión"},
-    ];
+    const {transacciones, setTransacciones} = useContext(AppContext);
+    const [cargando, setCargando] = useState(true);
+
+    // Filtros
+    const [filtroFecha, setFiltroFecha] = useState("");
+    const [filtroCategoria, setFiltroCategoria] = useState("");
+    const [filtroTipo, setFiltroTipo] = useState("");
+
+    // Carga las Transacciones desde SQLite
+    useFocusEffect(
+        useCallback(() => {
+            const load = async () => {
+                try{
+                    await controller.initialize();
+                    const data = await controller.listar(); // <-- Manda a llamar el metodo desde SQLite
+                    setTransacciones(data);
+                    setCargando(false);
+                }catch (error){
+                    Alert.alert("Error", error.message);
+                }
+            }; 
+            load();
+        }, [])
+    );
+    
+    function formatoFecha(f){
+        if(!f){
+            return "";
+        } 
+
+        const partes = f.split("-");
+
+        if(partes.length !== 3 ){
+            return f;
+        }
+
+        const año = partes[0].trim();
+        const mes = partes[1].trim().padStart(2, "0");
+        const dia = partes[2].trim().padStart(2, "0");
+
+        return `${año}-${mes}-${dia}`.slice(0,10);
+    }
+
+    //Funcion para los filtros
+    const aplicarFiltros = async () => {
+        try{
+            const fechaFormato = formatoFecha(filtroFecha);
+            const data = await controller.listarFiltardo(fechaFormato, filtroCategoria, filtroTipo);
+            setTransacciones(data);
+        }catch(error){
+            Alert.alert("Error al filtrar", error.message);
+        }
+    };
+
+    //Quitar los filtros y mostrar todas las transacciones
+    const limpiarFiltros = async () => {
+        try{
+            setFiltroFecha("");
+            setFiltroCategoria("");
+            setFiltroTipo("");
+            const data = await controller.listar();
+            setTransacciones(data);
+        }catch(error){
+            Alert.alert("Error", error.message);
+        }
+    };
+
+    if(cargando){
+        return(
+            <View style={{flex: 1, justifyContent:"center", alignItems:"center"}}>
+                <Text>Cargando transacciones...</Text>
+            </View>
+        );
+    }
 
     return(
         <ScrollView style={styles.container} contentContainerStyle={{paddingBottom: 100}}>
         
-        <Text style={styles.titulo}>LISTA DE TRANSACCIONES</Text>
+            <Text style={styles.titulo}>LISTA DE TRANSACCIONES</Text>
 
-        {/*FILTRADO*/}
-        <View style={styles.filtrosContainer}>
-            <Text style={styles.filtrosTitulo}>Filtrar por</Text>
+            {/*FILTRADO*/}
+            <View style={styles.filtrosContainer}>
+                <Text style={styles.filtrosTitulo}>Filtrar por</Text>
 
-            <View style={styles.filtrosFila}>
-                <Text style={styles.filtrosLabel}>Fecha: </Text>
-                <View style={styles.filtrosInput}>
-                    <TextInput style={styles.filtrosPlaceHolder} placeholder='AÑO-MES-DIA'></TextInput>
+                <View style={styles.filtrosFila}>
+                    <Text style={styles.filtrosLabel}>Fecha: </Text>
+                    <View style={styles.filtrosInput}>
+                        <TextInput 
+                            style={styles.filtrosPlaceHolder} 
+                            placeholder='AÑO-MES-DIA'
+                            value={filtroFecha}
+                            onChangeText={setFiltroFecha}
+                            color="#333"
+                        ></TextInput>
+                    </View>
                 </View>
-            </View>
 
-            <View style={styles.filtrosFila}>
-                <Text style={styles.filtrosLabel}>Categoria: </Text>
-                <View style={styles.filtrosInput}>
-                    <TextInput style={styles.filtrosPlaceHolder} placeholder='Seleccionar la categoria'></TextInput>
+                <View style={styles.filtrosFila}>
+                    <Text style={styles.filtrosLabel}>Categoria: </Text>
+                    <View style={styles.filtrosInput}>
+                        <TextInput 
+                            style={styles.filtrosPlaceHolder} 
+                            placeholder='Ingrese la Categoria (Comida, Transporte, etc)'
+                            value={filtroCategoria}
+                            onChangeText={setFiltroCategoria}
+                            color="#333"
+                        ></TextInput>
+                    </View>
                 </View>
+
+                <View style={styles.filtrosFila}>
+                    <Text style={styles.filtrosLabel}>Tipo: </Text>
+                    <View style={styles.filtrosInput}>
+                        <TextInput 
+                            style={styles.filtrosPlaceHolder} 
+                            placeholder='Ingreso / Gasto'
+                            value={filtroTipo}
+                            onChangeText={setFiltroTipo}
+                            color="#333"
+                        ></TextInput>
+                    </View>
+                </View>
+
+                <TouchableOpacity style={styles.filtrosBoton} onPress={aplicarFiltros}>
+                    <Text style={styles.filtrosBotonTexto}>Aplicar</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={[styles.filtrosBoton, {backgroundColor:"#555"}]} onPress={limpiarFiltros}>
+                    <Text style={styles.filtrosBotonTexto}>Deshacer Filtro</Text>
+                </TouchableOpacity>
             </View>
 
-            <TouchableOpacity style={styles.filtrosBoton}>
-                <Text style={styles.filtrosBotonTexto}>Aplicar</Text>
-            </TouchableOpacity>
+            {/* TARJETAS CON LAS TRANSACCIONES */}
+            {transacciones.length === 0 ? (
+                <Text style={{textAlign:"center", marginTop: 20, color: "#777"}}>
+                    No hay transacciones, registre una para visualizarla aqui
+                </Text>
+            ) : (
+                transacciones.map((item)=>(
+                    <TouchableOpacity key={item.id} style={styles.tarjeta} onPress={()=>navigation.navigate("EditarTransaccion", {transaccion: item})}>
+                        <Text style={styles.tipo}>{item.tipo}</Text>
+                        <Text style={styles.texto}>Categoria: {item.categoria}</Text>
+                        <Text style={styles.texto}>Monto: ${item.monto}</Text>
+                        <Text style={styles.texto}>Descripción: {item.descripcion}</Text>
+                        <Text style={styles.texto}>Fecha: {item.fecha}</Text>
+                    </TouchableOpacity>
+                ))
+            )}
 
-        </View>
-
-        {/* TARJETAS CON LAS TRANSACCIONES */}
-        {transacciones.map((item)=>(
-            <View key={item.id} style={styles.tarjeta}>
-                <Text style={styles.tipo}>{item.tipo}</Text>
-                <Text style={styles.texto}>Categoria: {item.categoria}</Text>
-                <Text style={styles.texto}>Monto: ${item.monto}</Text>
-                <Text style={styles.texto}>Fecha: {item.fecha}</Text>
-                <Text>Descripción: {item.descripcion}</Text>
-            </View>
-        ))}
-
-        <View style={styles.btnContainer}>
+            
             <TouchableOpacity style={styles.volverBoton} onPress={()=>navigation.goBack()}>
                 <Text style={styles.volverBotonTexto}>Volver al menu de Transacciones</Text>
             </TouchableOpacity>
-        </View>
+            
 
         </ScrollView>
     );

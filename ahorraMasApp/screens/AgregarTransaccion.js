@@ -1,8 +1,11 @@
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Button, TextInput, Alert } from "react-native";
-import React, {useContext, useState} from "react";
+import React, {useContext, useState, useEffect} from "react";
 //import PantallaGestionTransacciones from "./PantallaGestionTransacciones";
 import { useNavigation } from "@react-navigation/native";
 import { AppContext } from "../context/AppContext";
+import { TransaccionController } from "../controllers/TransaccionController";
+
+const controller = new TransaccionController();
 
 export default function AgregarTransaccion(){
     const navigatation = useNavigation();
@@ -10,26 +13,29 @@ export default function AgregarTransaccion(){
     const[tipo, setTipo] = useState("");
     const[categoria, setCategoria] = useState("");
     const[monto, setMonto] = useState("");
-    const[fecha, setFecha] = useState("");
     const[descripcion, setDescripcion] = useState("");
 
     const{ setTransacciones } = useContext(AppContext);
 
-    function guardarTransaccion(){
-        const nueva ={
-            tipo,
-            categoria,
-            monto,
-            fecha,
-            descripcion
-        };
+    //Inicia la base de datos
+    useEffect(() => {
+        controller.initialize();
+    },[]);
 
-        setTransacciones(prev => [...prev, nueva]); // <-- Activa la verificacion automaticamente
-        Alert.alert("Transaccion agregada");
+    async function handleGuardar(){
+        try{
+            const nueva = await controller.agregar(tipo, categoria, Number(monto), descripcion);
+            //Guarda el contexto para actualizar presupuestos y alertas
+            setTransacciones(prev => [...prev, nueva]);
+            Alert.alert("Transaccion guardada");
+            navigatation.goBack();
+        }catch(error){
+            Alert.alert("Error", error.message);
+        }
     }
 
-    const alertaRegistro = () => {
-        if(!tipo || !categoria || !monto || !fecha || descripcion.trim() === ""){
+    {/*const alertaRegistro = () => {
+        if(!tipo || !categoria || !monto || descripcion.trim() === "" || !fecha){
             Alert.alert("Por favor complete todos los campos");
             alert("Por favor complete todos los campos");
             return;
@@ -40,7 +46,7 @@ export default function AgregarTransaccion(){
         alert(
             `Transaccion agregada correctamente: \n Tipo: ${tipo} \n Categoria: ${categoria} \n Monto: $${monto} \n Fecha: ${fecha}`
         );
-    };
+    };*/}
 
     const filtrarCaracteresM = (input) => {
         const numerico = input.replace(/[^0-9]/g, '');
@@ -81,14 +87,6 @@ export default function AgregarTransaccion(){
                         onChangeText={filtrarCaracteresM}
                     ></TextInput>
 
-                    <Text style={styles.label}>Fecha: </Text>
-                    <TextInput 
-                        style={styles.input}
-                        placeholder="AÑO-MES-DIA"
-                        value={fecha}
-                        onChangeText={setFecha}
-                    ></TextInput>
-
                     <Text style={styles.label}>Descripción: </Text>
                     <TextInput 
                         style={styles.areaTexto}
@@ -98,8 +96,10 @@ export default function AgregarTransaccion(){
                         multiline={true}
                     ></TextInput>
 
+                    {/* Fecha se guarada automaticamente con SQLite */}
+
                     {/* Agregado 3:23 */}
-                    <TouchableOpacity style={styles.btnAgregar} onPress={alertaRegistro}>
+                    <TouchableOpacity style={styles.btnAgregar} onPress={handleGuardar}>
                         <Text style={styles.botonTexto}>Guardar Transaccion</Text>
                     </TouchableOpacity>
 
