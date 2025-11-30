@@ -1,6 +1,5 @@
 import React, { useContext, useEffect, useState} from "react";
-import { Text, StyleSheet, View, TouchableOpacity, ScrollView, ImageBackground, Animated, Easing, Image } from 'react-native'
-import { Button } from "react-native";
+import { Text, StyleSheet, View, ScrollView, ImageBackground, Animated, Easing, Image } from 'react-native'
 //import TransaccionesScreem from './PantallaGestionTransacciones';
 //import PantallaRegistro from "./PantallaRegistro";
 //import PantallaPresupuesto from "./PresupuestosScreen";
@@ -14,10 +13,14 @@ export default function PantallaPrincipal(){
     //Para la animacion de la pantalla de carga
     const[cargando, setCargando] = useState(true);
     const desvanecido = new Animated.Value(1);
-    //Para Navigation
-    const navigation = useNavigation();
-    //Para las notificaciones de ecceso del presupuesto
-    const { alertas } = useContext(AppContext);
+    // navegación no necesaria aquí (solo tarjetas)
+    //Para las notificaciones de exceso del presupuesto y transacciones
+    const { alertas, transacciones } = useContext(AppContext);
+
+    // Totales del mes
+    const [gastosMes, setGastosMes] = useState(0);
+    const [ingresosMes, setIngresosMes] = useState(0);
+    const [balanceMes, setBalanceMes] = useState(0);
 
     useEffect(()=>{
         const timer=setTimeout(()=>{
@@ -30,6 +33,40 @@ export default function PantallaPrincipal(){
         }, 2000);
         return()=>clearTimeout(timer);
     },[]);
+
+    // Calcular totales mensuales cuando cambien las transacciones
+    useEffect(() => {
+        try {
+            const now = new Date();
+            const currentMonth = now.getMonth();
+            const currentYear = now.getFullYear();
+
+            const gastos = transacciones
+                .filter(t => {
+                    if (!t.fecha) return false;
+                    const d = new Date(t.fecha);
+                    return d.getMonth() === currentMonth && d.getFullYear() === currentYear && t.tipo === 'Gasto';
+                })
+                .reduce((s, t) => s + Number(t.monto || 0), 0);
+
+            const ingresos = transacciones
+                .filter(t => {
+                    if (!t.fecha) return false;
+                    const d = new Date(t.fecha);
+                    return d.getMonth() === currentMonth && d.getFullYear() === currentYear && t.tipo === 'Ingreso';
+                })
+                .reduce((s, t) => s + Number(t.monto || 0), 0);
+
+            setGastosMes(gastos);
+            setIngresosMes(ingresos);
+            setBalanceMes(ingresos - gastos);
+        } catch (err) {
+            console.log('Error calculando totales del mes:', err);
+            setGastosMes(0);
+            setIngresosMes(0);
+            setBalanceMes(0);
+        }
+    }, [transacciones]);
 
     if(cargando){
         return(
@@ -55,61 +92,34 @@ export default function PantallaPrincipal(){
                 source={require('../assets/Logo.png')}
             />
 
+            {/* Alertas de presupuesto */}
             {alertas.length > 0 && (
-                <View style={{backgroundColor: "#ffcccc", padding: 10, borderRadius: 10, marginBottom: 10}}>
+                <View style={styles.alertContainer}>
                     {alertas.map((a, index) => (
-                        <Text key={index} style={{color: "#900", fontWeight: "bold"}}>
-                            {a}
-                        </Text>
+                        <Text key={index} style={styles.alertText}>{a}</Text>
                     ))}
                 </View>
             )}
-            
-            {/*CONTENEDOR DE GASTOS E INGRESOS*/}
-            <View style={styles.todoContainer}>
-                
-                <View style={styles.todoCajas}>
-                    <Text style={styles.todoLabel}>GASTOS</Text>
-                    <Text style={styles.todoAmount}>$1000</Text>
-                    {/*<Ionicons>*/}
-                </View>
-    
-                <View style={styles.todoCajas}>
-                    <Text style={styles.todoLabel}>INGRESOS</Text>
-                    <Text style={styles.todoAmount}>$1200</Text>
-                    {/*<Ionicons>*/}
-                </View>
-    
-            </View>
-    
-            {/*BOTONES PRINCIPALES*/}
-            <View style={styles.botonesContainer}>
-    
-                <TouchableOpacity style={styles.boton} onPress={()=>navigation.navigate("Transacciones")}>
-                    {/*<Ionicons>*/}
-                    <Text style={styles.botonText}>Transacciones</Text>
-                </TouchableOpacity>
-    
-                <TouchableOpacity style={styles.boton} onPress={()=>navigation.navigate("Presupuestos")}>
-                    {/*<Ionicons>*/}
-                    <Text style={styles.botonText}>Presupuesto Mensual</Text>
-                </TouchableOpacity>
-    
-                <TouchableOpacity style={styles.boton} onPress={()=>navigation.navigate("Graficas")}>
-                    {/*<Ionicons>*/}
-                    <Text style={styles.botonText}>Ver Graficas</Text>
-                </TouchableOpacity>
-    
-                <TouchableOpacity style={styles.boton} onPress={()=>navigation.navigate("Perfil")}>
-                    {/*<Ionicons>*/}
-                    <Text style={styles.botonText}>Configuración de Perfil</Text>
-                </TouchableOpacity>
-                
-                <TouchableOpacity style={styles.loginBoton} onPress={()=> navigation.navigate("Login")}>
-                    <Text style={styles.loginBotonTexto}>Iniciar Sesion</Text>
-                </TouchableOpacity>
 
+            {/* TARJETAS RESUMEN */}
+            <View style={styles.cardsRow}>
+                <View style={[styles.card, styles.cardLeft]}>
+                    <Text style={styles.cardLabel}>Gastos mes</Text>
+                    <Text style={styles.cardValue}>${gastosMes.toFixed(2)}</Text>
+                </View>
+
+                <View style={[styles.card, styles.cardRight]}>
+                    <Text style={styles.cardLabel}>Ingresos mes</Text>
+                    <Text style={styles.cardValue}>${ingresosMes.toFixed(2)}</Text>
+                </View>
             </View>
+
+            <View style={styles.balanceCard}>
+                <Text style={styles.cardLabel}>Balance</Text>
+                <Text style={[styles.cardValue, {color: balanceMes < 0 ? '#c62828' : '#2e7d32'}]}>${balanceMes.toFixed(2)}</Text>
+            </View>
+
+            {/* Sólo tarjetas y alertas — sin botones de navegación */}
     
         </ScrollView>
     );
@@ -170,31 +180,7 @@ const styles = StyleSheet.create({
         color: '#333',
     },
 
-    botonesContainer:{
-        marginTop: 10,
-    },
-
-    boton:{
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#fff',
-        paddingVertical: 15,
-        paddingHorizontal: 20,
-        borderRadius: 15,
-        marginBottom: 15,
-        shadowColor: '#000',
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 3,
-    },
-
-    botonText:{
-        margin: 10,
-        fontSize: 16,
-        color: '#333',
-        fontWeight: '500',
-        fontWeight: "bold",
-    },
+    /* botones antiguos eliminados */
 
     //Estilos imagen de carga
     splashContainer:{
@@ -218,18 +204,27 @@ const styles = StyleSheet.create({
         color: 'white',
     },
 
-    loginBoton:{
-        backgroundColor: '#2e7d32',
-        borderRadius: 10,
-        paddingVertical: 10,
-        marginTop: 5,
-        alignItems: 'center',
-    },
+    /* estilos de login eliminados */
 
-    loginBotonTexto:{
-        color: '#fff',
-        fontWeight: 'bold',
-        fontSize: 15,
+    alertContainer: {
+        backgroundColor: '#fff6f6',
+        padding: 10,
+        borderRadius: 10,
+        marginBottom: 12,
+        borderWidth: 1,
+        borderColor: '#f5c6c6'
     },
+    alertText: { color: '#900', fontWeight: '700' },
+
+    cardsRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 },
+    card: { backgroundColor: '#fff', width: '48%', borderRadius: 12, padding: 16, elevation: 3 },
+    cardLeft: {},
+    cardRight: {},
+    cardLabel: { color: '#666', fontSize: 14, fontWeight: '600' },
+    cardValue: { fontSize: 22, fontWeight: '800', marginTop: 6 },
+
+    balanceCard: { backgroundColor: '#fff', borderRadius: 12, padding: 16, elevation: 3, marginBottom: 16 },
+
+    /* botones de navegación pequeños eliminados */
 
 });
