@@ -1,7 +1,7 @@
 import { Text, StyleSheet, View, Button, TextInput, Image, ScrollView, Alert, Switch } from "react-native";
 import React, { useState, useEffect } from "react";
-import * as SQLite from "expo-sqlite";
 import { useNavigation } from "@react-navigation/native";
+import { initDB, getDB } from "../src/db";
 
 export default function LoginScreen() {
 
@@ -10,15 +10,26 @@ export default function LoginScreen() {
   const [password, setPassword] = useState("");
   const [db, setDb] = useState(null);
 
-  // Abrir DB al iniciar
+  // Inicializar BD usando el mismo método que el registro
   useEffect(() => {
+    const abrirDB = async () => {
+      try {
+        // Usar initDB() para asegurar que la BD esté inicializada
+        await initDB();
+        // Obtener la conexión usando getDB() - misma BD que el registro
+        const database = getDB();
+        if (database) {
+          setDb(database);
+        } else {
+          Alert.alert("Error", "No se pudo obtener la conexión a la base de datos");
+        }
+      } catch (error) {
+        console.log("Error inicializando BD:", error);
+        Alert.alert("Error", "No se pudo inicializar la base de datos");
+      }
+    };
     abrirDB();
   }, []);
-
-  const abrirDB = async () => {
-    const database = await SQLite.openDatabaseAsync("finanzas.db");
-    setDb(database);
-  };
 
   const iniciarSesion = async () => {
     if (!correo.trim() || !password.trim()) {
@@ -32,10 +43,16 @@ export default function LoginScreen() {
       return;
     }
 
+    // Validar que la BD esté lista
+    if (!db) {
+      Alert.alert("Error", "La base de datos no está lista. Intente de nuevo.");
+      return;
+    }
+
     try {
       const result = await db.getFirstAsync(
         "SELECT * FROM usuarios WHERE correo = ?",
-        [correo]
+        [correo.trim()]
       );
 
       if (!result) {
@@ -52,6 +69,7 @@ export default function LoginScreen() {
       nav.replace("Home");
 
     } catch (err) {
+      console.log("Error en login:", err);
       Alert.alert("Error inesperado", "No se pudo validar el usuario");
     }
   };
