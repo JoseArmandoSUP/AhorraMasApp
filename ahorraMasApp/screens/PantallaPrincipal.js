@@ -1,11 +1,11 @@
 import React, { useContext, useEffect, useState} from "react";
 import { Text, StyleSheet, View, ScrollView, ImageBackground, Animated, Easing, Image } from 'react-native'
+import { initDB, getDB } from '../src/db';
 //import TransaccionesScreem from './PantallaGestionTransacciones';
 //import PantallaRegistro from "./PantallaRegistro";
 //import PantallaPresupuesto from "./PresupuestosScreen";
 //import LoginScreen from "./LoginScreen";
 //import GraficasScreen from "./GraficasScreen";
-import { useNavigation } from "@react-navigation/native";
 import { AppContext } from "../context/AppContext";
 
 export default function PantallaPrincipal(){
@@ -22,6 +22,7 @@ export default function PantallaPrincipal(){
     const [ingresosMes, setIngresosMes] = useState(0);
     const [balanceMes, setBalanceMes] = useState(0);
 
+    
     useEffect(()=>{
         const timer=setTimeout(()=>{
             Animated.timing(desvanecido,{
@@ -34,39 +35,99 @@ export default function PantallaPrincipal(){
         return()=>clearTimeout(timer);
     },[]);
 
-    // Calcular totales mensuales cuando cambien las transacciones
+    // Calcular totales mensuales leyendo desde la BD con helpers de `src/db.js`.
     useEffect(() => {
-        try {
-            const now = new Date();
-            const currentMonth = now.getMonth();
-            const currentYear = now.getFullYear();
+        let mounted = true;
 
-            const gastos = transacciones
-                .filter(t => {
-                    if (!t.fecha) return false;
-                    const d = new Date(t.fecha);
-                    return d.getMonth() === currentMonth && d.getFullYear() === currentYear && t.tipo === 'Gasto';
-                })
-                .reduce((s, t) => s + Number(t.monto || 0), 0);
+        const calcularDesdeBD = async () => {
+            try {
+                await initDB();
+                const db = getDB();
+                if (!db) throw new Error('BD no disponible');
 
-            const ingresos = transacciones
-                .filter(t => {
-                    if (!t.fecha) return false;
-                    const d = new Date(t.fecha);
-                    return d.getMonth() === currentMonth && d.getFullYear() === currentYear && t.tipo === 'Ingreso';
-                })
-                .reduce((s, t) => s + Number(t.monto || 0), 0);
+                const now = new Date();
+                const mm = String(now.getMonth() + 1).padStart(2, '0');
+                const yyyy = String(now.getFullYear());
 
-            setGastosMes(gastos);
-            setIngresosMes(ingresos);
-            setBalanceMes(ingresos - gastos);
-        } catch (err) {
-            console.log('Error calculando totales del mes:', err);
-            setGastosMes(0);
-            setIngresosMes(0);
-            setBalanceMes(0);
-        }
+                const resGastos = await db.getFirstAsync(
+                    "SELECT IFNULL(SUM(monto),0) as total FROM transacciones WHERE tipo = 'Gasto' AND strftime('%m', fecha) = ? AND strftime('%Y', fecha) = ?",
+                    [mm, yyyy]
+                );
+
+                const resIngresos = await db.getFirstAsync(
+                    "SELECT IFNULL(SUM(monto),0) as total FROM transacciones WHERE tipo = 'Ingreso' AND strftime('%m', fecha) = ? AND strftime('%Y', fecha) = ?",
+                    [mm, yyyy]
+                );
+
+                const gastos = (resGastos && resGastos.total) ? Number(resGastos.total) : 0;
+                const ingresos = (resIngresos && resIngresos.total) ? Number(resIngresos.total) : 0;
+
+                if (!mounted) return;
+                setGastosMes(gastos);
+                setIngresosMes(ingresos);
+                setBalanceMes(ingresos - gastos);
+
+                // Calcular alertas desde presupuestos
+                try {
+                    const presupuestos = await db.getAllAsync('SELECT * FROM presupuestos');
+                    const nuevas = [];
+                    for (const pres of presupuestos) {
+                        const categoria = pres.categoria;
+                        const limite = Number(pres.monto) || 0;
+                        const gastoCat = await db.getFirstAsync(
+                            "SELECT IFNULL(SUM(monto),0) as total FROM transacciones WHERE tipo = 'Gasto' AND categoria = ? AND strftime('%m', fecha) = ? AND strftime('%Y', fecha) = ?",
+                            [categoria, mm, yyyy]
+                        );
+                        const totalGastado = (gastoCat && gastoCat.total) ? Number(gastoCat.total) : 0;
+                        if (totalGastado > limite) nuevas.push(`Presupuesto excedido: ${categoria}`);
+                    }
+                    if (!mounted) return;
+                    if (nuevas.length > 0) setLocalAlertsState(nuevas);
+                } catch (errPres) {
+                    console.log('Error calculando alertas desde BD:', errPres);
+                }
+
+            } catch (err) {
+                console.log('Error leyendo totales desde BD, usando contexto:', err);
+                // fallback al contexto
+                try {
+                    const now = new Date();
+                    const currentMonth = now.getMonth();
+                    const currentYear = now.getFullYear();
+
+                    const gastos = transacciones
+                        .filter(t => {
+                            if (!t.fecha) return false;
+                            const d = new Date(t.fecha);
+                            return d.getMonth() === currentMonth && d.getFullYear() === currentYear && t.tipo === 'Gasto';
+                        })
+                        .reduce((s, t) => s + Number(t.monto || 0), 0);
+
+                    const ingresos = transacciones
+                        .filter(t => {
+                            if (!t.fecha) return false;
+                            const d = new Date(t.fecha);
+                            return d.getMonth() === currentMonth && d.getFullYear() === currentYear && t.tipo === 'Ingreso';
+                        })
+                        .reduce((s, t) => s + Number(t.monto || 0), 0);
+
+                    if (!mounted) return;
+                    setGastosMes(gastos);
+                    setIngresosMes(ingresos);
+                    setBalanceMes(ingresos - gastos);
+                } catch (err2) {
+                    console.log('Fallback error calculando totales:', err2);
+                }
+            }
+        };
+
+        calcularDesdeBD();
+
+        return () => { mounted = false; };
     }, [transacciones]);
+
+    // local alerts state (DB-calculated) — shown in UI before falling back to AppContext.alertas
+    const [localAlertsState, setLocalAlertsState] = useState([]);
 
     if(cargando){
         return(
@@ -92,10 +153,10 @@ export default function PantallaPrincipal(){
                 source={require('../assets/Logo.png')}
             />
 
-            {/* Alertas de presupuesto */}
-            {alertas.length > 0 && (
+            {/* Alertas de presupuesto (DB o contexto) */}
+            {(localAlertsState.length > 0 ? localAlertsState : alertas).length > 0 && (
                 <View style={styles.alertContainer}>
-                    {alertas.map((a, index) => (
+                    {(localAlertsState.length > 0 ? localAlertsState : alertas).map((a, index) => (
                         <Text key={index} style={styles.alertText}>{a}</Text>
                     ))}
                 </View>
