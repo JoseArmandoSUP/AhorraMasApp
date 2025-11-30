@@ -1,207 +1,125 @@
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Button, TextInput, Alert } from "react-native";
-import React, {useContext, useState} from "react";
-//import PantallaGestionTransacciones from "./PantallaGestionTransacciones";
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, TextInput, Alert } from "react-native";
+import React, { useState } from "react";
 import { useNavigation } from "@react-navigation/native";
-import { AppContext } from "../context/AppContext";
+import * as SQLite from "expo-sqlite";
 
-export default function AgregarTransaccion(){
-    const navigatation = useNavigation();
+export default function AgregarTransaccion() {
+  const navigation = useNavigation();
 
-    const[tipo, setTipo] = useState("");
-    const[categoria, setCategoria] = useState("");
-    const[monto, setMonto] = useState("");
-    const[fecha, setFecha] = useState("");
-    const[descripcion, setDescripcion] = useState("");
+  const [tipo, setTipo] = useState("");
+  const [categoria, setCategoria] = useState("");
+  const [monto, setMonto] = useState("");
+  const [fecha, setFecha] = useState("");
+  const [descripcion, setDescripcion] = useState("");
 
-    const{ setTransacciones } = useContext(AppContext);
-
-    function guardarTransaccion(){
-        const nueva ={
-            tipo,
-            categoria,
-            monto,
-            fecha,
-            descripcion
-        };
-
-        setTransacciones(prev => [...prev, nueva]); // <-- Activa la verificacion automaticamente
-        Alert.alert("Transaccion agregada");
+  const alertaRegistro = async () => {
+    if (!tipo || !categoria || !monto || !fecha || descripcion.trim() === "") {
+      Alert.alert("Por favor complete todos los campos");
+      return;
     }
 
-    const alertaRegistro = () => {
-        if(!tipo || !categoria || !monto || !fecha || descripcion.trim() === ""){
-            Alert.alert("Por favor complete todos los campos");
-            alert("Por favor complete todos los campos");
-            return;
-        }
-        Alert.alert(
-            `Transaccion agregada correctamente: \n Tipo: ${tipo} \n Categoria: ${categoria} \n Monto: $${monto} \n Fecha: ${fecha}`
-        );
-        alert(
-            `Transaccion agregada correctamente: \n Tipo: ${tipo} \n Categoria: ${categoria} \n Monto: $${monto} \n Fecha: ${fecha}`
-        );
-    };
+    try {
+      const db = await SQLite.openDatabaseAsync("ahorramas_v1.db");
 
-    const filtrarCaracteresM = (input) => {
-        const numerico = input.replace(/[^0-9]/g, '');
-        setMonto(numerico);
-    };
+      await db.runAsync(
+        `INSERT INTO transacciones (tipo, categoria, monto, fecha, descripcion)
+         VALUES (?, ?, ?, ?, ?);`,
+        [tipo, categoria, parseFloat(monto), fecha, descripcion]
+      );
 
-    return(
-        <ScrollView contentContainerStyle={{paddingBottom: 80}}>
+      Alert.alert("Transacción guardada correctamente");
 
-            <View style={styles.container}>
+      // limpiar inputs
+      setTipo("");
+      setCategoria("");
+      setMonto("");
+      setFecha("");
+      setDescripcion("");
 
-                <Text style={styles.titulo}>AGREGAR TRANSACCIÓN</Text>
+    } catch (error) {
+      console.log("ERROR al guardar transacción", error);
+      Alert.alert("Error", "No se pudo guardar la transacción");
+    }
+  };
 
-                <View style={styles.fomrulario}>
-                    
-                    <Text style={styles.label}>Tipo (Gasto o Ingreso)</Text>
-                    <TextInput 
-                        style={styles.input}
-                        placeholder="Ejemplo: Gasto"
-                        value={tipo}
-                        onChangeText={setTipo}
-                    ></TextInput>
+  const filtrarCaracteresM = (input) => {
+    const numerico = input.replace(/[^0-9]/g, "");
+    setMonto(numerico);
+  };
 
-                    <Text style={styles.label}>Categoria</Text>
-                    <TextInput 
-                        style={styles.input}
-                        placeholder="Comida, Transporte, etc."
-                        value={categoria}
-                        onChangeText={setCategoria}
-                    ></TextInput>
+  return (
+    <ScrollView contentContainerStyle={{ paddingBottom: 80 }}>
+      <View style={styles.container}>
+        <Text style={styles.titulo}>AGREGAR TRANSACCIÓN</Text>
 
-                    <Text style={styles.label}>Monto</Text>
-                    <TextInput 
-                        style={styles.input}
-                        keyboardType="numeric"
-                        placeholder="Ejemplo: 500"
-                        value={monto}
-                        onChangeText={filtrarCaracteresM}
-                    ></TextInput>
+        <View style={styles.fomrulario}>
+          <Text style={styles.label}>Tipo</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Gasto o Ingreso"
+            value={tipo}
+            onChangeText={setTipo}
+          />
 
-                    <Text style={styles.label}>Fecha: </Text>
-                    <TextInput 
-                        style={styles.input}
-                        placeholder="AÑO-MES-DIA"
-                        value={fecha}
-                        onChangeText={setFecha}
-                    ></TextInput>
+          <Text style={styles.label}>Categoría</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Comida, Transporte, etc."
+            value={categoria}
+            onChangeText={setCategoria}
+          />
 
-                    <Text style={styles.label}>Descripción: </Text>
-                    <TextInput 
-                        style={styles.areaTexto}
-                        placeholder="Descripcion"
-                        value={descripcion}
-                        onChangeText={setDescripcion}
-                        multiline={true}
-                    ></TextInput>
+          <Text style={styles.label}>Monto</Text>
+          <TextInput
+            style={styles.input}
+            keyboardType="numeric"
+            value={monto}
+            placeholder="Ejemplo: 500"
+            onChangeText={filtrarCaracteresM}
+          />
 
-                    {/* Agregado 3:23 */}
-                    <TouchableOpacity style={styles.btnAgregar} onPress={alertaRegistro}>
-                        <Text style={styles.botonTexto}>Guardar Transaccion</Text>
-                    </TouchableOpacity>
+          <Text style={styles.label}>Fecha</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="AAAA-MM-DD"
+            value={fecha}
+            onChangeText={setFecha}
+          />
 
-                </View>
+          <Text style={styles.label}>Descripción</Text>
+          <TextInput
+            style={styles.areaTexto}
+            placeholder="Detalles de la transacción"
+            value={descripcion}
+            onChangeText={setDescripcion}
+            multiline={true}
+          />
 
-                <View style={styles.btnContainer}>
-                    <TouchableOpacity style={styles.volverBoton} onPress={()=>navigatation.goBack()}>
-                        <Text style={styles.volverBotonTexto}>Volver al menu de Transacciones</Text>
-                    </TouchableOpacity>
-                </View>
+          <TouchableOpacity style={styles.btnAgregar} onPress={alertaRegistro}>
+            <Text style={styles.botonTexto}>Guardar Transacción</Text>
+          </TouchableOpacity>
+        </View>
 
-            </View>
-
-        </ScrollView>
-    );
-
+        <TouchableOpacity
+          style={styles.volverBoton}
+          onPress={() => navigation.goBack()}
+        >
+          <Text style={styles.volverBotonTexto}>Volver</Text>
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
+  );
 }
 
 const styles = StyleSheet.create({
-    container:{
-        flex: 1,
-        backgroundColor: "#F9FAFB",
-        paddingTop: 60,
-        paddingHorizontal: 20,
-    },
-
-    titulo:{
-        fontSize: 22,
-        fontWeight: "bold",
-        color: "#1b5e20",
-        textAlign: 'center',
-        marginBottom: 25,
-    },
-
-    fomrulario:{
-        backgroundColor: "#fff",
-        borderRadius: 15,
-        padding: 20,
-        marginBottom: 20,
-        shadowColor: "#000",
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 3,
-    },
-
-    label:{
-        fontSize: 14,
-        fontWeight: "600",
-        color: "#333",
-        marginBottom: 5,
-    },
-
-    input:{
-        backgroundColor: "#f0f0f0",
-        borderRadius: 10,
-        paddingVertical: 10,
-        paddingHorizontal: 15,
-        marginBottom: 15,
-        color: "#000",
-    },
-
-    btnAgregar:{
-        backgroundColor: "#2e7d32",
-        borderRadius: 10,
-        paddingVertical: 12,
-        alignItems: "center",
-        marginTop: 10,
-    },
-
-    btnContainer:{
-        marginTop: 20,
-        marginBottom: 30,
-    },
-
-    //Agregado 3:23
-    areaTexto: {
-        borderWidth: 1,
-        borderColor: "#ccc",
-        padding: 15,
-        height: 120,
-        borderRadius: 10,
-        backgroundColor: "#fff",
-        marginBottom: 15,
-        textAlignVertical: "top",
-    },
-
-    botonTexto:{
-        color: '#fff',
-        fontWeight: 'bold',
-        fontSize: 15,
-    },
-
-    volverBoton: {
-        backgroundColor: "#999",
-        padding: 12,
-        borderRadius: 10,
-        alignItems: "center",
-        marginTop: 15,
-    },
-
-    volverBotonTexto: {
-        color: "#fff",
-        fontWeight: "bold",
-    },
+  container: { flex: 1, backgroundColor: "#F9FAFB", paddingTop: 60, paddingHorizontal: 20 },
+  titulo: { fontSize: 22, fontWeight: "bold", color: "#1b5e20", textAlign: "center", marginBottom: 25 },
+  fomrulario: { backgroundColor: "#fff", borderRadius: 15, padding: 20, marginBottom: 20, elevation: 3 },
+  label: { fontSize: 14, fontWeight: "600", marginBottom: 5 },
+  input: { backgroundColor: "#f0f0f0", borderRadius: 10, padding: 12, marginBottom: 15 },
+  areaTexto: { borderWidth: 1, borderColor: "#ccc", padding: 15, height: 120, borderRadius: 10, marginBottom: 15, textAlignVertical: "top" },
+  btnAgregar: { backgroundColor: "#2e7d32", borderRadius: 10, paddingVertical: 12, alignItems: "center" },
+  botonTexto: { color: "#fff", fontWeight: "bold" },
+  volverBoton: { backgroundColor: "#999", padding: 12, borderRadius: 10, alignItems: "center" },
+  volverBotonTexto: { color: "#fff", fontWeight: "bold" },
 });

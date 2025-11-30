@@ -3,7 +3,7 @@ import { View, Text, FlatList, StyleSheet, TouchableOpacity } from "react-native
 import * as SQLite from "expo-sqlite";
 import { useNavigation } from "@react-navigation/native";
 
-export default function ListarTransaccion() {
+export default function ListarParaEditar() {
   const [transacciones, setTransacciones] = useState([]);
   const [db, setDb] = useState(null);
   const navigation = useNavigation();
@@ -26,25 +26,27 @@ export default function ListarTransaccion() {
   }
 
   const renderItem = ({ item }) => {
-    // Validar que item existe y tiene id
     if (!item || !item.id) {
-      return null; // No renderizar si no hay item válido
+      return null;
     }
 
     return (
-      <View style={styles.card}>
-        {/* SOLO VISUALIZACIÓN - Sin clics, solo muestra la información */}
+      <TouchableOpacity 
+        style={styles.card}
+        onPress={() => navigation.navigate("EditarTransaccion", { transaccion: item })}
+      >
         <Text style={styles.tipo}>{item.tipo.toUpperCase()} • {item.categoria}</Text>
         <Text style={styles.monto}>${item.monto}</Text>
         <Text style={styles.fecha}>{item.fecha}</Text>
         {item.descripcion ? <Text style={styles.desc}>{item.descripcion}</Text> : null}
-      </View>
+        <Text style={styles.instruccion}>Toca para editar</Text>
+      </TouchableOpacity>
     );
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.titulo}>TRANSACCIONES REGISTRADAS</Text>
+      <Text style={styles.titulo}>SELECCIONA UNA TRANSACCIÓN PARA EDITAR</Text>
 
       <FlatList
         data={transacciones}
@@ -85,6 +87,7 @@ const styles = StyleSheet.create({
   monto: { fontSize: 18, fontWeight: "bold", marginTop: 5, color: "black" },
   fecha: { fontSize: 13, color: "#777", marginTop: 3 },
   desc: { fontSize: 14, marginTop: 6, color: "#555" },
+  instruccion: { fontSize: 12, color: "#2e7d32", marginTop: 8, fontStyle: "italic" },
   vacio: { textAlign: "center", marginTop: 40, fontSize: 16, color: "#999" },
   btnRegresar: {
     backgroundColor: "#777",

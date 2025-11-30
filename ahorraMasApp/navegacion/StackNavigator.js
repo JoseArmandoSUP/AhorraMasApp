@@ -10,6 +10,8 @@ import CambiarPassword from "../screens/CambiarPasswordScreen";
 //------------------------Pantallas de Transacciones----------------------------------------------
 import PantallaGestionTransacciones from "../screens/PantallaGestionTransacciones";
 import ListarTransaccion from "../screens/ListarTransaccion";
+import ListarParaEditar from "../screens/ListarParaEditar";
+import ListarParaEliminar from "../screens/ListarParaEliminar";
 import AgregarTransaccion from "../screens/AgregarTransaccion";
 import EditarTransaccion from "../screens/EditarTransaccion";
 import EliminarTransaccion from "../screens/EliminarTransaccion";
@@ -45,9 +47,12 @@ export default function StackNavigator(){
             {/* Transacciones (agregado 3:23)*/}
             <Stack.Screen name="Transacciones" component={PantallaGestionTransacciones}></Stack.Screen>
             <Stack.Screen name="ListarTransaccion" component={ListarTransaccion}></Stack.Screen>
+            <Stack.Screen name="ListarParaEditar" component={ListarParaEditar}></Stack.Screen>
+            <Stack.Screen name="ListarParaEliminar" component={ListarParaEliminar}></Stack.Screen>
             <Stack.Screen name="AgregarTransaccion" component={AgregarTransaccion}></Stack.Screen>
             <Stack.Screen name="EditarTransaccion" component={EditarTransaccion}></Stack.Screen>
             <Stack.Screen name="EliminarTransaccion" component={EliminarTransaccion}></Stack.Screen>
+            
             
             {/* Presupuestos (agregado 5:43)*/}
             <Stack.Screen name="Presupuestos" component={PresupuestosScreen}></Stack.Screen>

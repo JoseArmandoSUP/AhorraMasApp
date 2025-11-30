@@ -2,9 +2,12 @@ import { Text, StyleSheet, View, Button, ScrollView, TextInput, Image, Alert } f
 import React, { useEffect, useState } from "react";
 import * as SQLite from "expo-sqlite";
 import { useNavigation } from "@react-navigation/native";
+import { initDB, getDB } from "../src/db";  // IMPORTACIÓN CORRECTA
 
 export default function PantallaRegistro() {
   const nav = useNavigation();
+
+  const [db, setDb] = useState(null);
 
   const [nombre, setNombre] = useState("");
   const [usuario, setUsuario] = useState("");
@@ -13,30 +16,18 @@ export default function PantallaRegistro() {
   const [telefono, setTelefono] = useState("");
   const [password, setPassword] = useState("");
 
-  const [db, setDb] = useState(null);
-
-  // Inicializa la BD al entrar en la pantalla
+  // Inicializa la BD una sola vez
   useEffect(() => {
-    initDB();
+    const loadDB = async () => {
+      await initDB();          // crea las tablas
+      const database = getDB(); // obtiene la conexión
+      setDb(database);
+    };
+
+    loadDB();
   }, []);
 
-  const initDB = async () => {
-    const database = await SQLite.openDatabaseAsync("finanzas.db");
-    setDb(database);
-
-    await database.execAsync(`
-      CREATE TABLE IF NOT EXISTS usuarios (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        nombre TEXT,
-        usuario TEXT,
-        edad INTEGER,
-        correo TEXT UNIQUE,
-        telefono TEXT,
-        password TEXT
-      );
-    `);
-  };
-
+  // Valida que no falten campos
   const validarCampos = () => {
     return (
       nombre.trim() &&
@@ -48,9 +39,15 @@ export default function PantallaRegistro() {
     );
   };
 
+  // Solo Gmail válido
   const esCorreoValido = () => /^[\w.%+-]+@gmail\.com$/.test(correo);
 
   const registrarUsuario = async () => {
+    if (!db) {
+      Alert.alert("Error", "Base de datos no lista");
+      return;
+    }
+
     if (!validarCampos()) {
       Alert.alert("Campos vacíos", "Por favor completa todos los campos.");
       return;
@@ -67,19 +64,15 @@ export default function PantallaRegistro() {
         [nombre, usuario, edad, correo, telefono, password]
       );
 
-      Alert.alert(
-        "Registro exitoso",
-        "Tu cuenta ha sido creada correctamente",
-        [{ text: "OK", onPress: () => nav.replace("Login") }]
-      );
+      Alert.alert("Registro exitoso", "Tu cuenta ha sido creada correctamente", [
+        { text: "OK", onPress: () => nav.replace("Login") },
+      ]);
 
     } catch (error) {
+      console.log("Error registrando usuario:", error);
       Alert.alert("Error", "El correo ya está registrado");
     }
   };
-
-  const filtrarEdad = (txt) => setEdad(txt.replace(/[^0-9]/g, ""));
-  const filtrarTelefono = (txt) => setTelefono(txt.replace(/[^0-9]/g, ""));
 
   return (
     <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
@@ -91,48 +84,22 @@ export default function PantallaRegistro() {
 
         <TextInput style={styles.input} placeholder="Nombre" value={nombre} onChangeText={setNombre} />
         <TextInput style={styles.input} placeholder="Usuario" value={usuario} onChangeText={setUsuario} />
-        <TextInput style={styles.input} placeholder="Edad" keyboardType="numeric" value={edad} onChangeText={filtrarEdad} />
+        <TextInput style={styles.input} placeholder="Edad" keyboardType="numeric" value={edad} onChangeText={(txt) => setEdad(txt.replace(/[^0-9]/g, ""))} />
         <TextInput style={styles.input} placeholder="Correo Gmail" value={correo} onChangeText={setCorreo} />
-        <TextInput style={styles.input} placeholder="Teléfono" keyboardType="numeric" value={telefono} onChangeText={filtrarTelefono} />
+        <TextInput style={styles.input} placeholder="Teléfono" keyboardType="numeric" value={telefono} onChangeText={(txt) => setTelefono(txt.replace(/[^0-9]/g, ""))} />
         <TextInput style={styles.input} placeholder="Contraseña" secureTextEntry value={password} onChangeText={setPassword} />
 
         <Button title="Registrarse" color="blue" onPress={registrarUsuario} />
         <Button title="Volver al Login" onPress={() => nav.navigate("Login")} />
-        <Button title="Volver al Menú" onPress={() => nav.navigate("Home")} />
       </View>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#F5F9FF"
-  },
-  text: {
-    alignSelf: "flex-start",
-    marginLeft: 20,
-    fontWeight: "bold",
-    fontSize: 30
-  },
-  text2: {
-    alignSelf: "flex-start",
-    marginLeft: 20
-  },
-  input: {
-    width: "80%",
-    borderWidth: 2,
-    borderColor: "white",
-    borderRadius: 10,
-    padding: 20,
-    backgroundColor: "white",
-    marginTop: 20,
-    marginBottom: 20
-  },
-  logo: {
-    height: 250,
-    width: 250
-  }
+  container: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#F5F9FF" },
+  text: { alignSelf: "flex-start", marginLeft: 20, fontWeight: "bold", fontSize: 30 },
+  text2: { alignSelf: "flex-start", marginLeft: 20 },
+  input: { width: "80%", borderWidth: 2, borderColor: "white", borderRadius: 10, padding: 20, backgroundColor: "white", marginTop: 20, marginBottom: 20 },
+  logo: { height: 250, width: 250 },
 });

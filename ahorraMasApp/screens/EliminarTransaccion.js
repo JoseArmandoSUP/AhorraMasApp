@@ -1,129 +1,104 @@
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Button, TextInput, Alert } from "react-native";
-import React, {useState} from "react";
-//import PantallaGestionTransacciones from "./PantallaGestionTransacciones";
-import { useNavigation } from "@react-navigation/native";
+import { View, Text, TouchableOpacity, Alert, StyleSheet } from "react-native";
+import * as SQLite from "expo-sqlite";
+import { useRoute, useNavigation } from "@react-navigation/native";
+import { useState, useEffect } from "react";
 
-export default function EliminarTransaccion(){
-    const navigation = useNavigation();
+export default function EliminarTransaccion() {
+  const route = useRoute();
+  const navigation = useNavigation();
+  const id = route.params?.id; // Usar optional chaining para evitar el error
+  const [db, setDb] = useState(null);
 
-    const transaccion = {
-        tipo: "Gasto",
-        categoria: "Comida",
-        monto: 450,
-        fecha: "2025-10-20",
-    };
+  useEffect(() => {
+    SQLite.openDatabaseAsync("ahorramas_v1.db").then(setDb);
+  }, []);
 
-    const confirmarEliminacion = () => {
-        Alert.alert(
-            'Confirmar',
-            `¿Desea eliminar esta transacción?\n\n ${transaccion.tipo} - ${transaccion.categoria} - ${transaccion.monto}`,
-            [{text: "Cancelar", style: "cancel"}, {text: "Eliminar", style: "destructive", onPress:()=>alert("Transaccion eliminada")},]
-        );
+  // Validar que el id existe
+  useEffect(() => {
+    if (!id) {
+      Alert.alert("Error", "No se pudo obtener el ID de la transacción");
+      navigation.goBack();
+    }
+  }, [id]);
 
-        alert(
-            'Confirmar',
-            `¿Desea eliminar esta transacción?\n\n ${transaccion.tipo} - ${transaccion.categoria} - ${transaccion.monto}`,
-            [{text: "Cancelar", style: "cancel"}, {text: "Eliminar", style: "destructive", onPress:()=>alert("Transaccion eliminada")},]
-        );
-    };
+  async function eliminar() {
+    if (!id || !db) {
+      Alert.alert("Error", "No se puede eliminar la transacción");
+      return;
+    }
+    
+    try {
+      await db.runAsync("DELETE FROM transacciones WHERE id = ?", [id]);
+      navigation.goBack(); // vuelve a la lista
+    } catch (error) {
+      console.log("Error eliminando transacción:", error);
+      Alert.alert("Error", "No se pudo eliminar la transacción");
+    }
+  }
 
-    return(
-        <ScrollView style={styles.container} contentContainerStyle={{paddingBottom: 100}}>
+  if (!id) {
+    return null; // No renderizar si no hay id
+  }
 
-            <Text style={styles.titulo}>ELIMINAR TRANSACCIÓN</Text>
+  return (
+    <View style={styles.container}>
+      <Text style={styles.texto}>¿Eliminar transacción #{id}?</Text>
 
-            <View style={styles.trajeta}>
-                
-                <Text style={styles.label}>Tipo:</Text>
-                <Text style={styles.valor}>{transaccion.tipo}</Text>
+      <View style={styles.botonesContainer}>
+        <TouchableOpacity style={styles.btnEliminar} onPress={eliminar}>
+          <Text style={styles.btnTexto}>Eliminar</Text>
+        </TouchableOpacity>
 
-                <Text style={styles.label}>Categoria:</Text>
-                <Text style={styles.valor}>{transaccion.categoria}</Text>
-
-                <Text style={styles.label}>Monto:</Text>
-                <Text style={styles.valor}>{transaccion.monto}</Text>
-
-                <Text style={styles.label}>Fecha:</Text>
-                <Text style={styles.valor}>{transaccion.fecha}</Text>
-
-            </View>
-
-            <TouchableOpacity style={styles.btnEliminar} onPress={confirmarEliminacion}>
-                <Text style={styles.volverBotonTexto}>ELIMINAR TRANSACCIÓN</Text>
-            </TouchableOpacity>
-
-            <View style={styles.btnContainer}>
-                <TouchableOpacity style={styles.volverBoton} onPress={()=>navigation.goBack()}>
-                    <Text style={styles.volverBotonTexto}>Volver al menu de Transacciones</Text>
-                </TouchableOpacity>
-            </View>
-
-        </ScrollView>
-    );
+        <TouchableOpacity style={styles.btnCancelar} onPress={() => navigation.goBack()}>
+          <Text style={styles.btnTextoCancelar}>Cancelar</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
-    container:{
-        flex: 1,
-        backgroundColor: "#F9FAFB",
-        paddingTop: 60,
-        paddingHorizontal: 20,
-    },
-
-    titulo:{
-        fontSize: 22,
-        fontWeight: "bold",
-        color: "1b5e20",
-        textAlign: "center",
-        marginBottom: 25,
-    },
-
-    trajeta:{
-        backgroundColor: "#fff",
-        borderRadius: 15,
-        padding: 20,
-        marginBottom: 20,
-        shadowColor: "#000",
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 3,
-    },
-
-    label:{
-        fontSize: 15,
-        fontWeight: "600",
-        color: "#333",
-    },
-
-    valor:{
-        fontSize: 16,
-        color: "#555",
-        marginBottom: 8,
-    },
-
-    btnEliminar:{
-        backgroundColor: "#d32f2f",
-        borderRadius: 10,
-        paddingVertical: 14,
-        alignItems: "center",
-        marginTop: 10,
-    },
-
-    btnContainer:{
-        marginTop: 25,
-        marginBottom: 40,
-    },
-
-    volverBoton: {
-        backgroundColor: "#999",
-        padding: 12,
-        borderRadius: 10,
-        alignItems: "center",
-        marginTop: 15,
-    },
-
-    volverBotonTexto: {
-        color: "#fff",
-        fontWeight: "bold",
-    },
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+    backgroundColor: "#F4F6F8",
+  },
+  texto: {
+    fontSize: 18,
+    textAlign: "center",
+    marginBottom: 30,
+    color: "#333",
+  },
+  botonesContainer: {
+    flexDirection: "row",
+    gap: 15,
+    width: "100%",
+    justifyContent: "center",
+  },
+  btnEliminar: {
+    backgroundColor: "#c62828",
+    padding: 15,
+    borderRadius: 10,
+    alignItems: "center",
+    minWidth: 120,
+  },
+  btnCancelar: {
+    backgroundColor: "#777",
+    padding: 15,
+    borderRadius: 10,
+    alignItems: "center",
+    minWidth: 120,
+  },
+  btnTexto: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+  btnTextoCancelar: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
 });

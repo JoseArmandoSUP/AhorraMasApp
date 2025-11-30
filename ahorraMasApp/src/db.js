@@ -1,28 +1,38 @@
-import * as SQLite from 'expo-sqlite';
+import * as SQLite from "expo-sqlite";
 
-const db = SQLite.openDatabase('ahorramas.db');
 
-export function initDB() {
-  return new Promise((resolve, reject) => {
-    db.transaction(tx => {
-      tx.executeSql(
-        `CREATE TABLE IF NOT EXISTS users (
-          id INTEGER PRIMARY KEY NOT NULL,
-          nombre TEXT,
-          email TEXT UNIQUE NOT NULL,
-          passwordHash TEXT NOT NULL,
-          salt TEXT NOT NULL,
-          recoveryCode TEXT
-        );`,
-        [],
-        () => resolve(),
-        (_, err) => {
-          console.log('Error creando tabla users', err);
-          reject(err);
-        }
-      );
-    });
-  });
+
+let db;
+
+export async function initDB() {
+  db = await SQLite.openDatabaseAsync("ahorramas_v1.db");
+
+  await db.execAsync(`
+    CREATE TABLE IF NOT EXISTS transacciones (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      tipo TEXT NOT NULL,
+      categoria TEXT NOT NULL,
+      monto REAL NOT NULL,
+      fecha TEXT NOT NULL,
+      descripcion TEXT
+    );
+  `);
+
+  await db.execAsync(`
+    CREATE TABLE IF NOT EXISTS usuarios (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      nombre TEXT,
+      usuario TEXT,
+      edad INTEGER,
+      correo TEXT UNIQUE,
+      telefono TEXT,
+      password TEXT
+    );
+  `);
+
+  console.log("Base de datos lista");
 }
 
-export default db;
+export function getDB() {
+  return db;
+}
