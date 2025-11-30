@@ -1,229 +1,100 @@
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Button, TextInput } from "react-native";
-import React, {useState} from "react";
-//import PresupuestosScreen from "./PresupuestosScreen";
+import React, { useEffect, useState, useContext } from "react";
+import { View, Text, FlatList, StyleSheet, TouchableOpacity } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import { initDB } from "../src/db";
+import { AuthContext } from "../context/AuthContext";
 
-export default function VerPresupuestos(){
-    const navigation = useNavigation();
+export default function VerPresupuestos() {
+  const { usuario } = useContext(AuthContext);
+  const navigation = useNavigation();
 
-    const presupuestos = [
-        {id: 1, categoria: "Comida", limite: 500, gastado: 320, color: "#2e7d32"},
-        {id: 2, categoria: "Transporte", limite: 300, gastado: 200, color: "#1565c0"},
-        {id: 3, categoria: "Entretenimiento", limite: 400, gastado: 150, color: "#fbc02d"},
-        {id: 4, categoria: "Salud", limite: 350, gastado: 280, color: "#d32f2f"},
-    ];
+  const [db, setDb] = useState(null);
+  const [presupuestos, setPresupuestos] = useState([]);
+  const [cargando, setCargando] = useState(true);
 
-    return(
-        <ScrollView style={styles.container} contentContainerStyle={{paddingBottom: 100}}>
+  useEffect(() => {
+    const cargarDB = async () => {
+      try {
+        const database = await initDB();
+        setDb(database);
+      } catch (error) {
+        console.log("Error cargando BD:", error);
+        setCargando(false);
+      }
+    };
+    cargarDB();
+  }, []);
 
-            <Text style={styles.titulo}>LISTA DE PRESUPUESTOS</Text>
+  useEffect(() => {
+    if (db && usuario) {
+      obtenerPresupuestos();
+    }
+  }, [db, usuario]);
 
-            {/*FILTRADO*/}
-            <View style={styles.filtrosContainer}>
-                <Text style={styles.filtrosTitulo}>Filtrar por</Text>
-    
-                <View style={styles.filtrosFila}>
-                    <Text style={styles.filtrosLabel}>Fecha: </Text>
-                    <View style={styles.filtrosInput}>
-                        <TextInput style={styles.filtrosPlaceHolder} placeholder='AÑO-MES-DIA'></TextInput>
-                    </View>
-                </View>
-    
-                <View style={styles.filtrosFila}>
-                    <Text style={styles.filtrosLabel}>Categoria: </Text>
-                    <View style={styles.filtrosInput}>
-                        <TextInput style={styles.filtrosPlaceHolder} placeholder='Seleccionar la categoria'></TextInput>
-                    </View>
-                </View>
-    
-                <TouchableOpacity style={styles.filtrosBoton}>
-                    <Text style={styles.filtrosBotonTexto}>Aplicar</Text>
-                </TouchableOpacity>
-    
-            </View>
+  const obtenerPresupuestos = async () => {
+    try {
+      const resultados = await db.getAllAsync(
+        "SELECT * FROM presupuestos WHERE usuario_id = ? ORDER BY fecha DESC",
+        [usuario.id]
+      );
+      setPresupuestos(resultados || []);
+      setCargando(false);
+    } catch (error) {
+      console.log("Error obteniendo presupuestos:", error);
+      setCargando(false);
+    }
+  };
 
-            {presupuestos.map((item)=>{
-                const porcentaje = Math.round((item.gastado / item.limite)*100);
-                return(
-                    <View key={item.id} style={styles.tarjeta}>
-                        
-                        <View style={styles.fila}>
-                            
-                            <Text style={[styles.categoria, {color: item.color}]}>
-                                {item.categoria}
-                            </Text>
+  const renderItem = ({ item }) => (
+    <View style={styles.card}>
+      <Text style={styles.categoria}>{item.categoria}</Text>
+      <Text style={styles.monto}>${item.monto.toFixed(2)}</Text>
+      <Text style={styles.fecha}>{item.fecha}</Text>
+    </View>
+  );
 
-                            <Text style={styles.cantidad}>
-                                ${item.gastado} / ${item.limite}
-                            </Text>
-
-                        </View>
-
-                        <View style={styles.progresoBarra}>
-                            <View 
-                                style={[styles.llenarProgreso, {width: `${porcentaje}%`, backgroundColor: item.color},]}
-                            ></View>
-                        </View>
-
-                        <Text style={styles.procentaje}>{porcentaje}% del presupuesto usado</Text>
-
-                    </View>
-                );
-            })}
-
-            <View style={styles.btnContainer}>
-
-                <TouchableOpacity style={styles.volverBoton} onPress={()=>navigation.goBack()}>
-                    <Text style={styles.volverBotonTexto}>Volver al menú de Presupuestos</Text> 
-                </TouchableOpacity>
-
-            </View>
-
-        </ScrollView>
+  if (cargando) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.titulo}>Cargando presupuestos...</Text>
+      </View>
     );
+  }
+
+  if (!presupuestos.length) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.titulo}>No hay presupuestos registrados</Text>
+        <TouchableOpacity style={styles.boton} onPress={() => navigation.goBack()}>
+          <Text style={styles.botonTexto}>Volver al menú de presupuestos</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.titulo}>Mis Presupuestos</Text>
+      <FlatList
+        data={presupuestos}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={renderItem}
+        contentContainerStyle={{ paddingBottom: 20 }}
+      />
+      <TouchableOpacity style={styles.boton} onPress={() => navigation.goBack()}>
+        <Text style={styles.botonTexto}>Volver al menú de presupuestos</Text>
+      </TouchableOpacity>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
-    container:{
-        flex: 1, 
-        backgroundColor: "#F9FAFB",
-        paddingTop: 60,
-        paddingHorizontal: 20,
-    },
-
-    titulo:{
-        fontSize: 22,
-        fontWeight: 'bold',
-        color: "#1b5e20",
-        textAlign: 'center',
-        marginBottom: 20,
-    },
-
-    //Estilos del filtardo
-    filtrosContainer:{
-        backgroundColor: '#fff',
-        borderRadius: 15,
-        padding: 15,
-        marginBottom: 20,
-        shadowColor: '#000',
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 3,
-    },
-
-    filtrosTitulo:{
-        fontSize: 16,
-        fontWeight: 'bold',
-        color: '#2e6d7dff',
-        textAlign: 'center',
-        marginBottom: 10,
-    },
-
-    filtrosFila:{
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 10,
-    },
-
-    filtrosLabel:{
-        fontSize: 14,
-        fontWeight: '600',
-        color: '#333',
-        width: '40%',
-    },
-
-    filtrosInput:{
-        backgroundColor: '#f0f0f0',
-        borderRadius: 8,
-        paddingVertical: 8,
-        paddingHorizontal: 10,
-        width: '55%',
-    },
-
-    filtrosPlaceHolder:{
-        color: '#999',
-        fontSize: 14,
-    },
-
-    filtrosBoton:{
-        backgroundColor: '#2e6d7dff',
-        borderRadius: 10,
-        paddingVertical: 10,
-        marginTop: 5,
-        alignItems: 'center',
-    },
-
-    filtrosBotonTexto:{
-        color: '#fff',
-        fontWeight: 'bold',
-        fontSize: 15,
-    },
-    //-----------------------------------------------
-
-    tarjeta:{
-        backgroundColor: "#fff",
-        borderRadius: 15,
-        padding: 15,
-        marginBottom: 15,
-        shadowColor: "#000",
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 3,   
-    },
-
-    fila:{
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 8,
-    },
-
-    categoria:{
-        fontSize: 16,
-        fontWeight: "600",
-    },
-
-    cantidad:{
-        fontSize: 14,
-        color: "#555",
-    },
-
-    progresoBarra:{
-        height: 10,
-        backgroundColor: "#e0e0e0",
-        borderRadius: 5,
-        overflow: 'hidden',
-        marginTop: 4,   
-    },
-
-    llenarProgreso:{
-        height: '100%',
-        borderRadius: 5,
-    },
-
-    porcentaje:{
-        fontSize: 13,
-        color: "#444",
-        textAlign: "right",
-        marginTop: 5,
-    },
-
-    btnContainer:{
-        marginTop: 25,
-    },
-
-    volverBoton:{
-        backgroundColor: '#2e7d32',
-        borderRadius: 10,
-        paddingVertical: 10,
-        marginTop: 5,
-        alignItems: 'center',
-    },
-
-    volverBotonTexto:{
-        color: '#fff',
-        fontWeight: 'bold',
-        fontSize: 15,
-    },
+  container: { flex: 1, padding: 20, paddingTop: 60, backgroundColor: "#F9FAFB" },
+  titulo: { fontSize: 22, fontWeight: "bold", textAlign: "center", marginBottom: 20, color: "#1b5e20" },
+  card: { backgroundColor: "#fff", padding: 15, borderRadius: 10, marginBottom: 10, shadowColor: "#000", shadowOpacity: 0.1, shadowRadius: 4, elevation: 2 },
+  categoria: { fontSize: 16, fontWeight: "600", color: "#333" },
+  monto: { fontSize: 16, fontWeight: "bold", color: "#2e7d32" },
+  fecha: { fontSize: 14, color: "#777", marginTop: 5 },
+  boton: { backgroundColor: "#2e7d32", paddingVertical: 15, borderRadius: 10, alignItems: "center", marginTop: 20 },
+  botonTexto: { color: "#fff", fontWeight: "bold", fontSize: 16 },
 });
