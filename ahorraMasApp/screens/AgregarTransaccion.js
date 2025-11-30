@@ -1,10 +1,11 @@
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, TextInput, Alert } from "react-native";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigation } from "@react-navigation/native";
-import * as SQLite from "expo-sqlite";
+import { initDB, getDB } from "../src/db";
 
 export default function AgregarTransaccion() {
   const navigation = useNavigation();
+  const [db, setDb] = useState(null);
 
   const [tipo, setTipo] = useState("");
   const [categoria, setCategoria] = useState("");
@@ -12,22 +13,58 @@ export default function AgregarTransaccion() {
   const [fecha, setFecha] = useState("");
   const [descripcion, setDescripcion] = useState("");
 
+  // Inicializar BD al cargar el componente - usando el mismo patrón que PantallaRegistro
+  useEffect(() => {
+    const inicializarBD = async () => {
+      try {
+        // Asegurar que la BD esté inicializada
+        await initDB();
+        // Obtener la conexión usando getDB() en lugar de abrir una nueva
+        const database = getDB();
+        if (database) {
+          setDb(database);
+        } else {
+          Alert.alert("Error", "No se pudo obtener la conexión a la base de datos");
+        }
+      } catch (error) {
+        console.log("Error inicializando BD:", error);
+        Alert.alert("Error", "No se pudo inicializar la base de datos");
+      }
+    };
+    inicializarBD();
+  }, []);
+
   const alertaRegistro = async () => {
-    if (!tipo || !categoria || !monto || !fecha || descripcion.trim() === "") {
-      Alert.alert("Por favor complete todos los campos");
+    // Validación corregida
+    if (!tipo.trim() || !categoria.trim() || !monto.trim() || !fecha.trim()) {
+      Alert.alert("Error", "Por favor complete todos los campos obligatorios");
+      return;
+    }
+
+    // Validar que monto sea un número válido
+    const montoNumero = parseFloat(monto);
+    if (isNaN(montoNumero) || montoNumero <= 0) {
+      Alert.alert("Error", "El monto debe ser un número válido mayor a 0");
+      return;
+    }
+
+    // Validar que la BD esté lista
+    if (!db) {
+      Alert.alert("Error", "La base de datos no está lista. Intente de nuevo.");
       return;
     }
 
     try {
-      const db = await SQLite.openDatabaseAsync("ahorramas_v1.db");
-
+      // Manejar descripción vacía correctamente
+      const descripcionFinal = descripcion.trim() || null;
+      
       await db.runAsync(
         `INSERT INTO transacciones (tipo, categoria, monto, fecha, descripcion)
-         VALUES (?, ?, ?, ?, ?);`,
-        [tipo, categoria, parseFloat(monto), fecha, descripcion]
+         VALUES (?, ?, ?, ?, ?)`,
+        [tipo.trim(), categoria.trim(), montoNumero, fecha.trim(), descripcionFinal]
       );
 
-      Alert.alert("Transacción guardada correctamente");
+      Alert.alert("Éxito", "Transacción guardada correctamente");
 
       // limpiar inputs
       setTipo("");
@@ -38,12 +75,18 @@ export default function AgregarTransaccion() {
 
     } catch (error) {
       console.log("ERROR al guardar transacción", error);
-      Alert.alert("Error", "No se pudo guardar la transacción");
+      Alert.alert("Error", `No se pudo guardar la transacción: ${error.message || "Error desconocido"}`);
     }
   };
 
   const filtrarCaracteresM = (input) => {
-    const numerico = input.replace(/[^0-9]/g, "");
+    // Permitir números y un punto decimal
+    let numerico = input.replace(/[^0-9.]/g, "");
+    // Asegurar que solo haya un punto decimal
+    const partes = numerico.split(".");
+    if (partes.length > 2) {
+      numerico = partes[0] + "." + partes.slice(1).join("");
+    }
     setMonto(numerico);
   };
 
@@ -53,7 +96,7 @@ export default function AgregarTransaccion() {
         <Text style={styles.titulo}>AGREGAR TRANSACCIÓN</Text>
 
         <View style={styles.fomrulario}>
-          <Text style={styles.label}>Tipo</Text>
+          <Text style={styles.label}>Tipo *</Text>
           <TextInput
             style={styles.input}
             placeholder="Gasto o Ingreso"
@@ -61,7 +104,7 @@ export default function AgregarTransaccion() {
             onChangeText={setTipo}
           />
 
-          <Text style={styles.label}>Categoría</Text>
+          <Text style={styles.label}>Categoría *</Text>
           <TextInput
             style={styles.input}
             placeholder="Comida, Transporte, etc."
@@ -69,7 +112,7 @@ export default function AgregarTransaccion() {
             onChangeText={setCategoria}
           />
 
-          <Text style={styles.label}>Monto</Text>
+          <Text style={styles.label}>Monto *</Text>
           <TextInput
             style={styles.input}
             keyboardType="numeric"
@@ -78,10 +121,10 @@ export default function AgregarTransaccion() {
             onChangeText={filtrarCaracteresM}
           />
 
-          <Text style={styles.label}>Fecha</Text>
+          <Text style={styles.label}>Fecha *</Text>
           <TextInput
             style={styles.input}
-            placeholder="AAAA-MM-DD"
+            placeholder="AAAA-MM-DD (ej: 2025-01-15)"
             value={fecha}
             onChangeText={setFecha}
           />
@@ -89,14 +132,20 @@ export default function AgregarTransaccion() {
           <Text style={styles.label}>Descripción</Text>
           <TextInput
             style={styles.areaTexto}
-            placeholder="Detalles de la transacción"
+            placeholder="Detalles de la transacción (opcional)"
             value={descripcion}
             onChangeText={setDescripcion}
             multiline={true}
           />
 
-          <TouchableOpacity style={styles.btnAgregar} onPress={alertaRegistro}>
-            <Text style={styles.botonTexto}>Guardar Transacción</Text>
+          <TouchableOpacity 
+            style={[styles.btnAgregar, !db && styles.btnDisabled]} 
+            onPress={alertaRegistro}
+            disabled={!db}
+          >
+            <Text style={styles.botonTexto}>
+              {db ? "Guardar Transacción" : "Inicializando..."}
+            </Text>
           </TouchableOpacity>
         </View>
 
@@ -119,6 +168,7 @@ const styles = StyleSheet.create({
   input: { backgroundColor: "#f0f0f0", borderRadius: 10, padding: 12, marginBottom: 15 },
   areaTexto: { borderWidth: 1, borderColor: "#ccc", padding: 15, height: 120, borderRadius: 10, marginBottom: 15, textAlignVertical: "top" },
   btnAgregar: { backgroundColor: "#2e7d32", borderRadius: 10, paddingVertical: 12, alignItems: "center" },
+  btnDisabled: { backgroundColor: "#999", opacity: 0.6 },
   botonTexto: { color: "#fff", fontWeight: "bold" },
   volverBoton: { backgroundColor: "#999", padding: 12, borderRadius: 10, alignItems: "center" },
   volverBotonTexto: { color: "#fff", fontWeight: "bold" },
