@@ -64,82 +64,64 @@ export default function Perfil() {
 
 
 const styles = StyleSheet.create({
-  container: {
+  container:{
     flex: 1,
     alignItems: "center",
-    paddingTop: 60,
-    backgroundColor: "#F5F9FF",
+    paddingTop: 40,
+    backgroundColor: "#F5F9FF"
   },
 
-  nombre: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#1F2937", 
-    textAlign: "center",
-    marginBottom: 2,
+  nombre:{
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 5,
   },
 
-  usuario: {
-    fontSize: 14,
-    color: "#6B7280", 
-    textAlign: "center",
+  usuario:{
+    fontSize: 16,
+    color: "#555",
     marginBottom: 20,
   },
 
-  info: {
-    backgroundColor: "#FFFFFF",
-    width: "90%",
-    paddingVertical: 20,
-    paddingHorizontal: 15,
-    borderRadius: 16,
+  info:{
+    backgroundColor: "#fff",
+    width: "85%",
+    padding: 20,
+    borderRadius: 10,
     shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 5 },
-    elevation: 5,
-  },
-
-  infoItem: {
-    fontSize: 16,
-    color: "#111827",
-    marginVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
-    paddingBottom: 8,
-  },
-
-  btnCerrarS: {
-    marginTop: 30,
-    backgroundColor: "#EF4444", 
-    paddingVertical: 14,
-    paddingHorizontal: 60,
-    borderRadius: 12,
-  },
-
-  cerrarTexto: {
-    color: "#FFFFFF",
-    fontWeight: "600",
-    fontSize: 16,
-    textAlign: "center",
-  },
-
-  error: {
-    fontSize: 20,
-    color: "red",
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
     marginBottom: 20,
   },
 
-  botonLogin: {
-    backgroundColor: "#3B82F6", 
+  infoItem:{
+    fontSize: 16,
+    marginBottom: 8,
+  },
+
+  btnCerrarS:{
+    backgroundColor: "#c62828",
     paddingVertical: 12,
     paddingHorizontal: 40,
     borderRadius: 10,
   },
 
-  botonText: {
-    color: "#FFFFFF",
-    fontWeight: "600",
+  botonText:{
+    color: "#fff",
+    fontWeight: "bold",
     fontSize: 16,
-    textAlign: "center",
+  },
+
+  error:{
+    fontSize: 20,
+    color: "red",
+    marginBottom: 20,
+  },
+
+  botonLogin:{
+    backgroundColor: "#2e7d32",
+    padding: 12,
+    borderRadius: 8,
   },
 });
