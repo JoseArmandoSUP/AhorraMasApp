@@ -100,7 +100,7 @@ export default function PantallaPrincipal(){
                     <Text style={styles.botonText}>Ver Graficas</Text>
                 </TouchableOpacity>
     
-                <TouchableOpacity style={styles.boton}>
+                <TouchableOpacity style={styles.boton} onPress={()=>navigation.navigate("Perfil")}>
                     {/*<Ionicons>*/}
                     <Text style={styles.botonText}>Configuración de Perfil</Text>
                 </TouchableOpacity>

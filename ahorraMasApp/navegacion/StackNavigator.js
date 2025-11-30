@@ -5,8 +5,6 @@ import TabNavigator from "./TabNavigator"; // <-- Pantalla principal
 import RecuperarPassword from "../screens/RecuperarPasswordScreen";
 import CambiarPassword from "../screens/CambiarPasswordScreen";
 
-
-
 //------------------------Pantallas de Transacciones----------------------------------------------
 import PantallaGestionTransacciones from "../screens/PantallaGestionTransacciones";
 import ListarTransaccion from "../screens/ListarTransaccion";
@@ -24,45 +22,48 @@ import AgregarPresupuesto from "../screens/AgregarPresupuesto";
 import EditarPresupuesto from "../screens/EditarPresupuesto";
 import EliminarPresupuesto from "../screens/EliminarPresupuesto";
 //-------------------------------------------------------------------------------------------------
+
 import GraficasScreen from "../screens/GraficasScreen";
+import PerfilScreen from "../screens/PerfilScreen"; // <-- NUEVO: pantalla de perfil
 
 const Stack = createNativeStackNavigator();
 
-export default function StackNavigator(){
-    return(
-        <Stack.Navigator screenOptions={{headerShown: false}}>
-            
-            {/* Pantallas fuera del Tab */}
-            <Stack.Screen name="Login" component={LoginScreen}></Stack.Screen>
-            <Stack.Screen name="Registro" component={PantallaRegistro}></Stack.Screen>
+export default function StackNavigator() {
+    return (
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
 
-            {/*  Recuperación contraseña */}
+            {/* Pantallas fuera del Tab */}
+            <Stack.Screen name="Login" component={LoginScreen} />
+            <Stack.Screen name="Registro" component={PantallaRegistro} />
+
+            {/* Recuperación contraseña */}
             <Stack.Screen name="Recuperar" component={RecuperarPassword} />
             <Stack.Screen name="CambiarPassword" component={CambiarPassword} />
 
-
             {/* INICIO (Pantalla dentro del Tab) */}
-            <Stack.Screen name="Home" component={TabNavigator}></Stack.Screen>
+            <Stack.Screen name="Home" component={TabNavigator} />
 
-            {/* Transacciones (agregado 3:23)*/}
-            <Stack.Screen name="Transacciones" component={PantallaGestionTransacciones}></Stack.Screen>
-            <Stack.Screen name="ListarTransaccion" component={ListarTransaccion}></Stack.Screen>
-            <Stack.Screen name="ListarParaEditar" component={ListarParaEditar}></Stack.Screen>
-            <Stack.Screen name="ListarParaEliminar" component={ListarParaEliminar}></Stack.Screen>
-            <Stack.Screen name="AgregarTransaccion" component={AgregarTransaccion}></Stack.Screen>
-            <Stack.Screen name="EditarTransaccion" component={EditarTransaccion}></Stack.Screen>
-            <Stack.Screen name="EliminarTransaccion" component={EliminarTransaccion}></Stack.Screen>
-            
-            
-            {/* Presupuestos (agregado 5:43)*/}
-            <Stack.Screen name="Presupuestos" component={PresupuestosScreen}></Stack.Screen>
-            <Stack.Screen name="VerPresupuestos" component={VerPresupuestos}></Stack.Screen>
-            <Stack.Screen name="AgregarPresupuesto" component={AgregarPresupuesto}></Stack.Screen>
-            <Stack.Screen name="EditarPresupuesto" component={EditarPresupuesto}></Stack.Screen>
-            <Stack.Screen name="EliminarPresupuesto" component={EliminarPresupuesto}></Stack.Screen>
+            {/* Transacciones */}
+            <Stack.Screen name="Transacciones" component={PantallaGestionTransacciones} />
+            <Stack.Screen name="ListarTransaccion" component={ListarTransaccion} />
+            <Stack.Screen name="ListarParaEditar" component={ListarParaEditar} />
+            <Stack.Screen name="ListarParaEliminar" component={ListarParaEliminar} />
+            <Stack.Screen name="AgregarTransaccion" component={AgregarTransaccion} />
+            <Stack.Screen name="EditarTransaccion" component={EditarTransaccion} />
+            <Stack.Screen name="EliminarTransaccion" component={EliminarTransaccion} />
 
-            <Stack.Screen name="Graficas" component={GraficasScreen}></Stack.Screen>
-            {/* <Stack.Screen name="Perfil" component={PerfilScreen}></Stack.Screen> */}
+            {/* Presupuestos */}
+            <Stack.Screen name="Presupuestos" component={PresupuestosScreen} />
+            <Stack.Screen name="VerPresupuestos" component={VerPresupuestos} />
+            <Stack.Screen name="AgregarPresupuesto" component={AgregarPresupuesto} />
+            <Stack.Screen name="EditarPresupuesto" component={EditarPresupuesto} />
+            <Stack.Screen name="EliminarPresupuesto" component={EliminarPresupuesto} />
+
+            {/* Gráficas */}
+            <Stack.Screen name="Graficas" component={GraficasScreen} />
+
+            {/* Perfil */}
+            <Stack.Screen name="Perfil" component={PerfilScreen} />
 
         </Stack.Navigator>
     );
