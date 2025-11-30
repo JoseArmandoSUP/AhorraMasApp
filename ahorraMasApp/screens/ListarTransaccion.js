@@ -19,6 +19,9 @@ export default function ListarTransaccion(){
     const [filtroCategoria, setFiltroCategoria] = useState("");
     const [filtroTipo, setFiltroTipo] = useState("");
 
+    //Para las notificaciones de ecceso del presupuesto
+    const { alertas } = useContext(AppContext);
+
     // Carga las Transacciones desde SQLite
     useFocusEffect(
         useCallback(() => {
@@ -142,6 +145,17 @@ export default function ListarTransaccion(){
                     <Text style={styles.filtrosBotonTexto}>Deshacer Filtro</Text>
                 </TouchableOpacity>
             </View>
+
+            {/* Notificaciones de exceso de presupuesto */}
+            {alertas.length > 0 && (
+                <View style={{backgroundColor: "#ffcccc", padding: 10, borderRadius: 10, marginBottom: 10}}>
+                    {alertas.map((a, index) => (
+                        <Text key={index} style={{color: "#900", fontWeight: "bold"}}>
+                            {a}
+                        </Text>
+                    ))}
+                </View>
+            )}
 
             {/* TARJETAS CON LAS TRANSACCIONES */}
             {transacciones.length === 0 ? (

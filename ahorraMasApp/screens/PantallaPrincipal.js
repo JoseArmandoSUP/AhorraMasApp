@@ -7,6 +7,7 @@ import { Button } from "react-native";
 //import LoginScreen from "./LoginScreen";
 //import GraficasScreen from "./GraficasScreen";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
+//Notificaciones
 import { AppContext } from "../context/AppContext";
 import { TransaccionController } from '../controllers/TransaccionController';
 
@@ -17,11 +18,14 @@ export default function PantallaPrincipal(){
     //Para la animacion de la pantalla de carga
     const[cargando, setCargando] = useState(true);
     const desvanecido = new Animated.Value(1);
+    
     //Para Navigation
     const navigation = useNavigation();
+    
     //Para las notificaciones de ecceso del presupuesto
     const { alertas, setTransacciones } = useContext(AppContext);
 
+    //Para el total de Gastos e Ingresos
     const[totalGastos, setTotalGastos] = useState(0);
     const[totalIngresos, setTotalIngresos] = useState(0);
 
@@ -75,9 +79,8 @@ export default function PantallaPrincipal(){
         );
     }
 
-    
     return(
-        <ScrollView style={styles.container}>
+        <ScrollView style={styles.container} contentContainerStyle={{paddingBottom: 100}}>
         
             {/*ENCABEZADO*/}
             <Text style={styles.titulo}>AHORRA +</Text>
@@ -85,6 +88,7 @@ export default function PantallaPrincipal(){
                 source={require('../assets/Logo.png')}
             />
 
+            {/* Notificaciones de exceso de presupuesto */}
             {alertas.length > 0 && (
                 <View style={{backgroundColor: "#ffcccc", padding: 10, borderRadius: 10, marginBottom: 10}}>
                     {alertas.map((a, index) => (
@@ -135,9 +139,9 @@ export default function PantallaPrincipal(){
                     <Text style={styles.botonText}>Configuración de Perfil</Text>
                 </TouchableOpacity>
                 
-                <TouchableOpacity style={styles.loginBoton} onPress={()=> navigation.navigate("Login")}>
+                {/*<TouchableOpacity style={styles.loginBoton} onPress={()=> navigation.navigate("Login")}>
                     <Text style={styles.loginBotonTexto}>Iniciar Sesion</Text>
-                </TouchableOpacity>
+                </TouchableOpacity>*/}
 
             </View>
     

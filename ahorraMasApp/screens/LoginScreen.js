@@ -81,6 +81,7 @@ export default function LoginScreen (){
                     value={password}
                     onChangeText={setPassword}
                     autoCapitalize="none"
+                    secureTextEntry={true}
                 />
                 <View style={{flexDirection: "row", alignItems: "center"}}>
                     <Switch></Switch>

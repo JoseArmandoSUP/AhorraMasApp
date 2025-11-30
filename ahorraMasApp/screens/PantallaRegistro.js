@@ -98,6 +98,7 @@ export default function PantallaRegistro () {
 
                 <TextInput style={styles.input}
                     placeholder='Escribe tu correo'
+                    keyboardType="email-address"
                     value={correo}
                     onChangeText={setCorreo}
                 />
@@ -112,7 +113,6 @@ export default function PantallaRegistro () {
                 <TextInput style={styles.input}
                     placeholder="Definir contraseña"
                     value={password}
-                    secureTextEntry={true}
                     onChangeText={setPassword}
                 ></TextInput>
 

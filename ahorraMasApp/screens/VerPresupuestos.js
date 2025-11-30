@@ -1,9 +1,11 @@
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Button, TextInput, Alert } from "react-native";
-import React, {useState, useEffect, useCallback} from "react";
+import React, {useState, useEffect, useCallback, useContext} from "react";
 //import PresupuestosScreen from "./PresupuestosScreen";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { PresupuestoController } from "../controllers/PresupuestoController";
 import { TransaccionController } from "../controllers/TransaccionController";
+//Notificaciones
+import { AppContext } from "../context/AppContext";
 
 const presupuestoController = new PresupuestoController();
 const transaccionController = new TransaccionController();
@@ -18,6 +20,8 @@ export default function VerPresupuestos(){
     const [fAnio, setFAnio] = useState("");
     const [fCategoria, setFCategoria] = useState("");
 
+    //Para las notificaciones de ecceso del presupuesto
+    const { alertas } = useContext(AppContext);
 
     useFocusEffect(
         useCallback(() => {
@@ -172,6 +176,17 @@ export default function VerPresupuestos(){
                 </TouchableOpacity>
     
             </View>
+
+            {/* Notificaciones de exceso de presupuesto */}
+            {alertas.length > 0 && (
+                <View style={{backgroundColor: "#ffcccc", padding: 10, borderRadius: 10, marginBottom: 10}}>
+                    {alertas.map((a, index) => (
+                        <Text key={index} style={{color: "#900", fontWeight: "bold"}}>
+                            {a}
+                        </Text>
+                    ))}
+                </View>
+            )}
 
             {lista.length === 0 && (
                 <Text style={{textAlign: "center", marginTop: 10, color: "#666"}}>
