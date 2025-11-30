@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
     },
 
     definirPlaceholder:{
-        color: '#999',
+        color: '#333',
         fontSize: 14,
     },
 

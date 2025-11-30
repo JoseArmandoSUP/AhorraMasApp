@@ -11,13 +11,6 @@ const transaccionController = new TransaccionController();
 export default function VerPresupuestos(){
     const navigation = useNavigation();
 
-    {/*const presupuestos = [
-        {id: 1, categoria: "Comida", limite: 500, gastado: 320, color: "#2e7d32"},
-        {id: 2, categoria: "Transporte", limite: 300, gastado: 200, color: "#1565c0"},
-        {id: 3, categoria: "Entretenimiento", limite: 400, gastado: 150, color: "#fbc02d"},
-        {id: 4, categoria: "Salud", limite: 350, gastado: 280, color: "#d32f2f"},
-    ]; */}
-
     const[lista, setLista] = useState([]);
     const[transacciones, setTransacciones] = useState([]);
 
@@ -150,7 +143,7 @@ export default function VerPresupuestos(){
                     <View style={styles.filtrosInput}>
                         <TextInput 
                             style={styles.filtrosPlaceHolder} 
-                            placeholder="2025"
+                            placeholder="2020 - 2025"
                             keyboardType="numeric"
                             value={fAnio}
                             onChangeText={setFAnio}
@@ -189,29 +182,31 @@ export default function VerPresupuestos(){
             {lista.map(item=>{
                 const porcentaje = Math.min(Math.round((item.gastado / item.montolimite)*100), 100);
                 return(
-                    <View key={item.id} style={styles.tarjeta}>
+                    <TouchableOpacity key={item.id} onPress={()=>navigation.navigate("EditarPresupuesto", {id: item.id})}>
+                        <View style={styles.tarjeta}>
                         
-                        <View style={styles.fila}>
-                            
-                            <Text style={[styles.categoria, {color: item.color}]}>
-                                {item.categoria}
-                            </Text>
+                            <View style={styles.fila}>
+                                
+                                <Text style={[styles.categoria, {color: item.color}]}>
+                                    {item.categoria} -- {item.mes} / {item.anio}
+                                </Text>
 
-                            <Text style={styles.cantidad}>
-                                ${item.gastado} / ${item.montolimite}
-                            </Text>
+                                <Text style={styles.cantidad}>
+                                    ${item.gastado} / ${item.montolimite}
+                                </Text>
 
-                        </View>
+                            </View>
 
-                        <View style={styles.progresoBarra}>
-                            <View 
-                                style={[styles.llenarProgreso, {width: `${porcentaje}%`, backgroundColor: item.color},]}
-                            ></View>
-                        </View>
+                            <View style={styles.progresoBarra}>
+                                <View 
+                                    style={[styles.llenarProgreso, {width: `${porcentaje}%`, backgroundColor: item.color},]}
+                                ></View>
+                            </View>
 
                         <Text style={styles.porcentaje}>{porcentaje}% del presupuesto usado</Text>
 
-                    </View>
+                        </View>
+                    </TouchableOpacity>
                 );
             })}
 
@@ -286,7 +281,7 @@ const styles = StyleSheet.create({
     },
 
     filtrosPlaceHolder:{
-        color: '#999',
+        color: "#333",
         fontSize: 14,
     },
 

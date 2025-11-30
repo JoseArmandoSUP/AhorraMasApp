@@ -1,53 +1,131 @@
-import { Text, View, ScrollView, StyleSheet, Button, TouchableOpacity, Alert } from "react-native";
-import React, {useState} from "react";
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Button, TextInput, Alert } from "react-native";
+import React, {useState, useEffect, useCallback} from "react";
 //import PresupuestosScreen from "./PresupuestosScreen";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
+import { PresupuestoController } from "../controllers/PresupuestoController";
+import { TransaccionController } from "../controllers/TransaccionController";
 
-export default function EliminarPresupuesto(){
+const presupuestoController = new PresupuestoController();
+const transaccionController = new TransaccionController();
+
+export default function VerPresupuestos(){
     const navigation = useNavigation();
 
-    const presupuestos = [
-        {id: 1, categoria: "Comida", limite: 500, color: "#2e7d32"},
-        {id: 2, categoria: "Transporte", limite: 300, color: "#1565c0"},
-        {id: 3, categoria: "Entretenimiento", limite: 500, color: "#fbc02d"},
-        {id: 4, categoria: "Salud", limite: 300, color: "#d32f2f"},
-        {id: 5, categoria: "Servicios", limite: 800, color: "#8e24aa"},
-    ];
+    const[lista, setLista] = useState([]);
+    const[transacciones, setTransacciones] = useState([]);
 
-    const confirmarEliminacion = () => {
-        Alert.alert("Confirmar", "¿Desea eliminar este presupuesto?",
+    useFocusEffect(
+        useCallback(() => {
+            const cargarDatos = async () => {
+                try{
+                    await presupuestoController.initialize();
+                    await transaccionController.initialize();
+
+                    const presupuestosDB = await presupuestoController.listar();
+                    const transDB = await transaccionController.listar();
+
+                    setTransacciones(transDB);
+
+                    //Total gastado en cada presupuesto
+                    const calculados = presupuestosDB.map(p => {
+                        const gastado = transDB.filter(
+                            t => t.tipo === "Gasto" && t.categoria.toLowerCase() === p.categoria.toLowerCase()
+                        )
+                        .reduce((sum, t) => sum + Number(t.monto), 0);
+                        return{
+                            ...p,
+                            gastado,
+                            color: "#2e7d32"
+                        };
+                    });
+
+                    setLista(calculados)
+                }catch(error){
+                    console.log("Error cargando presupuestos: ", error);
+                }
+            };
+            cargarDatos();
+        },[])
+    );
+
+    const eliminarPresupuesto = async (id) => {
+        Alert.alert(
+            "Confirmar eliminación",
+            "¿Seguro que quieres eliminar este presupuesto?",
             [
-                {text: "Cancelar", style: "cancel"}, 
-                {text: "Eliminar", style: "destructive", onPress:()=>navigation.goBack()}
+                { text: "Cancelar", style: "cancel" },
+                {
+                    text: "Eliminar",
+                    style: "destructive",
+                    onPress: async () => {
+                        try {
+                            await presupuestoController.eliminar(id);
+                            setLista((prev) => prev.filter((p) => p.id !== id));
+                            Alert.alert("Eliminado", "El presupuesto ha sido eliminado");
+                        } catch (error) {
+                            Alert.alert("Error", "No se pudo eliminar: " + error.message);
+                        }
+                    },
+                },
             ]
         );
     };
 
+
     return(
-        <ScrollView contentContainerStyle={{paddingBottom: 100}}>
+        <ScrollView style={styles.container} contentContainerStyle={{paddingBottom: 100}}>
 
-            <View style={styles.container}>
+            <Text style={styles.titulo}>ELIMINAR PRESUPUESTO</Text>
 
-                <Text style={styles.titulo}>ELIMINAR PRESUPUESTO</Text>
+            {lista.length === 0 && (
+                <Text style={{textAlign: "center", marginTop: 10, color: "#666"}}>
+                    No hay registros
+                </Text>
+            )}
+            
+            {lista.map(item=>{
+                const porcentaje = Math.min(Math.round((item.gastado / item.montolimite)*100), 100);
+                return(
+                    <TouchableOpacity key={item.id} onPress={()=>navigation.navigate("EditarPresupuesto", {id: item.id})}>
+                        <View style={styles.tarjeta}>
+                        
+                            <View style={styles.fila}>
+                                
+                                <Text style={[styles.categoria, {color: item.color}]}>
+                                    {item.categoria} -- {item.mes} / {item.anio}
+                                </Text>
 
-                {presupuestos.map(item => (
-                    <View key={item.id} style={styles.tarjeta}>
+                                <TouchableOpacity
+                                    style={styles.botonEliminar}
+                                    onPress={() => eliminarPresupuesto(item.id)}
+                                >
+                                    <Text style={styles.botonEliminarTexto}>Eliminar</Text>
+                                </TouchableOpacity>
 
-                        <View style={styles.infoContainer}>
-                            <Text style={[styles.categoria, {color: item.color}]}>{item.categoria}</Text>
-                            <Text style={styles.monto}>Límite: ${item.limite}</Text>
+                                <Text style={styles.cantidad}>
+                                    ${item.gastado} / ${item.montolimite}
+                                </Text>
+
+                            </View>
+
+                            <View style={styles.progresoBarra}>
+                                <View 
+                                    style={[styles.llenarProgreso, {width: `${porcentaje}%`, backgroundColor: item.color},]}
+                                ></View>
+                            </View>
+
+                        <Text style={styles.porcentaje}>{porcentaje}% del usado</Text>
+
                         </View>
+                    </TouchableOpacity>
+                );
+            })}
 
-                        <TouchableOpacity style={styles.btnEliminar} onPress={confirmarEliminacion}>
-                            <Text style={styles.btnEliminarText}>ELIMINAR</Text>
-                        </TouchableOpacity>
-
-                    </View>
-                ))}
+            <View style={styles.btnContainer}>
 
                 <TouchableOpacity style={styles.volverBoton} onPress={()=>navigation.goBack()}>
-                    <Text style={styles.volverBotonTexto}>Volver al menú de Presupuestos</Text>    
-                </TouchableOpacity> 
+                    <Text style={styles.volverBotonTexto}>Volver al menú de Presupuestos</Text> 
+                </TouchableOpacity>
 
             </View>
 
@@ -56,78 +134,89 @@ export default function EliminarPresupuesto(){
 }
 
 const styles = StyleSheet.create({
-    container:{
+    container: {
         flex: 1,
         backgroundColor: "#F9FAFB",
-        paddinTop: 70,
-        paddingHorizontal: 25,
+        paddingTop: 60,
+        paddingHorizontal: 20,
     },
 
-    titulo:{
+    titulo: {
         fontSize: 22,
-        fontWeight: 'bold',
-        color: "#1b5e20",
-        textAlign: 'center',
+        fontWeight: "bold",
+        textAlign: "center",
         marginBottom: 25,
+        color: "#b71c1c",
     },
 
-    tarjeta:{
+    noDatos: {
+        textAlign: "center",
+        color: "#666",
+        marginTop: 10,
+    },
+
+    tarjeta: {
         backgroundColor: "#fff",
-        borderRadius: 15,
         padding: 15,
+        borderRadius: 15,
         marginBottom: 15,
-        shadowColor: "#000",
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
         elevation: 3,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
+    },
+
+    fila: {
+        flexDirection: "row",
+        justifyContent: "space-between",
         alignItems: "center",
     },
 
-    infoContainer:{
-        flexDirection: "column",
-    },
-
-    categoria:{
+    categoria: {
         fontSize: 18,
-        fontWeight: 'bold',
+        fontWeight: "bold",
+        color: "#333",
     },
 
-    monto:{
+    cantidad: {
+        marginTop: 5,
         fontSize: 14,
         color: "#555",
     },
 
-    btnEliminar:{
+    progresoBarra: {
+        height: 10,
+        backgroundColor: "#eee",
+        borderRadius: 5,
+        marginTop: 8,
+        overflow: "hidden",
+    },
+
+    llenarProgreso: {
+        height: "100%",
+        borderRadius: 5,
+    },
+
+    porcentaje: {
+        marginTop: 4,
+        textAlign: "right",
+        fontSize: 13,
+        color: "#444",
+    },
+
+    botonEliminar: {
         backgroundColor: "#c62828",
-        paddingVertical: 10,
-        paddingHorizontal: 15,
-        borderRadius: 10,
+        paddingVertical: 6,
+        paddingHorizontal: 12,
+        borderRadius: 6,
     },
 
-    btnEliminarText:{
+    botonEliminarTexto: {
         color: "#fff",
-        fontWeight: 'bold',
-        fontSize: 14,
-    },
-
-    btnVolver:{
-        backgroundColor: "#1b5e20",
-        borderRadius: 10,
-        paddingVertical: 14,
-        paddingHorizontal: 40,
-        alignItems: 'center',
-        marginVertical: 20,
-        shadowColor: "#000",
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 3,
-    },
-
-    btnTexto:{
-        fontSize: 16,
         fontWeight: "bold",
+        fontSize: 13,
+    },
+
+    btnContainer: {
+        marginTop: 25,
+        alignItems: "center",
     },
 
     volverBoton: {
@@ -135,11 +224,12 @@ const styles = StyleSheet.create({
         padding: 12,
         borderRadius: 10,
         alignItems: "center",
-        marginTop: 15,
+        width: "60%",
     },
 
     volverBotonTexto: {
         color: "#fff",
         fontWeight: "bold",
+        fontSize: 15,
     },
 });

@@ -1,33 +1,72 @@
 import { Text, View, ScrollView, StyleSheet, TouchableOpacity, Button, TextInput, Alert } from "react-native";
-import React, {useState} from "react";
+import React, {useState, useEffect} from "react";
 //import PresupuestosScreen from "./PresupuestosScreen";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
+import { PresupuestoController } from "../controllers/PresupuestoController";
+
+const controller = new PresupuestoController();
 
 export default function EditarPresupuesto({/*{route}*/}){
     const navigatation = useNavigation();
+    const route = useRoute();
+    const {id} = route.params;
 
     {/* const {categoria: cat, monto: mon} = route.params; */}
-    const[categoria, setCategoria] = useState("Comida"); {/* useState(cat) */}
-    const[monto, setMonto] = useState("500"); {/* useState(mont) */}
-    const[fecha, setFecha] = useState("2025-11-10");
+    const[categoria, setCategoria] = useState(""); {/* useState(cat) */}
+    const[montolimite, setMontolimite] = useState(""); {/* useState(mont) */}
+    const[mes, setMes] = useState("");
+    const[anio, setAnio] = useState("");
 
-    const alertaAgregar = () => {
-        if(!categoria || !monto || !fecha){
-            Alert.alert("Por favor complete todos los campos");
-            alert("Por favor complete todos los campos");
-            return;
+    useEffect(() => {
+        const cargar = async () => {
+            try {
+                await controller.initialize();
+                const lista = await controller.listar();
+                const encontrado = lista.find(p => p.id === id);
+
+                if (!encontrado) {
+                    Alert.alert("Error", "Presupuesto no encontrado");
+                    navigatation.goBack();
+                    return;
+                }
+
+                setCategoria(encontrado.categoria);
+                setMontolimite(String(encontrado.montolimite));
+                setMes(String(encontrado.mes));
+                setAnio(String(encontrado.anio));
+            } catch (error) {
+                console.log("Error al cargar presupuesto:", error);
+            }
+        };
+        cargar();
+    }, []);
+
+    async function alertaAgregar() {
+        try {
+            if (!categoria || !montolimite || !mes || !anio) {
+                Alert.alert("Campos incompletos");
+                return;
+            }
+
+            await controller.actualizar(
+                id,
+                categoria.trim(),
+                Number(montolimite),
+                Number(mes),
+                Number(anio)
+            );
+
+            Alert.alert("Éxito", "Presupuesto actualizado correctamente");
+            navigatation.goBack();
+
+        } catch (error) {
+            Alert.alert("Error", "No se pudo actualizar: " + error.message);
         }
-        Alert.alert(
-            `Presupuesto editado correctamente: \n Categoria: ${categoria} \n Monto: $${monto} \n Fecha: ${fecha}`
-        );
-        alert(
-            `Presupuesto editado correctamente: \n Categoria: ${categoria} \n Monto: $${monto} \n Fecha: ${fecha}`
-        );
-    };
+    }
     
     const filtrarCaracteresM = (input) => {
         const numerico = input.replace(/[^0-9]/g, '');
-        setMonto(numerico);
+        setMontolimite(numerico);
     };
 
     return(
@@ -52,18 +91,36 @@ export default function EditarPresupuesto({/*{route}*/}){
                     placeholder="Ejemplo: $500"
                     keyboardType="numeric"
                     placeholderTextColor="#999"
-                    value={monto}
+                    value={montolimite}
                     onChangeText={filtrarCaracteresM}
                 ></TextInput>
 
-                <Text style={styles.label}>Fecha:</Text>
-                <TextInput
-                    style={styles.input} 
-                    placeholder="AÑO-MES-DIA"
-                    placeholderTextColor="#999"
-                    value={fecha}
-                    onChangeText={setFecha}
-                ></TextInput>
+                <View style={styles.definirColumna}>
+                    <Text style={styles.definirLabel}>Mes:</Text>
+                    <View style={styles.definirInput}>
+                        <TextInput
+                            keyboardType="numeric"
+                            maxLength={2}
+                            style={styles.input} 
+                            placeholder="1 - 12"
+                            value={mes}
+                            onChangeText={setMes}
+                        ></TextInput>
+                    </View>
+                </View>
+
+                <View style={styles.definirColumna}>
+                    <Text style={styles.definirLabel}>Año:</Text>
+                    <View style={styles.definirInput}>
+                        <TextInput
+                            keyboardType="numeric"
+                            maxLength={4}
+                            style={styles.input} 
+                            value={anio}
+                            onChangeText={setAnio}
+                        ></TextInput>
+                    </View>
+                </View>
                 
 
                 <TouchableOpacity style={styles.definirBoton} onPress={alertaAgregar}>
