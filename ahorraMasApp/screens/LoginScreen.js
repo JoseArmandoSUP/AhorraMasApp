@@ -1,11 +1,13 @@
 import { Text, StyleSheet, View, Button, TextInput, Image, ScrollView, Alert, Switch } from "react-native";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useNavigation } from "@react-navigation/native";
-import { initDB, getDB } from "../src/db";
+import { initDB } from "../src/db";
+import { AuthContext } from "../context/AuthContext";
 
 export default function LoginScreen() {
 
   const nav = useNavigation();
+  const { setUsuario } = useContext(AuthContext);
   const [correo, setCorreo] = useState("");
   const [password, setPassword] = useState("");
   const [db, setDb] = useState(null);
@@ -14,14 +16,12 @@ export default function LoginScreen() {
   useEffect(() => {
     const abrirDB = async () => {
       try {
-        // Usar initDB() para asegurar que la BD esté inicializada
-        await initDB();
-        // Obtener la conexión usando getDB() - misma BD que el registro
-        const database = getDB();
+        // initDB() ahora retorna la base de datos directamente
+        const database = await initDB();
         if (database) {
           setDb(database);
         } else {
-          Alert.alert("Error", "No se pudo obtener la conexión a la base de datos");
+          console.log("Error: initDB no retornó la base de datos");
         }
       } catch (error) {
         console.log("Error inicializando BD:", error);
@@ -43,14 +43,28 @@ export default function LoginScreen() {
       return;
     }
 
-    // Validar que la BD esté lista
+    // Si db no está lista, intentar inicializarla de nuevo
     if (!db) {
-      Alert.alert("Error", "La base de datos no está lista. Intente de nuevo.");
-      return;
+      try {
+        const database = await initDB();
+        if (database) {
+          setDb(database);
+          // Continuar con el login después de inicializar
+        } else {
+          Alert.alert("Error", "La base de datos no está lista. Intente de nuevo.");
+          return;
+        }
+      } catch (error) {
+        Alert.alert("Error", "No se pudo inicializar la base de datos. Intente de nuevo.");
+        return;
+      }
     }
 
+    // Usar db del estado o la recién inicializada
+    const databaseToUse = db || await initDB();
+
     try {
-      const result = await db.getFirstAsync(
+      const result = await databaseToUse.getFirstAsync(
         "SELECT * FROM usuarios WHERE correo = ?",
         [correo.trim()]
       );
@@ -64,6 +78,14 @@ export default function LoginScreen() {
         Alert.alert("Contraseña incorrecta", "Intente de nuevo");
         return;
       }
+
+      // Guardar el usuario en el contexto
+      setUsuario({
+        id: result.id,
+        nombre: result.nombre,
+        correo: result.correo,
+        usuario: result.usuario
+      });
 
       Alert.alert("Bienvenido", `Hola ${result.nombre}`);
       nav.replace("Home");

@@ -1,11 +1,14 @@
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, TextInput, Alert } from "react-native";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useNavigation } from "@react-navigation/native";
-import { initDB, getDB } from "../src/db";
+import { initDB } from "../src/db";
+import { AuthContext } from "../context/AuthContext";
 
 export default function AgregarTransaccion() {
   const navigation = useNavigation();
+  const { usuario } = useContext(AuthContext);
   const [db, setDb] = useState(null);
+  const [inicializando, setInicializando] = useState(true);
 
   const [tipo, setTipo] = useState("");
   const [categoria, setCategoria] = useState("");
@@ -13,55 +16,82 @@ export default function AgregarTransaccion() {
   const [fecha, setFecha] = useState("");
   const [descripcion, setDescripcion] = useState("");
 
-  // Inicializar BD al cargar el componente - usando el mismo patrón que PantallaRegistro
+  // Inicializar BD al cargar el componente
   useEffect(() => {
     const inicializarBD = async () => {
+      setInicializando(true);
       try {
-        // Asegurar que la BD esté inicializada
-        await initDB();
-        // Obtener la conexión usando getDB() en lugar de abrir una nueva
-        const database = getDB();
+        const database = await initDB();
         if (database) {
           setDb(database);
+          console.log("BD inicializada correctamente en AgregarTransaccion");
         } else {
-          Alert.alert("Error", "No se pudo obtener la conexión a la base de datos");
+          console.error("initDB retornó null o undefined");
         }
       } catch (error) {
-        console.log("Error inicializando BD:", error);
-        Alert.alert("Error", "No se pudo inicializar la base de datos");
+        console.error("Error inicializando BD en useEffect:", error);
+        Alert.alert(
+          "Error de Base de Datos", 
+          `No se pudo inicializar la base de datos: ${error.message || "Error desconocido"}\n\nIntente cerrar y abrir la aplicación.`
+        );
+      } finally {
+        setInicializando(false);
       }
     };
     inicializarBD();
   }, []);
 
   const alertaRegistro = async () => {
-    // Validación corregida
+    // Validación
     if (!tipo.trim() || !categoria.trim() || !monto.trim() || !fecha.trim()) {
       Alert.alert("Error", "Por favor complete todos los campos obligatorios");
       return;
     }
 
-    // Validar que monto sea un número válido
     const montoNumero = parseFloat(monto);
     if (isNaN(montoNumero) || montoNumero <= 0) {
       Alert.alert("Error", "El monto debe ser un número válido mayor a 0");
       return;
     }
 
-    // Validar que la BD esté lista
-    if (!db) {
-      Alert.alert("Error", "La base de datos no está lista. Intente de nuevo.");
+    if (!usuario || !usuario.id) {
+      Alert.alert("Error", "Debe iniciar sesión para agregar transacciones");
       return;
     }
 
+    // Si db no está lista, intentar inicializarla de nuevo
+    let databaseToUse = db;
+    if (!databaseToUse) {
+      setInicializando(true);
+      try {
+        databaseToUse = await initDB();
+        if (databaseToUse) {
+          setDb(databaseToUse);
+        } else {
+          Alert.alert("Error", "No se pudo inicializar la base de datos. Por favor, cierre y abra la aplicación.");
+          setInicializando(false);
+          return;
+        }
+      } catch (error) {
+        console.error("Error inicializando BD en alertaRegistro:", error);
+        Alert.alert(
+          "Error", 
+          `No se pudo inicializar la base de datos: ${error.message || "Error desconocido"}\n\nPor favor, cierre y abra la aplicación.`
+        );
+        setInicializando(false);
+        return;
+      } finally {
+        setInicializando(false);
+      }
+    }
+
     try {
-      // Manejar descripción vacía correctamente
       const descripcionFinal = descripcion.trim() || null;
       
-      await db.runAsync(
-        `INSERT INTO transacciones (tipo, categoria, monto, fecha, descripcion)
-         VALUES (?, ?, ?, ?, ?)`,
-        [tipo.trim(), categoria.trim(), montoNumero, fecha.trim(), descripcionFinal]
+      await databaseToUse.runAsync(
+        `INSERT INTO transacciones (usuario_id, tipo, categoria, monto, fecha, descripcion)
+         VALUES (?, ?, ?, ?, ?, ?)`,
+        [usuario.id, tipo.trim(), categoria.trim(), montoNumero, fecha.trim(), descripcionFinal]
       );
 
       Alert.alert("Éxito", "Transacción guardada correctamente");
@@ -74,15 +104,16 @@ export default function AgregarTransaccion() {
       setDescripcion("");
 
     } catch (error) {
-      console.log("ERROR al guardar transacción", error);
-      Alert.alert("Error", `No se pudo guardar la transacción: ${error.message || "Error desconocido"}`);
+      console.error("ERROR al guardar transacción:", error);
+      Alert.alert(
+        "Error", 
+        `No se pudo guardar la transacción.\n\nError: ${error.message || "Error desconocido"}`
+      );
     }
   };
 
   const filtrarCaracteresM = (input) => {
-    // Permitir números y un punto decimal
     let numerico = input.replace(/[^0-9.]/g, "");
-    // Asegurar que solo haya un punto decimal
     const partes = numerico.split(".");
     if (partes.length > 2) {
       numerico = partes[0] + "." + partes.slice(1).join("");
@@ -94,6 +125,10 @@ export default function AgregarTransaccion() {
     <ScrollView contentContainerStyle={{ paddingBottom: 80 }}>
       <View style={styles.container}>
         <Text style={styles.titulo}>AGREGAR TRANSACCIÓN</Text>
+
+        {inicializando && (
+          <Text style={styles.mensajeEstado}>Inicializando base de datos...</Text>
+        )}
 
         <View style={styles.fomrulario}>
           <Text style={styles.label}>Tipo *</Text>
@@ -139,12 +174,18 @@ export default function AgregarTransaccion() {
           />
 
           <TouchableOpacity 
-            style={[styles.btnAgregar, !db && styles.btnDisabled]} 
+            style={[styles.btnAgregar, (!db || !usuario || inicializando) && styles.btnDisabled]} 
             onPress={alertaRegistro}
-            disabled={!db}
+            disabled={!usuario || inicializando}
           >
             <Text style={styles.botonTexto}>
-              {db ? "Guardar Transacción" : "Inicializando..."}
+              {inicializando 
+                ? "Inicializando..." 
+                : !usuario 
+                  ? "Debe iniciar sesión" 
+                  : !db 
+                    ? "BD no disponible" 
+                    : "Guardar Transacción"}
             </Text>
           </TouchableOpacity>
         </View>
@@ -163,6 +204,7 @@ export default function AgregarTransaccion() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#F9FAFB", paddingTop: 60, paddingHorizontal: 20 },
   titulo: { fontSize: 22, fontWeight: "bold", color: "#1b5e20", textAlign: "center", marginBottom: 25 },
+  mensajeEstado: { textAlign: "center", color: "#666", marginBottom: 10, fontSize: 14 },
   fomrulario: { backgroundColor: "#fff", borderRadius: 15, padding: 20, marginBottom: 20, elevation: 3 },
   label: { fontSize: 14, fontWeight: "600", marginBottom: 5 },
   input: { backgroundColor: "#f0f0f0", borderRadius: 10, padding: 12, marginBottom: 15 },

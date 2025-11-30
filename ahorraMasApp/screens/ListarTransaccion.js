@@ -1,42 +1,73 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, FlatList, StyleSheet, TouchableOpacity } from "react-native";
+import React, { useEffect, useState, useContext } from "react";
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import * as SQLite from "expo-sqlite";
 import { useNavigation } from "@react-navigation/native";
+import { AuthContext } from "../context/AuthContext";
+import { initDB, getDB } from "../src/db";
 
 export default function ListarTransaccion() {
   const [transacciones, setTransacciones] = useState([]);
   const [db, setDb] = useState(null);
   const navigation = useNavigation();
+  const { usuario } = useContext(AuthContext);
 
   useEffect(() => {
-    SQLite.openDatabaseAsync("ahorramas_v1.db").then(setDb);
+    const inicializarBD = async () => {
+      try {
+        await initDB();
+        const database = getDB();
+        if (database) {
+          setDb(database);
+        }
+      } catch (error) {
+        console.log("Error inicializando BD:", error);
+      }
+    };
+    inicializarBD();
   }, []);
 
   useEffect(() => {
-    if (db) cargarTransacciones();
-  }, [db]);
+    if (db && usuario) {
+      cargarTransacciones();
+    } else if (db && !usuario) {
+      // Si no hay usuario, limpiar la lista
+      setTransacciones([]);
+    }
+  }, [db, usuario]); // Agregar usuario como dependencia
 
   async function cargarTransacciones() {
     try {
-      const result = await db.getAllAsync("SELECT * FROM transacciones ORDER BY fecha DESC");
-      setTransacciones(result);
+      if (!db) {
+        return;
+      }
+
+      if (!usuario || !usuario.id) {
+        setTransacciones([]);
+        return;
+      }
+
+      // Incluir transacciones del usuario Y transacciones sin usuario_id (para migración)
+      const result = await db.getAllAsync(
+        "SELECT * FROM transacciones WHERE usuario_id = ? OR usuario_id IS NULL ORDER BY fecha DESC",
+        [usuario.id]
+      );
+      setTransacciones(result || []);
     } catch (error) {
       console.log("Error cargando transacciones", error);
+      setTransacciones([]);
     }
   }
 
   const renderItem = ({ item }) => {
-    // Validar que item existe y tiene id
     if (!item || !item.id) {
-      return null; // No renderizar si no hay item válido
+      return null;
     }
 
     return (
       <View style={styles.card}>
-        {/* SOLO VISUALIZACIÓN - Sin clics, solo muestra la información */}
-        <Text style={styles.tipo}>{item.tipo.toUpperCase()} • {item.categoria}</Text>
-        <Text style={styles.monto}>${item.monto}</Text>
-        <Text style={styles.fecha}>{item.fecha}</Text>
+        <Text style={styles.tipo}>{item.tipo?.toUpperCase() || ""} • {item.categoria || ""}</Text>
+        <Text style={styles.monto}>${item.monto || 0}</Text>
+        <Text style={styles.fecha}>{item.fecha || ""}</Text>
         {item.descripcion ? <Text style={styles.desc}>{item.descripcion}</Text> : null}
       </View>
     );
@@ -46,11 +77,19 @@ export default function ListarTransaccion() {
     <View style={styles.container}>
       <Text style={styles.titulo}>TRANSACCIONES REGISTRADAS</Text>
 
+      {!usuario && (
+        <Text style={styles.vacio}>Debe iniciar sesión para ver sus transacciones</Text>
+      )}
+
       <FlatList
         data={transacciones}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item) => item.id?.toString() || Math.random().toString()}
         renderItem={renderItem}
-        ListEmptyComponent={<Text style={styles.vacio}>No hay transacciones registradas</Text>}
+        ListEmptyComponent={
+          <Text style={styles.vacio}>
+            {usuario ? "No hay transacciones registradas" : "Debe iniciar sesión"}
+          </Text>
+        }
       />
 
       <TouchableOpacity style={styles.btnRegresar} onPress={() => navigation.goBack()}>

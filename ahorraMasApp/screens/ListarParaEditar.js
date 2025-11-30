@@ -1,27 +1,59 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { View, Text, FlatList, StyleSheet, TouchableOpacity } from "react-native";
 import * as SQLite from "expo-sqlite";
 import { useNavigation } from "@react-navigation/native";
+import { AuthContext } from "../context/AuthContext";
+import { initDB, getDB } from "../src/db";
 
 export default function ListarParaEditar() {
   const [transacciones, setTransacciones] = useState([]);
   const [db, setDb] = useState(null);
   const navigation = useNavigation();
+  const { usuario } = useContext(AuthContext);
 
   useEffect(() => {
-    SQLite.openDatabaseAsync("ahorramas_v1.db").then(setDb);
+    const inicializarBD = async () => {
+      try {
+        await initDB();
+        const database = getDB();
+        if (database) {
+          setDb(database);
+        }
+      } catch (error) {
+        console.log("Error inicializando BD:", error);
+      }
+    };
+    inicializarBD();
   }, []);
 
   useEffect(() => {
-    if (db) cargarTransacciones();
-  }, [db]);
+    if (db && usuario) {
+      cargarTransacciones();
+    } else if (db && !usuario) {
+      setTransacciones([]);
+    }
+  }, [db, usuario]);
 
   async function cargarTransacciones() {
     try {
-      const result = await db.getAllAsync("SELECT * FROM transacciones ORDER BY fecha DESC");
-      setTransacciones(result);
+      if (!db) {
+        return;
+      }
+
+      if (!usuario || !usuario.id) {
+        setTransacciones([]);
+        return;
+      }
+
+      // Filtrar por usuario_id, pero también incluir transacciones sin usuario_id (para migración)
+      const result = await db.getAllAsync(
+        "SELECT * FROM transacciones WHERE usuario_id = ? OR usuario_id IS NULL ORDER BY fecha DESC",
+        [usuario.id]
+      );
+      setTransacciones(result || []);
     } catch (error) {
       console.log("Error cargando transacciones", error);
+      setTransacciones([]);
     }
   }
 
@@ -35,9 +67,9 @@ export default function ListarParaEditar() {
         style={styles.card}
         onPress={() => navigation.navigate("EditarTransaccion", { transaccion: item })}
       >
-        <Text style={styles.tipo}>{item.tipo.toUpperCase()} • {item.categoria}</Text>
-        <Text style={styles.monto}>${item.monto}</Text>
-        <Text style={styles.fecha}>{item.fecha}</Text>
+        <Text style={styles.tipo}>{item.tipo?.toUpperCase() || ""} • {item.categoria || ""}</Text>
+        <Text style={styles.monto}>${item.monto || 0}</Text>
+        <Text style={styles.fecha}>{item.fecha || ""}</Text>
         {item.descripcion ? <Text style={styles.desc}>{item.descripcion}</Text> : null}
         <Text style={styles.instruccion}>Toca para editar</Text>
       </TouchableOpacity>
@@ -48,11 +80,19 @@ export default function ListarParaEditar() {
     <View style={styles.container}>
       <Text style={styles.titulo}>SELECCIONA UNA TRANSACCIÓN PARA EDITAR</Text>
 
+      {!usuario && (
+        <Text style={styles.vacio}>Debe iniciar sesión para editar transacciones</Text>
+      )}
+
       <FlatList
         data={transacciones}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item) => item.id?.toString() || Math.random().toString()}
         renderItem={renderItem}
-        ListEmptyComponent={<Text style={styles.vacio}>No hay transacciones registradas</Text>}
+        ListEmptyComponent={
+          <Text style={styles.vacio}>
+            {usuario ? "No hay transacciones registradas" : "Debe iniciar sesión"}
+          </Text>
+        }
       />
 
       <TouchableOpacity style={styles.btnRegresar} onPress={() => navigation.goBack()}>
