@@ -1,39 +1,62 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import * as SQLite from "expo-sqlite";
+import { initDB, getDB } from "../src/db";
+import { AuthContext } from '../context/AuthContext';
 
 export default function GraficasScreen() {
     const navigation = useNavigation();
+    const { usuario } = useContext(AuthContext);
     const [db, setDb] = useState(null);
     const [gastosPorCategoria, setGastosPorCategoria] = useState([]);
     const [ingresosYGastosMes, setIngresosYGastosMes] = useState({ ingresos: 0, gastos: 0 });
     const [cargando, setCargando] = useState(true);
 
     useEffect(() => {
-        SQLite.openDatabaseAsync("ahorramas_v1.db").then(setDb);
+        const inicializarBD = async () => {
+            try {
+                const database = await initDB();
+                if (database) {
+                    setDb(database);
+                }
+            } catch (error) {
+                console.error("Error inicializando BD en GraficasScreen:", error);
+            }
+        };
+        inicializarBD();
     }, []);
 
     useEffect(() => {
-        if (db) {
+        if (db && usuario) {
             cargarDatos();
+        } else if (db && !usuario) {
+            setGastosPorCategoria([]);
+            setIngresosYGastosMes({ ingresos: 0, gastos: 0 });
+            setCargando(false);
         }
-    }, [db]);
+    }, [db, usuario]);
 
     async function cargarDatos() {
         try {
+            if (!db || !usuario || !usuario.id) {
+                setGastosPorCategoria([]);
+                setIngresosYGastosMes({ ingresos: 0, gastos: 0 });
+                setCargando(false);
+                return;
+            }
+
             // Obtener mes actual (formato YYYY-MM)
             const ahora = new Date();
             const mesActual = `${ahora.getFullYear()}-${String(ahora.getMonth() + 1).padStart(2, '0')}`;
 
-            // 1. Gastos agrupados por categoría (solo gastos, no ingresos)
+            // 1. Gastos agrupados por categoría (solo gastos, no ingresos) - filtrado por usuario
             const gastosCategoria = await db.getAllAsync(`
                 SELECT categoria, SUM(monto) as total
                 FROM transacciones
-                WHERE tipo = 'Gasto'
+                WHERE tipo = 'Gasto' AND (usuario_id = ? OR usuario_id IS NULL)
                 GROUP BY categoria
                 ORDER BY total DESC
-            `);
+            `, [usuario.id]);
 
             // Calcular total de gastos para porcentajes
             const totalGastos = gastosCategoria.reduce((sum, item) => sum + item.total, 0);
@@ -49,18 +72,18 @@ export default function GraficasScreen() {
 
             setGastosPorCategoria(gastosConPorcentaje);
 
-            // 2. Ingresos y gastos del mes actual
+            // 2. Ingresos y gastos del mes actual - filtrado por usuario
             const ingresosMes = await db.getFirstAsync(`
                 SELECT COALESCE(SUM(monto), 0) as total
                 FROM transacciones
-                WHERE tipo = 'Ingreso' AND fecha LIKE ?
-            `, [`${mesActual}%`]);
+                WHERE tipo = 'Ingreso' AND fecha LIKE ? AND (usuario_id = ? OR usuario_id IS NULL)
+            `, [`${mesActual}%`, usuario.id]);
 
             const gastosMes = await db.getFirstAsync(`
                 SELECT COALESCE(SUM(monto), 0) as total
                 FROM transacciones
-                WHERE tipo = 'Gasto' AND fecha LIKE ?
-            `, [`${mesActual}%`]);
+                WHERE tipo = 'Gasto' AND fecha LIKE ? AND (usuario_id = ? OR usuario_id IS NULL)
+            `, [`${mesActual}%`, usuario.id]);
 
             setIngresosYGastosMes({
                 ingresos: ingresosMes?.total || 0,
@@ -96,6 +119,12 @@ export default function GraficasScreen() {
         <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 100 }}>
             <Text style={styles.titulo}>REPORTES</Text>
 
+            {!usuario && (
+                <View style={styles.card}>
+                    <Text style={styles.textoVacio}>Debe iniciar sesión para ver sus reportes</Text>
+                </View>
+            )}
+
             {/* Gráfica 1: Gastos por Categoría */}
             <View style={styles.seccion}>
                 <Text style={styles.subtitulo}>Gastos por Categoría</Text>
@@ -120,7 +149,9 @@ export default function GraficasScreen() {
                     </>
                 ) : (
                     <View style={styles.card}>
-                        <Text style={styles.textoVacio}>No hay gastos registrados</Text>
+                        <Text style={styles.textoVacio}>
+                            {usuario ? "No hay gastos registrados" : "Debe iniciar sesión"}
+                        </Text>
                     </View>
                 )}
             </View>

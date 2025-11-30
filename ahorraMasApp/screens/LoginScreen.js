@@ -1,7 +1,7 @@
 import { Text, StyleSheet, View, Button, TextInput, Image, ScrollView, Alert, Switch } from "react-native";
 import React, { useState, useEffect, useContext } from "react";
 import { useNavigation } from "@react-navigation/native";
-import { initDB } from "../src/db";
+import { initDB, getDB } from "../src/db";
 import { AuthContext } from "../context/AuthContext";
 
 export default function LoginScreen() {
@@ -25,7 +25,7 @@ export default function LoginScreen() {
         }
       } catch (error) {
         console.log("Error inicializando BD:", error);
-        Alert.alert("Error", "No se pudo inicializar la base de datos");
+        // No mostrar alerta aquí para evitar spam al cargar
       }
     };
     abrirDB();
@@ -43,27 +43,42 @@ export default function LoginScreen() {
       return;
     }
 
-    // Si db no está lista, intentar inicializarla de nuevo
-    if (!db) {
+    // Obtener la BD - usar la del estado o inicializar de nuevo
+    let databaseToUse = db;
+    
+    if (!databaseToUse) {
       try {
-        const database = await initDB();
-        if (database) {
-          setDb(database);
-          // Continuar con el login después de inicializar
+        databaseToUse = await initDB();
+        if (databaseToUse) {
+          setDb(databaseToUse);
+          // Esperar un momento adicional para asegurar que esté lista
+          await new Promise(resolve => setTimeout(resolve, 100));
         } else {
-          Alert.alert("Error", "La base de datos no está lista. Intente de nuevo.");
-          return;
+          // Intentar obtener de getDB como respaldo
+          databaseToUse = getDB();
         }
       } catch (error) {
+        console.error("Error obteniendo BD:", error);
         Alert.alert("Error", "No se pudo inicializar la base de datos. Intente de nuevo.");
         return;
       }
     }
 
-    // Usar db del estado o la recién inicializada
-    const databaseToUse = db || await initDB();
+    if (!databaseToUse) {
+      Alert.alert("Error", "La base de datos no está disponible. Por favor, cierre y abra la aplicación.");
+      return;
+    }
 
     try {
+      // Hacer una consulta de prueba primero para asegurar que la BD esté lista
+      try {
+        await databaseToUse.getFirstAsync("SELECT 1");
+      } catch (testError) {
+        console.error("Error en prueba de BD:", testError);
+        Alert.alert("Error", "La base de datos no está lista. Por favor, intente de nuevo.");
+        return;
+      }
+
       const result = await databaseToUse.getFirstAsync(
         "SELECT * FROM usuarios WHERE correo = ?",
         [correo.trim()]
@@ -92,7 +107,7 @@ export default function LoginScreen() {
 
     } catch (err) {
       console.log("Error en login:", err);
-      Alert.alert("Error inesperado", "No se pudo validar el usuario");
+      Alert.alert("Error inesperado", `No se pudo validar el usuario: ${err.message || "Error desconocido"}`);
     }
   };
 

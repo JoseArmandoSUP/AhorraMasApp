@@ -1,7 +1,7 @@
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, TextInput, Alert } from "react-native";
 import React, { useState, useEffect, useContext } from "react";
 import { useNavigation } from "@react-navigation/native";
-import { initDB } from "../src/db";
+import { initDB, getDB } from "../src/db";
 import { AuthContext } from "../context/AuthContext";
 
 export default function AgregarTransaccion() {
@@ -30,10 +30,6 @@ export default function AgregarTransaccion() {
         }
       } catch (error) {
         console.error("Error inicializando BD en useEffect:", error);
-        Alert.alert(
-          "Error de Base de Datos", 
-          `No se pudo inicializar la base de datos: ${error.message || "Error desconocido"}\n\nIntente cerrar y abrir la aplicación.`
-        );
       } finally {
         setInicializando(false);
       }
@@ -59,8 +55,9 @@ export default function AgregarTransaccion() {
       return;
     }
 
-    // Si db no está lista, intentar inicializarla de nuevo
+    // Obtener la BD - usar la del estado o inicializar de nuevo
     let databaseToUse = db;
+    
     if (!databaseToUse) {
       setInicializando(true);
       try {
@@ -68,16 +65,11 @@ export default function AgregarTransaccion() {
         if (databaseToUse) {
           setDb(databaseToUse);
         } else {
-          Alert.alert("Error", "No se pudo inicializar la base de datos. Por favor, cierre y abra la aplicación.");
-          setInicializando(false);
-          return;
+          databaseToUse = getDB();
         }
       } catch (error) {
-        console.error("Error inicializando BD en alertaRegistro:", error);
-        Alert.alert(
-          "Error", 
-          `No se pudo inicializar la base de datos: ${error.message || "Error desconocido"}\n\nPor favor, cierre y abra la aplicación.`
-        );
+        console.error("Error obteniendo BD:", error);
+        Alert.alert("Error", "No se pudo obtener la conexión a la base de datos. Por favor, cierre y abra la aplicación.");
         setInicializando(false);
         return;
       } finally {
@@ -85,12 +77,16 @@ export default function AgregarTransaccion() {
       }
     }
 
+    if (!databaseToUse) {
+      Alert.alert("Error", "La base de datos no está disponible. Por favor, cierre y abra la aplicación.");
+      return;
+    }
+
     try {
       const descripcionFinal = descripcion.trim() || null;
       
       await databaseToUse.runAsync(
-        `INSERT INTO transacciones (usuario_id, tipo, categoria, monto, fecha, descripcion)
-         VALUES (?, ?, ?, ?, ?, ?)`,
+        "INSERT INTO transacciones (usuario_id, tipo, categoria, monto, fecha, descripcion) VALUES (?, ?, ?, ?, ?, ?)",
         [usuario.id, tipo.trim(), categoria.trim(), montoNumero, fecha.trim(), descripcionFinal]
       );
 
