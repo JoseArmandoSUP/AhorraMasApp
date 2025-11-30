@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, TextInput, Button, Alert, StyleSheet } from "react-native";
-import * as SQLite from "expo-sqlite";
 import { useRoute, useNavigation } from "@react-navigation/native";
+import { getDB, initDB } from "../src/db"; // ✅ Importa tu DB central
 
 export default function CambiarPasswordScreen() {
   const { params } = useRoute();
@@ -12,7 +12,14 @@ export default function CambiarPasswordScreen() {
   const [db, setDb] = useState(null);
 
   useEffect(() => {
-    SQLite.openDatabaseAsync("finanzas.db").then(setDb);
+    const cargarDB = async () => {
+      let database = getDB();
+      if (!database) {
+        database = await initDB(); // inicializa si no existe
+      }
+      setDb(database);
+    };
+    cargarDB();
   }, []);
 
   const actualizarPassword = async () => {
@@ -21,13 +28,18 @@ export default function CambiarPasswordScreen() {
       return;
     }
 
-    await db.runAsync(
-      "UPDATE usuarios SET password = ? WHERE correo = ?",
-      [password, correo]
-    );
+    try {
+      await db.runAsync(
+        "UPDATE usuarios SET password = ? WHERE correo = ?",
+        [password, correo]
+      );
 
-    Alert.alert("Éxito", "La contraseña ha sido actualizada");
-    nav.replace("Login");
+      Alert.alert("Éxito", "La contraseña ha sido actualizada");
+      nav.replace("Login");
+    } catch (error) {
+      console.log("Error actualizando password:", error);
+      Alert.alert("Error", "No se pudo actualizar la contraseña");
+    }
   };
 
   return (

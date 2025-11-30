@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, TextInput, Button, Alert, StyleSheet } from "react-native";
-import * as SQLite from "expo-sqlite";
+import { initDB, getDB } from "../src/db";
 import { useNavigation } from "@react-navigation/native";
 
 export default function RecuperarPasswordScreen() {
@@ -9,7 +9,15 @@ export default function RecuperarPasswordScreen() {
   const [db, setDb] = useState(null);
 
   useEffect(() => {
-    SQLite.openDatabaseAsync("finanzas.db").then(setDb);
+    const abrirDB = async () => {
+      try {
+        const database = await initDB();
+        setDb(database);
+      } catch (error) {
+        console.log("Error inicializando BD en RecuperarPassword:", error);
+      }
+    };
+    abrirDB();
   }, []);
 
   const verificarCorreo = async () => {
