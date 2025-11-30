@@ -1,33 +1,61 @@
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Button, TextInput, Alert } from "react-native";
-import React, {useState} from "react";
+import React, {useState, useEffect} from "react";
 //import PresupuestosScreen from "./PresupuestosScreen";
 import { useNavigation } from "@react-navigation/native";
+import { PresupuestoController } from "../controllers/PresupuestoController";
+
+const controller = new PresupuestoController();
 
 export default function AgregarPresupuesto(){
     const navigatation = useNavigation();
 
     const[categoria, setCategoria] = useState("");
-    const[monto, setMonto] = useState("");
-    const[fecha, setFecha] = useState("");
+    const[montolimite, setMontolimite] = useState("");
+    const[mes, setMes] = useState("");
+    const[anio, setAnio] = useState("");
 
-    const alertaAgregar = () => {
-        if(!categoria || !monto || !fecha){
-            Alert.alert("Por favor complete todos los campos");
-            alert("Por favor complete todos los campos");
-            return;
+    // Inicializar SQLite
+    useEffect(() => {
+        const init = async () => {
+            try{
+                await controller.initialize();
+            }catch(error){
+                Alert.alert("Error inicializando base de datos", error.message);
+            }
+        };
+        init();
+    }, []);
+
+    async function alertaAgregar(){
+        try{
+            if(!categoria || !montolimite || !mes || !anio){
+                Alert.alert("Campos incompletos");
+                return;
+            }
+            await controller.agregar(
+                categoria.trim(),
+                Number(montolimite),
+                Number(mes),
+                Number(anio)
+            );
+            Alert.alert("Exito", "Presupuesto agregado correctamente");
+
+            setCategoria("");
+            setMontolimite("");
+            setMes("");
+            setAnio("");
+
+            navigatation.goBack();
+        }catch(error){
+            Alert.alert("Error", "No se pudo guardar el presupuesto: " + error.message);
         }
-        Alert.alert(
-            `Presupuesto agregado correctamente: \n Categoria: ${categoria} \n Monto: $${monto} \n Fecha: ${fecha}`
-        );
-        alert(
-            `Presupuesto agregado correctamente: \n Categoria: ${categoria} \n Monto: $${monto} \n Fecha: ${fecha}`
-        );
     };
 
     const filtrarCaracteresM = (input) => {
         const numerico = input.replace(/[^0-9]/g, '');
-        setMonto(numerico);
+        setMontolimite(numerico);
     };
+
 
     return(
         <ScrollView style={styles.container}>
@@ -58,20 +86,35 @@ export default function AgregarPresupuesto(){
                             keyboardType="numeric"
                             style={styles.definirPlaceholder} 
                             placeholder="Ejemplo: $500"
-                            value={monto}
+                            value={montolimite}
                             onChangeText={filtrarCaracteresM}
                         ></TextInput>
                     </View>
                 </View>
 
                 <View style={styles.definirColumna}>
-                    <Text style={styles.definirLabel}>Fecha:</Text>
+                    <Text style={styles.definirLabel}>Mes:</Text>
                     <View style={styles.definirInput}>
                         <TextInput
+                            keyboardType="numeric"
+                            maxLength={2}
                             style={styles.definirPlaceholder} 
-                            placeholder="AÑO-MES-DIA"
-                            value={fecha}
-                            onChangeText={setFecha}
+                            placeholder="1 - 12"
+                            value={mes}
+                            onChangeText={setMes}
+                        ></TextInput>
+                    </View>
+                </View>
+
+                <View style={styles.definirColumna}>
+                    <Text style={styles.definirLabel}>Año:</Text>
+                    <View style={styles.definirInput}>
+                        <TextInput
+                            keyboardType="numeric"
+                            maxLength={4}
+                            style={styles.definirPlaceholder} 
+                            value={anio}
+                            onChangeText={setAnio}
                         ></TextInput>
                     </View>
                 </View>

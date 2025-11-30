@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState} from "react";
+import React, { useContext, useEffect, useState, useCallback} from "react";
 import { Text, StyleSheet, View, TouchableOpacity, ScrollView, ImageBackground, Animated, Easing, Image } from 'react-native'
 import { Button } from "react-native";
 //import TransaccionesScreem from './PantallaGestionTransacciones';
@@ -6,8 +6,11 @@ import { Button } from "react-native";
 //import PantallaPresupuesto from "./PresupuestosScreen";
 //import LoginScreen from "./LoginScreen";
 //import GraficasScreen from "./GraficasScreen";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { AppContext } from "../context/AppContext";
+import { TransaccionController } from '../controllers/TransaccionController';
+
+const controller = new TransaccionController();
 
 export default function PantallaPrincipal(){
     
@@ -17,7 +20,34 @@ export default function PantallaPrincipal(){
     //Para Navigation
     const navigation = useNavigation();
     //Para las notificaciones de ecceso del presupuesto
-    const { alertas } = useContext(AppContext);
+    const { alertas, setTransacciones } = useContext(AppContext);
+
+    const[totalGastos, setTotalGastos] = useState(0);
+    const[totalIngresos, setTotalIngresos] = useState(0);
+
+    //Carga las Transacciones y calcula totales
+    useFocusEffect(
+        useCallback(() => {
+            const load = async () => {
+                await controller.initialize();
+                const data = await controller.listar();
+
+                setTransacciones(data);
+
+                let gastos = 0;
+                let ingresos = 0;
+
+                data.forEach(t => {
+                    if(t.tipo.toLowerCase() === "gasto") gastos += Number(t.monto);
+                    if(t.tipo.toLowerCase() === "ingreso") ingresos += Number(t.monto);
+                });
+
+                setTotalGastos(gastos);
+                setTotalIngresos(ingresos);
+            };
+            load();
+        }, [])
+    );
 
     useEffect(()=>{
         const timer=setTimeout(()=>{
@@ -69,14 +99,14 @@ export default function PantallaPrincipal(){
             <View style={styles.todoContainer}>
                 
                 <View style={styles.todoCajas}>
-                    <Text style={styles.todoLabel}>GASTOS</Text>
-                    <Text style={styles.todoAmount}>$1000</Text>
+                    <Text style={styles.todoLabel1}>GASTOS</Text>
+                    <Text style={styles.todoAmount}>${totalGastos}</Text>
                     {/*<Ionicons>*/}
                 </View>
     
                 <View style={styles.todoCajas}>
-                    <Text style={styles.todoLabel}>INGRESOS</Text>
-                    <Text style={styles.todoAmount}>$1200</Text>
+                    <Text style={styles.todoLabel2}>INGRESOS</Text>
+                    <Text style={styles.todoAmount}>${totalIngresos}</Text>
                     {/*<Ionicons>*/}
                 </View>
     
@@ -157,10 +187,16 @@ const styles = StyleSheet.create({
         elevation: 3,
     },
 
-    todoLabel:{
+    todoLabel1:{
         fontSize: 14,
         fontWeight: '600',
-        color: '#444',
+        color: '#c20a0aff',
+    },
+
+    todoLabel2:{
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#1f4de4ff',
     },
 
     todoAmount:{

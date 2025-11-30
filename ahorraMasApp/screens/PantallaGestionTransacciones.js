@@ -1,16 +1,49 @@
-import React, {useEffect, useState} from 'react'
-import { Text, StyleSheet, View, TouchableOpacity, ScrollView, Button, TextInput } from 'react-native'
+import React, {useEffect, useState, useCallback, useContext} from 'react'
+import { Text, StyleSheet, View, TouchableOpacity, ScrollView, Button, TextInput, Animated, Easing } from 'react-native'
 //import PantallaPrincipal from './PantallaPrincipal';
 //import ListarTransaccion from './ListarTransaccion';
 //import AgregarTransaccion from './AgregarTransaccion';
 //import EditarTransacciones from './EditarTransaccion';
 //import EliminarTransaccion from './EliminarTransaccion';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { AppContext } from '../context/AppContext';
+import { TransaccionController } from '../controllers/TransaccionController';
+
+const controller = new TransaccionController();
 
 
 export default function PantallaGestionTransacciones() {
     //Agregado 3:23
     const navigation = useNavigation();
+
+    const { transacciones, setTransacciones } = useContext(AppContext);
+    
+    const[totalGastos, setTotalGastos] = useState(0);
+    const[totalIngresos, setTotalIngresos] = useState(0);
+
+    //Carga las Transacciones y calcula totales
+    useFocusEffect(
+        useCallback(() => {
+            const load = async () => {
+                await controller.initialize();
+                const data = await controller.listar();
+
+                setTransacciones(data);
+
+                let gastos = 0;
+                let ingresos = 0;
+
+                data.forEach(t => {
+                    if(t.tipo.toLowerCase() === "gasto") gastos += Number(t.monto);
+                    if(t.tipo.toLowerCase() === "ingreso") ingresos += Number(t.monto);
+                });
+
+                setTotalGastos(gastos);
+                setTotalIngresos(ingresos);
+            };
+            load();
+        }, [])
+    );
 
     return (
         <ScrollView style={styles.container} contentContainerStyle={{paddingBottom: 100}}>
@@ -22,14 +55,14 @@ export default function PantallaGestionTransacciones() {
             <View style={styles.todoContainer}>
 
                 <View style={styles.todoCajas}>
-                    <Text style={styles.todoLabel}>GASTOS</Text>
-                    <Text style={styles.todoAmount}>$1000</Text>
+                    <Text style={styles.todoLabel1}>GASTOS</Text>
+                    <Text style={styles.todoAmount}>${totalGastos}</Text>
                     {/*<Ionicons>*/}
                 </View>
 
                 <View style={styles.todoCajas}>
-                    <Text style={styles.todoLabel}>INGRESOS</Text>
-                    <Text style={styles.todoAmount}>$1200</Text>
+                    <Text style={styles.todoLabel2}>INGRESOS</Text>
+                    <Text style={styles.todoAmount}>${totalIngresos}</Text>
                     {/*<Ionicons>*/}
                 </View>
 
@@ -103,10 +136,16 @@ const styles = StyleSheet.create({
         elevation: 3,
     },
 
-    todoLabel:{
+    todoLabel1:{
         fontSize: 14,
         fontWeight: '600',
-        color: '#444',
+        color: '#c20a0aff',
+    },
+
+    todoLabel2:{
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#1f4de4ff',
     },
 
     todoAmount:{

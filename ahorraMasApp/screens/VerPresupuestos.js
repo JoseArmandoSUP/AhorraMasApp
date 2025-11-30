@@ -1,17 +1,127 @@
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Button, TextInput } from "react-native";
-import React, {useState} from "react";
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Button, TextInput, Alert } from "react-native";
+import React, {useState, useEffect, useCallback} from "react";
 //import PresupuestosScreen from "./PresupuestosScreen";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
+import { PresupuestoController } from "../controllers/PresupuestoController";
+import { TransaccionController } from "../controllers/TransaccionController";
+
+const presupuestoController = new PresupuestoController();
+const transaccionController = new TransaccionController();
 
 export default function VerPresupuestos(){
     const navigation = useNavigation();
 
-    const presupuestos = [
+    {/*const presupuestos = [
         {id: 1, categoria: "Comida", limite: 500, gastado: 320, color: "#2e7d32"},
         {id: 2, categoria: "Transporte", limite: 300, gastado: 200, color: "#1565c0"},
         {id: 3, categoria: "Entretenimiento", limite: 400, gastado: 150, color: "#fbc02d"},
         {id: 4, categoria: "Salud", limite: 350, gastado: 280, color: "#d32f2f"},
-    ];
+    ]; */}
+
+    const[lista, setLista] = useState([]);
+    const[transacciones, setTransacciones] = useState([]);
+
+    const [fMes, setFMes] = useState("");
+    const [fAnio, setFAnio] = useState("");
+    const [fCategoria, setFCategoria] = useState("");
+
+
+    useFocusEffect(
+        useCallback(() => {
+            const cargarDatos = async () => {
+                try{
+                    await presupuestoController.initialize();
+                    await transaccionController.initialize();
+
+                    const presupuestosDB = await presupuestoController.listar();
+                    const transDB = await transaccionController.listar();
+
+                    setTransacciones(transDB);
+
+                    //Total gastado en cada presupuesto
+                    const calculados = presupuestosDB.map(p => {
+                        const gastado = transDB.filter(
+                            t => t.tipo === "Gasto" && t.categoria.toLowerCase() === p.categoria.toLowerCase()
+                        )
+                        .reduce((sum, t) => sum + Number(t.monto), 0);
+                        return{
+                            ...p,
+                            gastado,
+                            color: "#2e7d32"
+                        };
+                    });
+
+                    setLista(calculados)
+                }catch(error){
+                    console.log("Error cargando presupuestos: ", error);
+                }
+            };
+            cargarDatos();
+        },[])
+    );
+
+    async function aplicarFiltro() {
+        try {
+            await presupuestoController.initialize();
+            await transaccionController.initialize();
+
+            let presupuestosDB = await presupuestoController.listar();
+
+            
+            if (fMes.trim() !== "") {
+                presupuestosDB = presupuestosDB.filter(p => p.mes == Number(fMes));
+            }
+
+            
+            if (fAnio.trim() !== "") {
+                presupuestosDB = presupuestosDB.filter(p => p.anio == Number(fAnio));
+            }
+
+            
+            if (fCategoria.trim() !== "") {
+                presupuestosDB = presupuestosDB.filter(p => 
+                    p.categoria.toLowerCase().includes(fCategoria.toLowerCase())
+                );
+            }
+
+            
+            const transDB = await transaccionController.listar();
+
+            const calculados = presupuestosDB.map(p => {
+                const gastado = transDB.filter(
+                    t => 
+                        t.tipo === "Gasto" && 
+                        t.categoria.toLowerCase() === p.categoria.toLowerCase()
+                )
+                .reduce((sum, t) => sum + Number(t.monto), 0);
+
+                return {
+                    ...p,
+                    gastado,
+                    color: "#2e7d32"
+                };
+            });
+
+            setLista(calculados);
+
+        } catch (error) {
+            console.log("Error al aplicar filtros:", error);
+        }
+    }
+
+    //Quitar los filtros 
+    const limpiarFiltros = async () => {
+        try{
+            setFMes("");
+            setFAnio("");
+            setFCategoria("");
+            const calculados = await presupuestoController.listar();
+            setLista(calculados);
+        }catch(error){
+            Alert.alert("Error", error.message);
+        }
+    };
+
 
     return(
         <ScrollView style={styles.container} contentContainerStyle={{paddingBottom: 100}}>
@@ -23,27 +133,61 @@ export default function VerPresupuestos(){
                 <Text style={styles.filtrosTitulo}>Filtrar por</Text>
     
                 <View style={styles.filtrosFila}>
-                    <Text style={styles.filtrosLabel}>Fecha: </Text>
+                    <Text style={styles.filtrosLabel}>Mes:</Text>
                     <View style={styles.filtrosInput}>
-                        <TextInput style={styles.filtrosPlaceHolder} placeholder='AÑO-MES-DIA'></TextInput>
+                        <TextInput 
+                            style={styles.filtrosPlaceHolder} 
+                            placeholder="1 - 12"
+                            keyboardType="numeric"
+                            value={fMes}
+                            onChangeText={setFMes}
+                        />
+                    </View>
+                </View>
+
+                <View style={styles.filtrosFila}>
+                    <Text style={styles.filtrosLabel}>Año:</Text>
+                    <View style={styles.filtrosInput}>
+                        <TextInput 
+                            style={styles.filtrosPlaceHolder} 
+                            placeholder="2025"
+                            keyboardType="numeric"
+                            value={fAnio}
+                            onChangeText={setFAnio}
+                        />
                     </View>
                 </View>
     
                 <View style={styles.filtrosFila}>
-                    <Text style={styles.filtrosLabel}>Categoria: </Text>
+                    <Text style={styles.filtrosLabel}>Categoría:</Text>
                     <View style={styles.filtrosInput}>
-                        <TextInput style={styles.filtrosPlaceHolder} placeholder='Seleccionar la categoria'></TextInput>
+                        <TextInput 
+                            style={styles.filtrosPlaceHolder} 
+                            placeholder="Ej. Comida"
+                            value={fCategoria}
+                            onChangeText={setFCategoria}
+                        />
                     </View>
                 </View>
     
-                <TouchableOpacity style={styles.filtrosBoton}>
+                <TouchableOpacity style={styles.filtrosBoton} onPress={aplicarFiltro}>
                     <Text style={styles.filtrosBotonTexto}>Aplicar</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={[styles.filtrosBoton, {backgroundColor:"#555"}]} onPress={limpiarFiltros}>
+                    <Text style={styles.filtrosBotonTexto}>Deshacer Filtro</Text>
                 </TouchableOpacity>
     
             </View>
 
-            {presupuestos.map((item)=>{
-                const porcentaje = Math.round((item.gastado / item.limite)*100);
+            {lista.length === 0 && (
+                <Text style={{textAlign: "center", marginTop: 10, color: "#666"}}>
+                    No hay registros
+                </Text>
+            )}
+            
+            {lista.map(item=>{
+                const porcentaje = Math.min(Math.round((item.gastado / item.montolimite)*100), 100);
                 return(
                     <View key={item.id} style={styles.tarjeta}>
                         
@@ -54,7 +198,7 @@ export default function VerPresupuestos(){
                             </Text>
 
                             <Text style={styles.cantidad}>
-                                ${item.gastado} / ${item.limite}
+                                ${item.gastado} / ${item.montolimite}
                             </Text>
 
                         </View>
@@ -65,7 +209,7 @@ export default function VerPresupuestos(){
                             ></View>
                         </View>
 
-                        <Text style={styles.procentaje}>{porcentaje}% del presupuesto usado</Text>
+                        <Text style={styles.porcentaje}>{porcentaje}% del presupuesto usado</Text>
 
                     </View>
                 );
