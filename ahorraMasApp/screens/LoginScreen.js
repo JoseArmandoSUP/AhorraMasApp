@@ -78,7 +78,7 @@ export default function LoginScreen (){
 
                 <TouchableOpacity onPress={() => nav.navigate("RecuperarPassCorreo")}>
                     <Text style={{ 
-                        color: "#e4c61fff", 
+                        color: "#e4951fff", 
                         fontWeight: "bold", 
                         textAlign: "center",
                         marginTop: 10 
