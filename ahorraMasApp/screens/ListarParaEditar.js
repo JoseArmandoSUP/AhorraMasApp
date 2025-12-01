@@ -1,61 +1,13 @@
 import React, { useEffect, useState, useContext } from "react";
 import { View, Text, FlatList, StyleSheet, TouchableOpacity } from "react-native";
-import * as SQLite from "expo-sqlite";
 import { useNavigation } from "@react-navigation/native";
+import { AppContext } from "../context/AppContext";
 import { AuthContext } from "../context/AuthContext";
-import { initDB, getDB } from "../src/db";
 
 export default function ListarParaEditar() {
-  const [transacciones, setTransacciones] = useState([]);
-  const [db, setDb] = useState(null);
-  const navigation = useNavigation();
+  const { transacciones } = useContext(AppContext);
   const { usuario } = useContext(AuthContext);
-
-  useEffect(() => {
-    const inicializarBD = async () => {
-      try {
-        await initDB();
-        const database = getDB();
-        if (database) {
-          setDb(database);
-        }
-      } catch (error) {
-        console.log("Error inicializando BD:", error);
-      }
-    };
-    inicializarBD();
-  }, []);
-
-  useEffect(() => {
-    if (db && usuario) {
-      cargarTransacciones();
-    } else if (db && !usuario) {
-      setTransacciones([]);
-    }
-  }, [db, usuario]);
-
-  async function cargarTransacciones() {
-    try {
-      if (!db) {
-        return;
-      }
-
-      if (!usuario || !usuario.id) {
-        setTransacciones([]);
-        return;
-      }
-
-      // Filtrar por usuario_id, pero también incluir transacciones sin usuario_id (para migración)
-      const result = await db.getAllAsync(
-        "SELECT * FROM transacciones WHERE usuario_id = ? OR usuario_id IS NULL ORDER BY fecha DESC",
-        [usuario.id]
-      );
-      setTransacciones(result || []);
-    } catch (error) {
-      console.log("Error cargando transacciones", error);
-      setTransacciones([]);
-    }
-  }
+  const navigation = useNavigation();
 
   const renderItem = ({ item }) => {
     if (!item || !item.id) {

@@ -3,53 +3,31 @@ import { View, Text, TextInput, FlatList, TouchableOpacity, Alert, StyleSheet } 
 import { useNavigation } from "@react-navigation/native";
 import { initDB } from "../src/db";
 import { AuthContext } from "../context/AuthContext";
+import { AppContext } from "../context/AppContext";
 
 export default function EditarPresupuesto() {
   const { usuario } = useContext(AuthContext);
   const navigation = useNavigation();
 
   const [db, setDb] = useState(null);
-  const [presupuestos, setPresupuestos] = useState([]);
-  const [cargando, setCargando] = useState(true);
+  const { presupuestos } = useContext(AppContext);
   const [presupuestoSeleccionado, setPresupuestoSeleccionado] = useState(null);
   const [categoria, setCategoria] = useState("");
   const [monto, setMonto] = useState("");
   const [fecha, setFecha] = useState("");
-
-  // Cargar base de datos
+  // initialize DB only when performing updates
   useEffect(() => {
-    const cargarDB = async () => {
+    let mounted = true;
+    (async () => {
       try {
         const database = await initDB();
-        setDb(database);
-      } catch (error) {
-        console.log("Error cargando BD:", error);
-        setCargando(false);
+        if (mounted) setDb(database);
+      } catch (e) {
+        console.log('Error inicializando DB:', e);
       }
-    };
-    cargarDB();
+    })();
+    return () => { mounted = false; };
   }, []);
-
-  // Cargar presupuestos del usuario
-  useEffect(() => {
-    if (db && usuario) {
-      obtenerPresupuestos();
-    }
-  }, [db, usuario]);
-
-  const obtenerPresupuestos = async () => {
-    try {
-      const resultados = await db.getAllAsync(
-        "SELECT * FROM presupuestos WHERE usuario_id = ? ORDER BY fecha DESC",
-        [usuario.id]
-      );
-      setPresupuestos(resultados || []);
-      setCargando(false);
-    } catch (error) {
-      console.log("Error obteniendo presupuestos:", error);
-      setCargando(false);
-    }
-  };
 
   // Seleccionar un presupuesto para editar
   const seleccionarPresupuesto = (presupuesto) => {
@@ -72,19 +50,18 @@ export default function EditarPresupuesto() {
         Alert.alert("Error", "El monto debe ser un número válido");
         return;
       }
-
-      await db.runAsync(
+      const database = db || (await initDB());
+      await database.runAsync(
         "UPDATE presupuestos SET categoria = ?, monto = ?, fecha = ? WHERE id = ?",
         [categoria, valorMonto, fecha, presupuestoSeleccionado.id]
       );
       Alert.alert("Éxito", "Presupuesto actualizado");
 
-      // Limpiar selección y recargar lista
+      // Limpiar selección; AppContext will refresh list via DB change listener
       setPresupuestoSeleccionado(null);
       setCategoria("");
       setMonto("");
       setFecha("");
-      obtenerPresupuestos();
     } catch (error) {
       console.log("Error actualizando presupuesto:", error);
       Alert.alert("Error", "No se pudo actualizar el presupuesto");
@@ -94,18 +71,12 @@ export default function EditarPresupuesto() {
   const renderItem = ({ item }) => (
     <TouchableOpacity style={styles.card} onPress={() => seleccionarPresupuesto(item)}>
       <Text style={styles.categoria}>{item.categoria}</Text>
-      <Text style={styles.monto}>${item.monto.toFixed(2)}</Text>
+      <Text style={styles.monto}>${(Number(item.monto) || 0).toFixed(2)}</Text>
       <Text style={styles.fecha}>{item.fecha}</Text>
     </TouchableOpacity>
   );
 
-  if (cargando) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.titulo}>Cargando presupuestos...</Text>
-      </View>
-    );
-  }
+  // show UI directly; presupuestos come from AppContext and update automatically
 
   return (
     <View style={styles.container}>

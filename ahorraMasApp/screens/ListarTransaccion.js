@@ -2,46 +2,13 @@ import React, { useEffect, useState, useContext } from "react";
 import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { AuthContext } from "../context/AuthContext";
-import { initDB, getDB } from "../src/db";
+import { AppContext } from "../context/AppContext";
 
 export default function ListarTransaccion() {
-  const [transacciones, setTransacciones] = useState([]);
-  const [db, setDb] = useState(null);
+  const { transacciones } = useContext(AppContext);
   const { usuario } = useContext(AuthContext);
   const navigation = useNavigation();
-
-  useEffect(() => {
-    const inicializar = async () => {
-      try {
-        await initDB();
-        const database = getDB();
-        setDb(database);
-      } catch (error) {
-        console.log("Error inicializando BD en ListarTransaccion:", error);
-      }
-    };
-    inicializar();
-  }, []);
-
-  useEffect(() => {
-    if (db) cargarTransacciones();
-  }, [db, usuario]);
-
-  async function cargarTransacciones() {
-    try {
-      if (!db) return;
-
-      const uid = usuario?.id || null;
-      const result = await db.getAllAsync(
-        "SELECT * FROM transacciones WHERE usuario_id = ? OR usuario_id IS NULL ORDER BY fecha DESC",
-        [uid]
-      );
-      setTransacciones(result || []);
-    } catch (error) {
-      console.log("Error cargando transacciones:", error);
-      setTransacciones([]);
-    }
-  }
+  // `transacciones` comes from AppContext and updates automatically when the DB changes
 
   const renderItem = ({ item }) => {
     return (

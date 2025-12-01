@@ -59,9 +59,10 @@ export default function PantallaRegistro() {
     }
 
     try {
+      const correoLimpio = correo.trim().toLowerCase();
       await db.runAsync(
         "INSERT INTO usuarios (nombre, usuario, edad, correo, telefono, password) VALUES (?, ?, ?, ?, ?, ?)",
-        [nombre, usuario, edad, correo, telefono, password]
+        [nombre.trim(), usuario.trim(), edad.trim(), correoLimpio, telefono.trim(), password]
       );
 
       Alert.alert("Registro exitoso", "Tu cuenta ha sido creada correctamente", [

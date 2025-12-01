@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import * as SQLite from "expo-sqlite";
+import { initDB } from "../src/db";
 
 export default function EditarTransaccion() {
   const navigation = useNavigation();
@@ -17,7 +17,7 @@ export default function EditarTransaccion() {
 
   const guardarCambios = async () => {
     try {
-      const db = await SQLite.openDatabaseAsync("ahorramas_v1.db");
+      const db = await initDB();
 
       await db.runAsync(
         `UPDATE transacciones

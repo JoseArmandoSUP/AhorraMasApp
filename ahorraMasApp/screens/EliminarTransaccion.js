@@ -1,5 +1,5 @@
 import { View, Text, TouchableOpacity, Alert, StyleSheet } from "react-native";
-import * as SQLite from "expo-sqlite";
+import { initDB } from '../src/db';
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { useState, useEffect } from "react";
 
@@ -10,7 +10,11 @@ export default function EliminarTransaccion() {
   const [db, setDb] = useState(null);
 
   useEffect(() => {
-    SQLite.openDatabaseAsync("ahorramas_v1.db").then(setDb);
+    const init = async () => {
+      const database = await initDB();
+      setDb(database);
+    };
+    init();
   }, []);
 
   // Validar que el id existe

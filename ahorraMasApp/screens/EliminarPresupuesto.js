@@ -3,49 +3,29 @@ import React, { useState, useEffect, useContext } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { initDB } from "../src/db";
 import { AuthContext } from "../context/AuthContext";
+import { AppContext } from "../context/AppContext";
 
 export default function EliminarPresupuesto() {
   const navigation = useNavigation();
   const { usuario } = useContext(AuthContext);
 
   const [db, setDb] = useState(null);
-  const [presupuestos, setPresupuestos] = useState([]);
-  const [cargando, setCargando] = useState(true);
+  const { presupuestos } = useContext(AppContext);
+  const [cargando, setCargando] = useState(false);
 
-  // Inicializar DB
+  // initialize DB when needed for delete operations
   useEffect(() => {
-    const cargarDB = async () => {
+    let mounted = true;
+    (async () => {
       try {
         const database = await initDB();
-        setDb(database);
-      } catch (error) {
-        console.log("Error cargando BD:", error);
-        setCargando(false);
+        if (mounted) setDb(database);
+      } catch (e) {
+        console.log('Error inicializando DB:', e);
       }
-    };
-    cargarDB();
+    })();
+    return () => { mounted = false; };
   }, []);
-
-  // Cargar presupuestos del usuario
-  useEffect(() => {
-    if (db && usuario) {
-      obtenerPresupuestos();
-    }
-  }, [db, usuario]);
-
-  const obtenerPresupuestos = async () => {
-    try {
-      const resultados = await db.getAllAsync(
-        "SELECT * FROM presupuestos WHERE usuario_id = ? ORDER BY fecha DESC",
-        [usuario.id]
-      );
-      setPresupuestos(resultados || []);
-      setCargando(false);
-    } catch (error) {
-      console.log("Error obteniendo presupuestos:", error);
-      setCargando(false);
-    }
-  };
 
   const confirmarEliminacion = (item) => {
     Alert.alert(
@@ -58,9 +38,10 @@ export default function EliminarPresupuesto() {
           style: "destructive",
           onPress: async () => {
             try {
-              await db.runAsync("DELETE FROM presupuestos WHERE id = ?", [item.id]);
+              const database = db || (await initDB());
+              await database.runAsync("DELETE FROM presupuestos WHERE id = ?", [item.id]);
               Alert.alert("Éxito", "Presupuesto eliminado");
-              obtenerPresupuestos();
+              // AppContext will refresh presupuestos via DB change listener
             } catch (error) {
               console.log("Error eliminando presupuesto:", error);
               Alert.alert("Error", "No se pudo eliminar el presupuesto");
@@ -81,7 +62,7 @@ export default function EliminarPresupuesto() {
             <View key={item.id} style={styles.tarjeta}>
               <View style={styles.infoContainer}>
                 <Text style={[styles.categoria, { color: "#1b5e20" }]}>{item.categoria}</Text>
-                <Text style={styles.monto}>Límite: ${item.monto.toFixed(2)}</Text>
+                <Text style={styles.monto}>Límite: ${(Number(item.monto) || 0).toFixed(2)}</Text>
               </View>
 
               <TouchableOpacity style={styles.btnEliminar} onPress={() => confirmarEliminacion(item)}>

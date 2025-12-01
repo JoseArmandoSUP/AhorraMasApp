@@ -1,105 +1,78 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { initDB, getDB } from "../src/db";
 import { AuthContext } from '../context/AuthContext';
+import { AppContext } from '../context/AppContext';
 
 export default function GraficasScreen() {
     const navigation = useNavigation();
     const { usuario } = useContext(AuthContext);
-    const [db, setDb] = useState(null);
+    const { transacciones } = useContext(AppContext);
     const [gastosPorCategoria, setGastosPorCategoria] = useState([]);
     const [ingresosYGastosMes, setIngresosYGastosMes] = useState({ ingresos: 0, gastos: 0 });
     const [cargando, setCargando] = useState(true);
 
     useEffect(() => {
-        const inicializarBD = async () => {
-            try {
-                const database = await initDB();
-                if (database) {
-                    setDb(database);
-                }
-            } catch (error) {
-                console.error("Error inicializando BD en GraficasScreen:", error);
-            }
-        };
-        inicializarBD();
-    }, []);
-
-    useEffect(() => {
-        if (db && usuario) {
-            cargarDatos();
-        } else if (db && !usuario) {
-            setGastosPorCategoria([]);
-            setIngresosYGastosMes({ ingresos: 0, gastos: 0 });
-            setCargando(false);
-        }
-    }, [db, usuario]);
-
-    async function cargarDatos() {
         try {
-            if (!db || !usuario || !usuario.id) {
+            if (!Array.isArray(transacciones) || !usuario || !usuario.id) {
                 setGastosPorCategoria([]);
                 setIngresosYGastosMes({ ingresos: 0, gastos: 0 });
                 setCargando(false);
                 return;
             }
 
-            // Obtener mes actual (formato YYYY-MM)
-            const ahora = new Date();
-            const mesActual = `${ahora.getFullYear()}-${String(ahora.getMonth() + 1).padStart(2, '0')}`;
+            const now = new Date();
+            const mesActual = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
-            // 1. Gastos agrupados por categoría (solo gastos, no ingresos) - filtrado por usuario
-            const gastosCategoria = await db.getAllAsync(`
-                SELECT categoria, SUM(monto) as total
-                FROM transacciones
-                WHERE tipo = 'Gasto' AND (usuario_id = ? OR usuario_id IS NULL)
-                GROUP BY categoria
-                ORDER BY total DESC
-            `, [usuario.id]);
+            const userTrans = transacciones.filter(t => t.usuario_id === usuario.id || t.usuario_id == null);
 
-            // Calcular total de gastos para porcentajes
-            const totalGastos = gastosCategoria.reduce((sum, item) => sum + item.total, 0);
+            const gastos = userTrans.filter(t => t.tipo === 'Gasto');
+            const map = {};
+            gastos.forEach(t => {
+                const cat = t.categoria || 'Sin categoría';
+                const monto = Number(t.monto) || 0;
+                map[cat] = (map[cat] || 0) + monto;
+            });
 
-            // Preparar datos con porcentajes y colores
+            const totalGastos = Object.values(map).reduce((s, v) => s + v, 0);
             const colores = ['#ff6b6b', '#4dabf7', '#51cf66', '#845ef7', '#fbc02d', '#d32f2f', '#8e24aa'];
-            const gastosConPorcentaje = gastosCategoria.map((item, index) => ({
-                categoria: item.categoria,
-                total: item.total,
-                porcentaje: totalGastos > 0 ? (item.total / totalGastos) * 100 : 0,
-                color: colores[index % colores.length]
-            }));
+
+            const gastosConPorcentaje = Object.keys(map)
+                .map((cat, idx) => ({
+                    categoria: cat,
+                    total: map[cat],
+                    porcentaje: totalGastos > 0 ? (map[cat] / totalGastos) * 100 : 0,
+                    color: colores[idx % colores.length]
+                }))
+                .sort((a, b) => b.total - a.total);
+
+            const ingresosMesTotal = userTrans
+                .filter(t => t.tipo === 'Ingreso' && String(t.fecha || '').startsWith(mesActual))
+                .reduce((s, t) => s + (Number(t.monto) || 0), 0);
+
+            const gastosMesTotal = userTrans
+                .filter(t => t.tipo === 'Gasto' && String(t.fecha || '').startsWith(mesActual))
+                .reduce((s, t) => s + (Number(t.monto) || 0), 0);
 
             setGastosPorCategoria(gastosConPorcentaje);
-
-            // 2. Ingresos y gastos del mes actual - filtrado por usuario
-            const ingresosMes = await db.getFirstAsync(`
-                SELECT COALESCE(SUM(monto), 0) as total
-                FROM transacciones
-                WHERE tipo = 'Ingreso' AND fecha LIKE ? AND (usuario_id = ? OR usuario_id IS NULL)
-            `, [`${mesActual}%`, usuario.id]);
-
-            const gastosMes = await db.getFirstAsync(`
-                SELECT COALESCE(SUM(monto), 0) as total
-                FROM transacciones
-                WHERE tipo = 'Gasto' AND fecha LIKE ? AND (usuario_id = ? OR usuario_id IS NULL)
-            `, [`${mesActual}%`, usuario.id]);
-
             setIngresosYGastosMes({
-                ingresos: ingresosMes?.total || 0,
-                gastos: gastosMes?.total || 0
+                ingresos: Number(ingresosMesTotal) || 0,
+                gastos: Number(gastosMesTotal) || 0
             });
 
             setCargando(false);
-        } catch (error) {
-            console.log("Error cargando datos de gráficas:", error);
+        } catch (err) {
+            console.log('Error calculando gráficas:', err);
+            setGastosPorCategoria([]);
+            setIngresosYGastosMes({ ingresos: 0, gastos: 0 });
             setCargando(false);
         }
-    }
+    }, [transacciones, usuario]);
 
-    // Función para renderizar barra de progreso
     const renderBarraProgreso = (porcentaje, color) => {
-        const porcentajeLimitado = Math.min(porcentaje, 100);
+        const valor = Number(porcentaje) || 0;
+        const porcentajeLimitado = Math.min(valor, 100);
+
         return (
             <View style={styles.barraContainer}>
                 <View style={[styles.barraProgreso, { width: `${porcentajeLimitado}%`, backgroundColor: color }]} />
@@ -115,48 +88,44 @@ export default function GraficasScreen() {
         );
     }
 
+    const balance =
+        (Number(ingresosYGastosMes.ingresos) || 0) -
+        (Number(ingresosYGastosMes.gastos) || 0);
+
     return (
         <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 100 }}>
             <Text style={styles.titulo}>REPORTES</Text>
 
-            {!usuario && (
-                <View style={styles.card}>
-                    <Text style={styles.textoVacio}>Debe iniciar sesión para ver sus reportes</Text>
-                </View>
-            )}
-
-            {/* Gráfica 1: Gastos por Categoría */}
+            {/* Gastos por Categoría */}
             <View style={styles.seccion}>
                 <Text style={styles.subtitulo}>Gastos por Categoría</Text>
 
                 {gastosPorCategoria.length > 0 ? (
-                    <>
-                        {gastosPorCategoria.map((item, index) => (
-                            <View key={index} style={styles.card}>
-                                <View style={styles.cardHeader}>
-                                    <View style={[styles.colorIndicator, { backgroundColor: item.color }]} />
-                                    <Text style={styles.textoCategoria}>{item.categoria}</Text>
-                                </View>
-                                <View style={styles.cardContent}>
-                                    <Text style={styles.textoMonto}>${item.total.toFixed(2)}</Text>
-                                    <Text style={styles.textoPorcentaje}>
-                                        {item.porcentaje.toFixed(2)}%
-                                    </Text>
-                                </View>
-                                {renderBarraProgreso(item.porcentaje, item.color)}
+                    gastosPorCategoria.map((item, index) => (
+                        <View key={index} style={styles.card}>
+                            <View style={styles.cardHeader}>
+                                <View style={[styles.colorIndicator, { backgroundColor: item.color }]} />
+                                <Text style={styles.textoCategoria}>{item.categoria}</Text>
                             </View>
-                        ))}
-                    </>
+
+                            <View style={styles.cardContent}>
+                                <Text style={styles.textoMonto}>${(Number(item.total) || 0).toFixed(2)}</Text>
+                                <Text style={styles.textoPorcentaje}>
+                                    {(Number(item.porcentaje) || 0).toFixed(2)}%
+                                </Text>
+                            </View>
+
+                            {renderBarraProgreso(Number(item.porcentaje) || 0, item.color)}
+                        </View>
+                    ))
                 ) : (
                     <View style={styles.card}>
-                        <Text style={styles.textoVacio}>
-                            {usuario ? "No hay gastos registrados" : "Debe iniciar sesión"}
-                        </Text>
+                        <Text style={styles.textoVacio}>No hay gastos registrados</Text>
                     </View>
                 )}
             </View>
 
-            {/* Gráfica 2: Ingresos vs Gastos del Mes */}
+            {/* Ingresos vs Gastos */}
             <View style={styles.seccion}>
                 <Text style={styles.subtitulo}>Ingresos vs Gastos del Mes Actual</Text>
 
@@ -164,11 +133,12 @@ export default function GraficasScreen() {
                     <View style={styles.comparacionCard}>
                         <Text style={styles.comparacionLabel}>Ingresos</Text>
                         <Text style={[styles.comparacionMonto, { color: '#2e7d32' }]}>
-                            ${ingresosYGastosMes.ingresos.toFixed(2)}
+                            ${(Number(ingresosYGastosMes.ingresos) || 0).toFixed(2)}
                         </Text>
                         {renderBarraProgreso(
                             ingresosYGastosMes.ingresos + ingresosYGastosMes.gastos > 0
-                                ? (ingresosYGastosMes.ingresos / (ingresosYGastosMes.ingresos + ingresosYGastosMes.gastos)) * 100
+                                ? (Number(ingresosYGastosMes.ingresos) /
+                                  (ingresosYGastosMes.ingresos + ingresosYGastosMes.gastos)) * 100
                                 : 0,
                             '#2e7d32'
                         )}
@@ -177,24 +147,28 @@ export default function GraficasScreen() {
                     <View style={styles.comparacionCard}>
                         <Text style={styles.comparacionLabel}>Gastos</Text>
                         <Text style={[styles.comparacionMonto, { color: '#c62828' }]}>
-                            ${ingresosYGastosMes.gastos.toFixed(2)}
+                            ${(Number(ingresosYGastosMes.gastos) || 0).toFixed(2)}
                         </Text>
                         {renderBarraProgreso(
                             ingresosYGastosMes.ingresos + ingresosYGastosMes.gastos > 0
-                                ? (ingresosYGastosMes.gastos / (ingresosYGastosMes.ingresos + ingresosYGastosMes.gastos)) * 100
+                                ? (Number(ingresosYGastosMes.gastos) /
+                                  (ingresosYGastosMes.ingresos + ingresosYGastosMes.gastos)) * 100
                                 : 0,
                             '#c62828'
                         )}
                     </View>
                 </View>
 
+                {/* BALANCE */}
                 <View style={styles.balanceCard}>
                     <Text style={styles.balanceLabel}>Balance del Mes</Text>
-                    <Text style={[
-                        styles.balanceMonto,
-                        { color: ingresosYGastosMes.ingresos >= ingresosYGastosMes.gastos ? '#2e7d32' : '#c62828' }
-                    ]}>
-                        ${(ingresosYGastosMes.ingresos - ingresosYGastosMes.gastos).toFixed(2)}
+                    <Text
+                        style={[
+                            styles.balanceMonto,
+                            { color: balance >= 0 ? '#2e7d32' : '#c62828' }
+                        ]}
+                    >
+                        ${balance.toFixed(2)}
                     </Text>
                 </View>
             </View>
@@ -234,9 +208,6 @@ const styles = StyleSheet.create({
         borderRadius: 15,
         padding: 15,
         marginBottom: 10,
-        shadowColor: '#000',
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
         elevation: 3,
     },
     cardHeader: {
@@ -258,7 +229,6 @@ const styles = StyleSheet.create({
     cardContent: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        alignItems: 'center',
         marginBottom: 8,
     },
     textoMonto: {
@@ -295,9 +265,6 @@ const styles = StyleSheet.create({
         borderRadius: 15,
         padding: 15,
         width: '48%',
-        shadowColor: '#000',
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
         elevation: 3,
     },
     comparacionLabel: {
@@ -316,9 +283,6 @@ const styles = StyleSheet.create({
         borderRadius: 15,
         padding: 20,
         alignItems: 'center',
-        shadowColor: '#000',
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
         elevation: 3,
     },
     balanceLabel: {

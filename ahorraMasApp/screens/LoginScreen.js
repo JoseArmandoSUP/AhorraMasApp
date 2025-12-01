@@ -79,9 +79,10 @@ export default function LoginScreen() {
         return;
       }
 
+      const correoLimpio = correo.trim().toLowerCase();
       const result = await databaseToUse.getFirstAsync(
         "SELECT * FROM usuarios WHERE correo = ?",
-        [correo.trim()]
+        [correoLimpio]
       );
 
       if (!result) {
