@@ -20,7 +20,7 @@ class TransaccionService{
                     categoria TEXT NOT NULL,
                     monto REAL NOT NULL,
                     descripcion TEXT,
-                    fecha TEXT NOT NULL
+                    fecha TEXT NOT NULL  
                 );    
             `);
         }

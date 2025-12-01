@@ -1,4 +1,4 @@
-import { Text,  StyleSheet, View, Button, ImageBackground, TextInput, Image, ScrollView, Alert} from "react-native";
+import { Text,  StyleSheet, View, Button, ImageBackground, TextInput, Image, ScrollView, Alert, TouchableOpacity} from "react-native";
 import React, { useState, useEffect } from 'react'
 //import LoginScreen from "./LoginScreen";
 //import PantallaPrincipal from "./PantallaPrincipal";
@@ -116,15 +116,13 @@ export default function PantallaRegistro () {
                     onChangeText={setPassword}
                 ></TextInput>
 
-                <Button
-                    color="blue"
-                    title="Resgistrarse"
-                    onPress={handleRegistro}
-                ></Button>
+                <TouchableOpacity style={styles.volverBoton1} onPress={handleRegistro}>
+                    <Text style={styles.volverBotonTexto1}>Resgistrarse</Text>
+                </TouchableOpacity>
 
-                <Button title="Volver al Login" onPress={()=>nav.navigate("Login")}></Button>
-
-                <Button onPress={()=> nav.navigate("Home")} title="Volver al menú"></Button>
+                <TouchableOpacity style={styles.volverBoton} onPress={()=>nav.navigate("Login")}>
+                    <Text style={styles.volverBotonTexto}>Volver al Login</Text>
+                </TouchableOpacity>
                 
             </View>
         </ScrollView> 
@@ -168,5 +166,35 @@ const styles = StyleSheet.create ({
         alignItems: 'center',
         justifyContent: 'center',
     }, 
+
+    //----------------------
+    volverBoton:{
+        flex: 1,
+        backgroundColor: '#2e7d32',
+        borderRadius: 10,
+        paddingVertical: 10,
+        marginTop: 5,
+        alignItems: 'center',
+    },
+
+    volverBotonTexto:{
+        color: '#fff',
+        fontWeight: 'bold',
+        fontSize: 15,
+    },
+    volverBoton1:{
+        flex: 1,
+        backgroundColor: '#1154b9ff',
+        borderRadius: 10,
+        paddingVertical: 10,
+        marginTop: 5,
+        alignItems: 'center',
+    },
+
+    volverBotonTexto1:{
+        color: '#fff',
+        fontWeight: 'bold',
+        fontSize: 15,
+    },
     
 })

@@ -1,4 +1,4 @@
-import { Text,  StyleSheet, View, Button, ImageBackground, TextInput, Image, Switch, ScrollView, Alert} from "react-native";
+import { Text,  StyleSheet, View, Button, ImageBackground, TextInput, Image, Switch, ScrollView, Alert, TouchableOpacity} from "react-native";
 import React, { useState, useEffect } from 'react'
 //import PantallaPrincipal from "./PantallaPrincipal";
 //import PantallaRegistro from "./PantallaRegistro";
@@ -83,16 +83,16 @@ export default function LoginScreen (){
                     autoCapitalize="none"
                     secureTextEntry={true}
                 />
-                <View style={{flexDirection: "row", alignItems: "center"}}>
-                    <Switch></Switch>
-                    <Text>Aceptar Terminos y Condiciones</Text>
-                </View>
                 
-                <Button title="INICIAR SESION" onPress={iniciarSesion}></Button>
+                <TouchableOpacity onPress={iniciarSesion} style={styles.volverBoton}>
+                    <Text style={styles.volverBotonTexto}>INICIAR SESION</Text>
+                </TouchableOpacity>
                 
-                <Text style={{marginTop: 15}}>¿No tienes cuenta? REGISTRARSE</Text>
+                <Text style={{marginTop: 15}}>¿No tienes cuenta? REGISTRATSE</Text>
 
-                <Button style={styles.boton} onPress={()=> nav.navigate("Registro")} title="Registrarse"></Button>
+                <TouchableOpacity style={styles.volverBoton1} onPress={()=> nav.navigate("Registro")}>
+                    <Text style={styles.volverBotonTexto1}>REGISTRARSE</Text>
+                </TouchableOpacity>   
 
             </View>
         </ScrollView>
@@ -138,5 +138,33 @@ const styles = StyleSheet.create ({
 
     boton:{
         flex: 1,
+    },
+    volverBoton:{
+        flex: 1,
+        backgroundColor: '#2e7d32',
+        borderRadius: 10,
+        paddingVertical: 10,
+        marginTop: 5,
+        alignItems: 'center',
+    },
+
+    volverBotonTexto:{
+        color: '#fff',
+        fontWeight: 'bold',
+        fontSize: 15,
+    },
+    volverBoton1:{
+        flex: 1,
+        backgroundColor: '#1154b9ff',
+        borderRadius: 10,
+        paddingVertical: 10,
+        marginTop: 5,
+        alignItems: 'center',
+    },
+
+    volverBotonTexto1:{
+        color: '#fff',
+        fontWeight: 'bold',
+        fontSize: 15,
     },
 })
