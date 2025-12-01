@@ -1,16 +1,13 @@
 import React, { useContext, useEffect, useState, useCallback} from "react";
 import { Text, StyleSheet, View, TouchableOpacity, ScrollView, ImageBackground, Animated, Easing, Image } from 'react-native'
 import { Button } from "react-native";
-//import TransaccionesScreem from './PantallaGestionTransacciones';
-//import PantallaRegistro from "./PantallaRegistro";
-//import PantallaPresupuesto from "./PresupuestosScreen";
-//import LoginScreen from "./LoginScreen";
-//import GraficasScreen from "./GraficasScreen";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 //Notificaciones
 import { AppContext } from "../context/AppContext";
 import { TransaccionController } from '../controllers/TransaccionController';
+import { PresupuestoController } from "../controllers/PresupuestoController";
 
+const presupuestoController = new PresupuestoController();
 const controller = new TransaccionController();
 
 export default function PantallaPrincipal(){
@@ -28,6 +25,8 @@ export default function PantallaPrincipal(){
     //Para el total de Gastos e Ingresos
     const[totalGastos, setTotalGastos] = useState(0);
     const[totalIngresos, setTotalIngresos] = useState(0);
+
+    const[lista, setLista] = useState([]);
 
     //Carga las Transacciones y calcula totales
     useFocusEffect(
@@ -51,6 +50,41 @@ export default function PantallaPrincipal(){
             };
             load();
         }, [])
+    );
+
+    //Resumen de Presupuestos
+    useFocusEffect(
+        useCallback(() => {
+            const cargarDatos = async () => {
+                try{
+                    await presupuestoController.initialize();
+                    await controller.initialize();
+
+                    const presupuestosDB = await presupuestoController.listar();
+                    const transDB = await controller.listar();
+
+                    setTransacciones(transDB);
+
+                    //Total gastado en cada presupuesto
+                    const calculados = presupuestosDB.map(p => {
+                        const gastado = transDB.filter(
+                            t => t.tipo === "Gasto" && t.categoria.toLowerCase() === p.categoria.toLowerCase()
+                        )
+                        .reduce((sum, t) => sum + Number(t.monto), 0);
+                        return{
+                            ...p,
+                            gastado,
+                            color: "#2e7d32"
+                        };
+                    });
+
+                    setLista(calculados)
+                }catch(error){
+                    console.log("Error cargando presupuestos: ", error);
+                }
+            };
+            cargarDatos();
+        },[])
     );
 
     useEffect(()=>{
@@ -115,6 +149,43 @@ export default function PantallaPrincipal(){
                 </View>
     
             </View>
+
+            {lista.length === 0 && (
+                <Text style={{textAlign: "center", marginTop: 10, color: "#666"}}>
+                    No hay presupuestos, registre uno para visalizar el resumen aqui
+                </Text>
+            )}
+            
+            {lista.map(item=>{
+                const porcentaje = Math.min(Math.round((item.gastado / item.montolimite)*100), 100);
+                return(
+                    
+                    <View key={item.id} style={styles.tarjeta}>
+                    
+                        <View style={styles.fila}>
+                            
+                            <Text style={[styles.categoria, {color: item.color}]}>
+                                {item.categoria} -- {item.mes} / {item.anio}
+                            </Text>
+
+                            <Text style={styles.cantidad}>
+                                ${item.gastado} / ${item.montolimite}
+                            </Text>
+
+                        </View>
+
+                        <View style={styles.progresoBarra}>
+                            <View 
+                                style={[styles.llenarProgreso, {width: `${porcentaje}%`, backgroundColor: item.color},]}
+                            ></View>
+                        </View>
+
+                        <Text style={styles.porcentaje}>{porcentaje}% del presupuesto usado</Text>
+
+                    </View>
+                    
+                );
+            })}
     
             {/*BOTONES PRINCIPALES*/}
             <View style={styles.botonesContainer}>
@@ -272,4 +343,52 @@ const styles = StyleSheet.create({
         fontSize: 15,
     },
 
+
+    tarjeta:{
+        backgroundColor: "#fff",
+        borderRadius: 15,
+        padding: 15,
+        marginBottom: 15,
+        shadowColor: "#000",
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,   
+    },
+
+    fila:{
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 8,
+    },
+
+    categoria:{
+        fontSize: 16,
+        fontWeight: "600",
+    },
+
+    cantidad:{
+        fontSize: 14,
+        color: "#555",
+    },
+
+    progresoBarra:{
+        height: 10,
+        backgroundColor: "#e0e0e0",
+        borderRadius: 5,
+        overflow: 'hidden',
+        marginTop: 4,   
+    },
+
+    llenarProgreso:{
+        height: '100%',
+        borderRadius: 5,
+    },
+
+    porcentaje:{
+        fontSize: 13,
+        color: "#444",
+        textAlign: "right",
+        marginTop: 5,
+    },
 });

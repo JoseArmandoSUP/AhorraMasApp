@@ -20,6 +20,8 @@ import EliminarPresupuesto from "../screens/EliminarPresupuesto";
 //-------------------------------------------------------------------------------------------------
 import GraficasScreen from "../screens/GraficasScreen";
 import Perfil from "../screens/Perfil";
+import RecuperarPassCorreo from "../screens/RecuperarPassCorreo";
+import RecuperarPassNueva from "../screens/RecuperarPassNueva";
 
 const Stack = createNativeStackNavigator();
 
@@ -30,6 +32,9 @@ export default function StackNavigator(){
             {/* Pantallas fuera del Tab */}
             <Stack.Screen name="Login" component={LoginScreen}></Stack.Screen>
             <Stack.Screen name="Registro" component={PantallaRegistro}></Stack.Screen>
+            <Stack.Screen name="RecuperarPassCorreo" component={RecuperarPassCorreo} />
+            <Stack.Screen name="RecuperarPassNueva" component={RecuperarPassNueva} />
+
 
             {/* INICIO (Pantalla dentro del Tab) */}
             <Stack.Screen name="Home" component={TabNavigator}></Stack.Screen>

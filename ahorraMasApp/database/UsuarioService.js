@@ -87,6 +87,14 @@ class UsuarioService{
             };
         }
     }
+
+    async updatePassword(id, nuevaPass) {
+        await this.db.runAsync(
+            "UPDATE usuarios SET password=? WHERE id=?",
+            [nuevaPass, id]
+        );
+    }
+
 }
 
 export default new UsuarioService();

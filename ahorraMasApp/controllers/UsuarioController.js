@@ -45,4 +45,15 @@ export class UsuarioController{
             throw error;
         }
     }
+
+    //Recuperar Contraseña
+    async actualizarPassword(id, nuevaPass) {
+        return await UsuarioService.updatePassword(id, nuevaPass);
+    }
+
+    async listar() {
+        return await UsuarioService.getAll();
+    }
+
+
 }

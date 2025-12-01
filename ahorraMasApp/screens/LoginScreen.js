@@ -44,24 +44,6 @@ export default function LoginScreen (){
         }
     };
 
-    {/* const mostrarAlerta = () =>{
-        if(correo.trim() === '' || password.trim() === ''){
-            Alert.alert("Faltan campos por llenar, porfavor completelos");
-            alert("Faltan campos por llenar, porfavor completelos");
-            return false;
-        }
-        const validarCorreo = /^[\w.%+-]+@gmail\.com$/;
-        if(!validarCorreo.test(correo)){
-            Alert.alert("Correo electronico no valido, intente otra vez porfavor");
-            alert("Correo electronico no valido, intente otra vez porfavor");
-            return false;
-        }else{
-            Alert.alert("Inicio de sesión esxitoso\n");
-            alert("Inicio de sesión esxitoso\n");
-            return true;
-        }
-    }; */}
-
     return(
         <ScrollView contentContainerStyle={{paddingBottom: 100}}>
             <View style={styles.container}>
@@ -92,7 +74,19 @@ export default function LoginScreen (){
 
                 <TouchableOpacity style={styles.volverBoton1} onPress={()=> nav.navigate("Registro")}>
                     <Text style={styles.volverBotonTexto1}>REGISTRARSE</Text>
-                </TouchableOpacity>   
+                </TouchableOpacity> 
+
+                <TouchableOpacity onPress={() => nav.navigate("RecuperarPassCorreo")}>
+                    <Text style={{ 
+                        color: "#e4c61fff", 
+                        fontWeight: "bold", 
+                        textAlign: "center",
+                        marginTop: 10 
+                    }}>
+                        Olvidé mi contraseña
+                    </Text>
+                </TouchableOpacity>
+  
 
             </View>
         </ScrollView>
