@@ -1,13 +1,7 @@
 import React, {useState, useEffect, useCallback} from "react";
 import {View, Text, TouchableOpacity, StyleSheet, ScrollView, ProgressBarAndroid, Platform, 
     ProgressViewIOS, TextInput} from 'react-native'
-//import { ProgressBar } from "react-native-web";
-//import PantallaPrincipal from "./PantallaPrincipal";
 import { Button } from "react-native";
-//import VerPresupuestos from "./VerPresupuestos";
-//import AgregarPresupuesto from "./AgregarPresupuesto";
-//import EditarPresupuesto from "./EditarPresupuesto";
-//import EliminarPresupuesto from "./EliminarPresupuesto";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { PresupuestoController } from "../controllers/PresupuestoController";
 import { TransaccionController } from "../controllers/TransaccionController";

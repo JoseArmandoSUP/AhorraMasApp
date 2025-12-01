@@ -1,6 +1,5 @@
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Button, TextInput, Alert } from "react-native";
 import React, {useContext, useState, useEffect} from "react";
-//import PantallaGestionTransacciones from "./PantallaGestionTransacciones";
 import { useNavigation } from "@react-navigation/native";
 import { AppContext } from "../context/AppContext";
 import { TransaccionController } from "../controllers/TransaccionController";
@@ -33,20 +32,6 @@ export default function AgregarTransaccion(){
             Alert.alert("Error", error.message);
         }
     }
-
-    {/*const alertaRegistro = () => {
-        if(!tipo || !categoria || !monto || descripcion.trim() === "" || !fecha){
-            Alert.alert("Por favor complete todos los campos");
-            alert("Por favor complete todos los campos");
-            return;
-        }
-        Alert.alert(
-            `Transaccion agregada correctamente: \n Tipo: ${tipo} \n Categoria: ${categoria} \n Monto: $${monto} \n Fecha: ${fecha}`
-        );
-        alert(
-            `Transaccion agregada correctamente: \n Tipo: ${tipo} \n Categoria: ${categoria} \n Monto: $${monto} \n Fecha: ${fecha}`
-        );
-    };*/}
 
     const filtrarCaracteresM = (input) => {
         const numerico = input.replace(/[^0-9]/g, '');

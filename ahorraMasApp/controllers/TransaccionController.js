@@ -31,14 +31,6 @@ export class TransaccionController{
 
     async listar(){
         try{
-            {/*if(Platform.OS === "web"){
-                const data = await this.getAll();
-                return data;
-            }else{
-                const sql = "SELECT * FROM transacciones ORDER BY fecha DESC";
-                const rows = await this.db.getAllAsync(sql);
-                return rows;
-            }*/}
             return await TransaccionService.getAll();
         }catch(error){
             console.error(error);

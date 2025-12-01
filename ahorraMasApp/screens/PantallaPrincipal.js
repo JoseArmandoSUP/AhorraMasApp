@@ -1,11 +1,6 @@
 import React, { useContext, useEffect, useState, useCallback} from "react";
 import { Text, StyleSheet, View, TouchableOpacity, ScrollView, ImageBackground, Animated, Easing, Image } from 'react-native'
 import { Button } from "react-native";
-//import TransaccionesScreem from './PantallaGestionTransacciones';
-//import PantallaRegistro from "./PantallaRegistro";
-//import PantallaPresupuesto from "./PresupuestosScreen";
-//import LoginScreen from "./LoginScreen";
-//import GraficasScreen from "./GraficasScreen";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 //Notificaciones
 import { AppContext } from "../context/AppContext";

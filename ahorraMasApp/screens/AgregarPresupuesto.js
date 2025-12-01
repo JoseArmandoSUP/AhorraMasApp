@@ -1,6 +1,5 @@
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Button, TextInput, Alert } from "react-native";
 import React, {useState, useEffect} from "react";
-//import PresupuestosScreen from "./PresupuestosScreen";
 import { useNavigation } from "@react-navigation/native";
 import { PresupuestoController } from "../controllers/PresupuestoController";
 
