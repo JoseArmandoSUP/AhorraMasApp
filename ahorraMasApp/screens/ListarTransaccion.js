@@ -39,6 +39,13 @@ export default function ListarTransaccion() {
         ListEmptyComponent={<Text style={styles.vacio}>No hay transacciones registradas</Text>}
       />
 
+      <TouchableOpacity
+        style={styles.botonVolver}
+        onPress={() => navigation.goBack()}
+      >
+        <Text style={styles.botonVolverTexto}>Volver al menú</Text>
+      </TouchableOpacity>
+
     </View>
   );
 }
@@ -51,4 +58,19 @@ const styles = StyleSheet.create({
   monto: { fontSize: 16, marginTop: 6, fontWeight: "700", color: "#000" },
   fecha: { fontSize: 12, color: "#666", marginTop: 4 },
   vacio: { textAlign: "center", marginTop: 40, fontSize: 16, color: "#999" },
+  botonVolver: {
+  backgroundColor: "#2e7d32",
+  paddingVertical: 15,
+  borderRadius: 10,
+  marginTop: 20,
+  alignItems: "center",
+  elevation: 3,
+},
+
+botonVolverTexto: {
+  fontSize: 16,
+  fontWeight: "bold",
+  color: "#fff",
+},
+
 });

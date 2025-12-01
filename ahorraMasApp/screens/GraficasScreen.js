@@ -173,9 +173,7 @@ export default function GraficasScreen() {
                 </View>
             </View>
 
-            <TouchableOpacity style={styles.volverBoton} onPress={() => navigation.goBack()}>
-                <Text style={styles.volverBotonTexto}>Volver al menú</Text>
-            </TouchableOpacity>
+           
         </ScrollView>
     );
 }

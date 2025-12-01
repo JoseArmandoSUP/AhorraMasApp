@@ -48,10 +48,7 @@ export default function PantallaGestionTransacciones() {
           <Text style={styles.botonText}>Eliminar Transacción</Text>
         </TouchableOpacity>
 
-        {/* VOLVER */}
-        <TouchableOpacity style={styles.volverBoton} onPress={() => navigation.navigate("Home")}>
-          <Text style={styles.volverBotonTexto}>Volver al menú</Text>
-        </TouchableOpacity>
+        
 
       </View>
     </ScrollView>

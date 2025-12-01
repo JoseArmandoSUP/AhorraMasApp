@@ -75,9 +75,7 @@ export default function PresupuestosScreen(){
                 </TouchableOpacity>
 
     
-                <TouchableOpacity style={styles.volverBoton} onPress={()=> navigation.navigate("Home")}>
-                    <Text style={styles.volverBotonTexto}>Volver al menú</Text>
-                </TouchableOpacity>
+                
 
             </View>
 
