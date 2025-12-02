@@ -30,7 +30,7 @@ export default function PresupuestosScreen(){
     const [fCategoria, setFCategoria] = useState("");
     
     
-    useFocusEffect(
+    {/*useFocusEffect(
         useCallback(() => {
             const cargarDatos = async () => {
                 try{
@@ -62,14 +62,14 @@ export default function PresupuestosScreen(){
             };
             cargarDatos();
         },[])
-    );
+    );*/}
 
     return(
         <ScrollView style={styles.container} contentContainerStyle={{paddingBottom: 100}}>
             
             <Text style={styles.titulo}>PRESUPUESTO</Text>
 
-            {lista.length === 0 && (
+            {/*{lista.length === 0 && (
                 <Text style={{textAlign: "center", marginTop: 10, color: "#666"}}>
                     No hay registros
                 </Text>
@@ -104,7 +104,7 @@ export default function PresupuestosScreen(){
                     </View>
                    
                 );
-            })}
+            })}*/}
 
             {/*BOTONES DEL CRUD*/}
             <View style={styles.crudContainer}>

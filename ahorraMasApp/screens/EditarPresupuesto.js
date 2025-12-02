@@ -1,8 +1,9 @@
 import { Text, View, ScrollView, StyleSheet, TouchableOpacity, Button, TextInput, Alert } from "react-native";
-import React, {useState, useEffect} from "react";
+import React, {useState, useEffect, useContext} from "react";
 //import PresupuestosScreen from "./PresupuestosScreen";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { PresupuestoController } from "../controllers/PresupuestoController";
+import { AppContext } from "../context/AppContext";
 
 const controller = new PresupuestoController();
 
@@ -10,6 +11,8 @@ export default function EditarPresupuesto({/*{route}*/}){
     const navigatation = useNavigation();
     const route = useRoute();
     const {id} = route.params;
+
+    const{transacciones, setAlertas} = useContext(AppContext) || {};
 
     {/* const {categoria: cat, monto: mon} = route.params; */}
     const[categoria, setCategoria] = useState(""); {/* useState(cat) */}
@@ -56,6 +59,8 @@ export default function EditarPresupuesto({/*{route}*/}){
                 Number(anio)
             );
 
+            recalcularAlertas(Number(montolimite), categoria);
+
             Alert.alert("Éxito", "Presupuesto actualizado correctamente");
             navigatation.goBack();
 
@@ -64,6 +69,36 @@ export default function EditarPresupuesto({/*{route}*/}){
         }
     }
     
+    function recalcularAlertas(nuevoMontoLimite, categoria) {
+        let totalGastado = 0;
+
+        transacciones.forEach(t => {
+            if (t.tipo.toLowerCase() === "gasto" && t.categoria.toLowerCase() === categoria.toLowerCase()) {
+                totalGastado += Number(t.monto);
+            }
+        });
+
+        // Si el contexto no tiene setAlertas, solo salimos sin romper nada
+        if (!setAlertas) {
+            return;
+        }
+
+        if (totalGastado > nuevoMontoLimite) {
+            setAlertas(prev => {
+                if (!prev.includes(`¡¡!! Se ha excedido el presupuesto de ${categoria}`)) {
+                    return [...prev, `¡¡!! Se ha excedido el presupuesto de ${categoria}`];
+                }
+                return prev;
+            });
+        } else {
+            setAlertas(prev =>
+                prev.filter(a => !a.includes(`presupuesto de ${categoria}`))
+            );
+        }
+    }
+
+
+
     const filtrarCaracteresM = (input) => {
         const numerico = input.replace(/[^0-9]/g, '');
         setMontolimite(numerico);

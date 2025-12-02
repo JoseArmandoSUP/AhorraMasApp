@@ -187,34 +187,34 @@ export default function PantallaPrincipal(){
                 );
             })}
     
-            {/*BOTONES PRINCIPALES*/}
+            {/*BOTONES PRINCIPALES
             <View style={styles.botonesContainer}>
     
                 <TouchableOpacity style={styles.boton} onPress={()=>navigation.navigate("Transacciones")}>
-                    {/*<Ionicons>*/}
+                    
                     <Text style={styles.botonText}>Transacciones</Text>
                 </TouchableOpacity>
     
                 <TouchableOpacity style={styles.boton} onPress={()=>navigation.navigate("Presupuestos")}>
-                    {/*<Ionicons>*/}
+            
                     <Text style={styles.botonText}>Presupuesto Mensual</Text>
                 </TouchableOpacity>
     
                 <TouchableOpacity style={styles.boton} onPress={()=>navigation.navigate("Graficas")}>
-                    {/*<Ionicons>*/}
+                    <Ionicons>*
                     <Text style={styles.botonText}>Ver Graficas</Text>
                 </TouchableOpacity>
     
                 <TouchableOpacity style={styles.boton} onPress={()=>navigation.navigate("Perfil")}>
-                    {/*<Ionicons>*/}
+                    <Ionicons>*
                     <Text style={styles.botonText}>Configuración de Perfil</Text>
                 </TouchableOpacity>
                 
-                {/*<TouchableOpacity style={styles.loginBoton} onPress={()=> navigation.navigate("Login")}>
+                <TouchableOpacity style={styles.loginBoton} onPress={()=> navigation.navigate("Login")}>
                     <Text style={styles.loginBotonTexto}>Iniciar Sesion</Text>
-                </TouchableOpacity>*/}
+                </TouchableOpacity>
 
-            </View>
+            </View>*/}
     
         </ScrollView>
     );
